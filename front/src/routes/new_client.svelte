@@ -33,7 +33,7 @@
   }
 </script>
 <div class="flex flex-col border-myroon-100 border p-3 ml-3 rounded w-2/12 text-myhigh_white" style="min-width: 226px;">
-  <div class="client-form-header mb-2 bg-myroon-100">new client</div>
+  <div class="client-form-header bg-mywood-900 rounded mb-5">new client</div>
   <div class="client-form-fields w-2/12 text-mywood-900">
     <label>name</label>
     <input type="text" style="width: 80px;" bind:value={name} on:keyup={keyupName}/>

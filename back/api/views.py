@@ -4,8 +4,8 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
-from .models import Client
-from .serializers import ClientSerializer
+from .models import Client, WorkInterval
+from .serializers import ClientSerializer, WorkIntervalSerializer
 
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -46,3 +46,22 @@ def clients(request):
             return JsonResponse({'error': f'not found to delete: {id=}'}, status=404, safe=False)
     else:
         return JsonResponse(json.dumps({'data': f"{request.method} unsupported"}), status=400, safe=False)
+
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+def work_intervals(request):
+    if request.method == 'GET':
+        pass
+    if request.method == 'POST':
+        serializer = WorkIntervalSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            created = serializer.save()
+            return JsonResponse(model_to_dict(created), status=201, safe=False)
+    if request.method == 'PUT':
+        pass
+    if request.method == 'DELETE':
+        try:
+            id = int(request.GET.get('id'))
+            WorkInterval.objects.get(id=id).delete()
+            return JsonResponse({'detail': f'deleted WorkInterval[{id}]'}, status=200)
+        except Exception as e:
+            return JsonResponse({'detail': f'deleted WorkInterval[{e}]'}, status=404)
