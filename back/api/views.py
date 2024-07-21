@@ -22,7 +22,11 @@ def clients(request):
                     status=404,
                     safe=False
                 )
-        return JsonResponse(json.dumps({'data': 'ok'}), status=200, safe=False)
+        else:
+            return JsonResponse(
+                json.dumps([model_to_dict(instance) for instance in Client.objects.all().order_by('name')]),
+                status=200,
+                safe=False)
     elif request.method == 'POST':
         if not Client.objects.filter(name=request.GET.get('name')).exists():
             serializer = ClientSerializer(data=request.data)
