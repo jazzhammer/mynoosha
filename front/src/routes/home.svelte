@@ -1,6 +1,7 @@
 <script lang="ts">
   import NewClient from './new_client.svelte';
   import Nav from './home_nav.svelte';
+  import TimeRecorders from './time_recorders.svelte';
   import {type NavEvent, NavStore} from "../stores";
   import {onDestroy} from "svelte";
 
@@ -23,6 +24,11 @@
     {#if mode === 'clients'}
       <div class="bg-myhigh_white rounded-lg">
         <NewClient></NewClient>
+      </div>
+    {/if}
+    {#if mode === 'time-recorders'}
+      <div class="bg-myhigh_white rounded-lg">
+        <TimeRecorders></TimeRecorders>
       </div>
     {/if}
   </div>

@@ -16,6 +16,4 @@ class WorkInterval(models.Model):
     def save(self, *args, **kwargs):
         self.start_utcms = round(self.start.timestamp())
         self.stop_utcms = round(self.start.timestamp())
-        print(f'calculated {self.start_utcms}')
-        print(f'calculated {self.stop_utcms}')
         super(WorkInterval, self).save(*args, **kwargs)

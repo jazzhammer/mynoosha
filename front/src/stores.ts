@@ -12,16 +12,15 @@ export interface NavEvent {
   type: string;
   value: string;
 }
-
 export const NavStore = writable<NavEvent>();
+
 
 export interface ClientCrud {
   type: crud;
   payload: Client | Client[];
 }
-
-// const initialClientCrud: ClientCrud = {
-//   type: crud.NOOP,
-//   payload: null
-// };
 export const ClientStore = writable<ClientCrud>();
+
+export const RecordableClientsStore = writable<Client[]>();
+
+export const WorkIntervalListsByClient = writable<{}>({});

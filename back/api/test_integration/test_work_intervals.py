@@ -35,13 +35,14 @@ def test_crud():
         content = response.content.decode('utf8')
         founds = json.loads(json.loads(content))
         found = founds[0]
+    client = found;
     # ============================================================
     # CRUD, with getting by id only
     # ============================================================
     dt_str = str(timezone.now() - timezone.timedelta(hours=1))
     post_parms = {
         'start': dt_str,
-        'client': found['id'],
+        'client': client['id'],
         'description': 'a test interval'
     }
     response = requests.post(endpoint_work_intervals, json=post_parms)
@@ -62,7 +63,7 @@ def test_crud():
     dt_str = str(timezone.now() - timezone.timedelta(hours=1))
     post_parms = {
         'start': dt_str,
-        'client': found['id'],
+        'client': client['id'],
         'description': 'a test interval'
     }
     response = requests.post(endpoint_work_intervals, json=post_parms)
@@ -78,3 +79,30 @@ def test_crud():
     assert response.status_code == 200
     founds = json.loads(response.content)
     assert len([instance for instance in founds if instance['id'] == created['id']]) == 0
+    # ============================================================
+    # cRud, with getting by client
+    # ============================================================
+    # confirm client
+    # delete all for the client
+    # create 3 for the client
+    # retrieve the 3 for the client
+    response = requests.get(endpoint_work_intervals, params={'client': client['id']})
+    assert response.status_code == 200
+    founds = json.loads(response.content.decode('utf8'))
+    for found in founds:
+        requests.delete(endpoint_work_intervals, params={'id': found['id']})
+    # create 3 for the client
+    for w in range(3):
+        dt_str = str(timezone.now() - timezone.timedelta(hours=1))
+        post_parms = {
+            'start': dt_str,
+            'client': client['id'],
+            'description': 'a test interval'
+        }
+        response = requests.post(endpoint_work_intervals, json=post_parms)
+        assert response.status_code == 201
+    # retrieve the 3 for the client
+    response = requests.get(endpoint_work_intervals, params={'client': client['id']})
+    assert response.status_code == 200
+    founds = json.loads(response.content.decode('utf8'))
+    assert len(founds) == 3
