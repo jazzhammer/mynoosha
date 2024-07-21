@@ -73,7 +73,7 @@ def test_crud():
     assert response.status_code == 200
     founds = json.loads(response.content)
     assert len([instance for instance in founds if instance['id'] == created['id']]) > 0
-    hour_from_now_2 = timezone.now() + timezone.timedelta(hours=23)
+    hour_from_now_2 = timezone.now() + timezone.timedelta(hours=2)
     response = requests.get(endpoint_work_intervals, params={'pre_start': str(hour_from_now_2)})
     assert response.status_code == 200
     founds = json.loads(response.content)
