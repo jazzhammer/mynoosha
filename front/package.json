@@ -39,6 +39,9 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"axios": "^1.7.2"
+		"@types/luxon": "^3.4.2",
+		"axios": "^1.7.2",
+		"luxon": "^3.4.4",
+		"ts-luxon": "^5.0.5"
 	}
 }

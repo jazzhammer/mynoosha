@@ -46,7 +46,7 @@
     if (indexAlready < 0) {
       nextRecordables.push(client);
       // get this client's workIntervals for .... today
-      
+
     }
     RecordableClientsStore.set(nextRecordables);
   }

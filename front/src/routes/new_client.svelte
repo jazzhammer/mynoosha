@@ -15,7 +15,7 @@
   let name ='';
   $: name
   function createClient(): void {
-    ClientService.createClient({
+    ClientService.create({
       name
     }).then((response: any) => {
       const created = response.data;

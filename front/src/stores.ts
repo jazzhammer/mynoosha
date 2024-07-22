@@ -1,5 +1,6 @@
 import {writable} from "svelte/store";
 import type {Client} from "./models/client";
+import type {WorkInterval} from "./models/work_interval";
 
 export enum crud {
   CREATE,
@@ -24,3 +25,9 @@ export const ClientStore = writable<ClientCrud>();
 export const RecordableClientsStore = writable<Client[]>();
 
 export const WorkIntervalListsByClient = writable<{}>({});
+
+export interface WorkIntervalCrud {
+  type: crud;
+  payload: WorkInterval | WorkInterval[];
+}
+export const WorkIntervalStore = writable<WorkIntervalCrud>();
