@@ -6,5 +6,8 @@ export interface WorkInterval {
   description?: string;
   client?: number;
   minutes?: number;
-  hours?: number
+  hours?: number;
+  localHHMMStart?: string;
+  localHHMMStop?: string;
+  hhmm?: string;
 }

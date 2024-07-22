@@ -51,17 +51,29 @@ def work_intervals(request):
                 founds = founds.filter(client=client)
                 dt_filtered = True
             if dt_filtered:
-                print(founds.query)
-                return JsonResponse([model_to_dict(instance) for instance in founds], status=200, safe=False)
+                # print(founds.query)
+                dicts = [model_to_dict(instance) for instance in founds]
+                serializers = [WorkIntervalSerializer(data=dict) for dict in dicts]
+                json_array = []
+                for serializer in serializers:
+                    serializer.is_valid(raise_exception=True)
+                    print(serializer.data)
+                    json_array.append(serializer.data)
+                # return JsonResponse([model_to_dict(instance) for instance in founds], status=200, safe=False)
+                return JsonResponse(json_array, status=200, safe=False)
             else:
                 return JsonResponse({'error': f'operation not supported by this set of fields: {request.data}'}, status=400, safe=False)
     if request.method == 'POST':
         #post a stop on all existing unstopped WorkIntervals for the client
         client = request.data['client']
         stoppables = WorkInterval.objects.filter(client=client).filter(stop__isnull=True)
-        utc_now = str(timezone.now())
+        utc_now = timezone.now()
+
+        utc_now_ts = utc_now.timestamp()
+        utc_now_s = str(utc_now)
         for stoppable in stoppables:
-            stoppable.stop = utc_now
+            stoppable.stop = utc_now_s
+            stoppable.stop_utcms = utc_now_ts
             stoppable.save()
         serializer = WorkIntervalSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):

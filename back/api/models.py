@@ -1,4 +1,8 @@
 from django.db import models
+from django.utils import timezone
+import pytz
+
+timezone.activate(pytz.timezone('UTC'))
 
 
 class Client(models.Model):
@@ -14,6 +18,15 @@ class WorkInterval(models.Model):
     client = models.ForeignKey(Client, null=False, on_delete=models.PROTECT)
 
     def save(self, *args, **kwargs):
-        self.start_utcms = round(self.start.timestamp())
-        self.stop_utcms = round(self.start.timestamp())
+        if isinstance(self.start, str):
+            utc = timezone.datetime.fromisoformat(self.start)
+        else:
+            utc = self.start
+        self.start_utcms = round(utc.timestamp())
+        if self.stop:
+            if isinstance(self.stop, str):
+                utc = timezone.datetime.fromisoformat(self.stop)
+            else:
+                utc = self.stop
+            self.stop_utcms = round(utc.timestamp())
         super(WorkInterval, self).save(*args, **kwargs)

@@ -1,9 +1,21 @@
 <script lang="ts">
+  import { DateTime } from "luxon";
 
-  import {type ClientCrud, ClientStore, crud, NavStore, RecordableClientsStore} from "../stores";
+  import {
+    type ClientCrud,
+    ClientStore,
+    crud,
+    NavStore,
+    RecordableClientsStore,
+    WorkIntervalListsByClient
+  } from "../stores";
   import type {Client} from "../models/client";
   import ClientService from "../services/client.service";
   import {onDestroy} from "svelte";
+  import WorkIntervalService from "../services/work_interval.service";
+  import type {WorkInterval} from "../models/work_interval";
+  import {padLeft} from "../utils/numbers";
+  // import {padStart} from "ts-luxon/dist/impl/util.js";
 
   let clients: Client[] = [];
 
@@ -20,7 +32,7 @@
   }
 
   function refreshClients(): void {
-    ClientService.find(null).then((founds) => {
+    ClientService.find(null).then((founds: any) => {
       clients = JSON.parse(founds.data);
     })
   }
@@ -34,6 +46,12 @@
   })
   onDestroy(unsubscribe);
 
+  let workIntervalListsByClient: {[key: number]: WorkInterval[]};
+  const unsubWorkIntervalListsByClient = WorkIntervalListsByClient.subscribe((next) => {
+    workIntervalListsByClient = next;
+  });
+  onDestroy(unsubWorkIntervalListsByClient);
+
   function addTimeRecorderClient(client: Client): void {
     NavStore.set({type: 'home', value: 'time-recorders'})
     if (!recordableClients) {
@@ -46,7 +64,26 @@
     if (indexAlready < 0) {
       nextRecordables.push(client);
       // get this client's workIntervals for .... today
+      // debugger;
+      WorkIntervalService.find({client: client.id}).then((response: any) => {
+        const founds = response.data;
+        workIntervalListsByClient = !workIntervalListsByClient ? {} : workIntervalListsByClient;
+        const next = structuredClone(workIntervalListsByClient);
 
+        founds.forEach((each: WorkInterval) => {
+          const isoStart = DateTime.fromISO(each.start)
+          const isoStartLocal = isoStart.toLocal();
+          each.localHHMMStart = `${padLeft(isoStartLocal.hour, 2)}:${padLeft(isoStartLocal.minute, 2)}`;
+          if (each.stop) {
+            const isoStop = DateTime.fromISO(each.stop)
+            const isoStopLocal = isoStop.toLocal();
+            each.localHHMMStop = `${padLeft(isoStopLocal.hour, 2)}:${padLeft(isoStopLocal.minute, 2)}`;
+          }
+        });
+
+        next[client.id] = founds;
+        WorkIntervalListsByClient.set(next);
+      });
     }
     RecordableClientsStore.set(nextRecordables);
   }

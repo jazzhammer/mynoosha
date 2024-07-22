@@ -15,7 +15,7 @@
   let clients: Client[] = []
   const unsubscribe = RecordableClientsStore.subscribe((founds: Client[]) => {
     clients = founds;
-    console.log(`new set of recordables: ${JSON.stringify(clients)}`);
+    // console.log(`new set of recordables: ${JSON.stringify(clients)}`);
   });
   onDestroy(unsubscribe);
 

@@ -6,8 +6,8 @@ const WorkIntervalService = {
   create: (toCreate: WorkInterval): Promise<WorkInterval> => {
     return axios.post(`${apiBaseUrl}work_intervals/`, toCreate);
   },
-  find: (search: string | null): Promise<WorkInterval[]> => {
-    const params = {search}
+  find: (search: {}): Promise<WorkInterval[]> => {
+    const params = search
     return axios.get(`${apiBaseUrl}work_intervals/`, {params});
   }
 };
