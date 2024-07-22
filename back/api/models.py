@@ -10,6 +10,7 @@ class Client(models.Model):
 
 
 class WorkInterval(models.Model):
+    # id = modelObjectIdField(db_column="_id", primary_key=True)
     start = models.DateTimeField()
     stop = models.DateTimeField(null=True)
     start_utcms = models.BigIntegerField(null=True)

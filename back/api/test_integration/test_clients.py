@@ -3,7 +3,7 @@ import json
 import requests
 
 endpoint_clients = 'http://localhost:8001/api/v0/clients/'
-TEST_NAME = 'asdf'
+TEST_NAME = 'testingONLY'
 
 
 def test_get():

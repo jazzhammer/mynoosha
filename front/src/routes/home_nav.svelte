@@ -69,7 +69,7 @@
         const founds = response.data;
         workIntervalListsByClient = !workIntervalListsByClient ? {} : workIntervalListsByClient;
         const next = structuredClone(workIntervalListsByClient);
-
+        debugger;
         founds.forEach((each: WorkInterval) => {
           const isoStart = DateTime.fromISO(each.start)
           const isoStartLocal = isoStart.toLocal();

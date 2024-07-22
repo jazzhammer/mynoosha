@@ -19,17 +19,20 @@ class ClientSerializer(serializers.ModelSerializer):
 
 class WorkIntervalSerializer(serializers.ModelSerializer):
     hhmm = serializers.SerializerMethodField('get_hhmm')
+
     class Meta:
         model = WorkInterval
-        fields = [
+        fields = (
+            'pk',
+            'id',
             'start',
             'stop',
             'start_utcms',
             'stop_utcms',
             'description',
             'client',
-            'hhmm'
-        ]
+            'hhmm',
+        )
 
     def get_hhmm(self, instance):
         print(f"composing hhmm")
