@@ -30,6 +30,7 @@
   import { DateTime } from "luxon";
   import {onDestroy} from "svelte";
   import {padLeft} from "../utils/numbers.js";
+  import markdownify from "../utils/markdown.js";
 
   export let client: Client;
   export let workIntervalList: WorkInterval[];
@@ -176,7 +177,7 @@
          on:keyup={() => {}}
          tabindex="0"
          role="button"
-    >{workInterval.description ? workInterval.description : ''}
+    >{@html markdownify(workInterval.description)}
     </div>
   </div>
   {/each}

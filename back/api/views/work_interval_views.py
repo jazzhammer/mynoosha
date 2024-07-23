@@ -112,7 +112,9 @@ def work_intervals(request):
                     utc_stop = timezone.datetime.fromisoformat(stops)
                     found.stop_utcms = utc_stop.timestamp()
 
-            if len(request.data.get('description')) >= 0:
+            if request.data.get('description') is None or len(request.data.get('description')) >= 0:
+                if request.data.get('description') is None:
+                    request.data['description'] = ''
                 next_description = request.data.get('description')
                 found.description = next_description
 
