@@ -6,5 +6,5 @@ timezone.activate(pytz.timezone('UTC'))
 
 def get_utc_timestamp(source):
     if source.endswith('Z'):
-        source = source[:-1]
+        source = source.replace('Z', '+00:00')
     return timezone.datetime.fromisoformat(source).timestamp()

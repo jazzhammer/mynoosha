@@ -63,13 +63,10 @@
     });
     if (indexAlready < 0) {
       nextRecordables.push(client);
-      // get this client's workIntervals for .... today
-      // debugger;
       WorkIntervalService.find({client: client.id}).then((response: any) => {
         const founds = response.data;
         workIntervalListsByClient = !workIntervalListsByClient ? {} : workIntervalListsByClient;
         const next = structuredClone(workIntervalListsByClient);
-        debugger;
         founds.forEach((each: WorkInterval) => {
           const isoStart = DateTime.fromISO(each.start)
           const isoStartLocal = isoStart.toLocal();

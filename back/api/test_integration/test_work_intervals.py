@@ -24,11 +24,13 @@ import pytz
 
 timezone.activate(pytz.timezone('UTC'))
 
+
 def test_crud():
     client = confirmClientExists()
     deleteClientWorkIntervals(client)
     created = createClientWorkIntervals(client, 1)[0]
     updated = updateWorkIntervalStop(created)
+    updated = updateWorkIntervalDescription(updated)
     deleteWorkIntervalById(updated)
     createClientWorkIntervals(client, 3)
     readClientWorkIntervals(client, 3)
@@ -42,6 +44,7 @@ def test_crud():
     founds = readWorkIntervals(hours_ahead=2)
     assert len([instance for instance in founds if instance['id'] == created['id']]) == 0
 
+
 def deleteClientWorkIntervals(client):
     response = requests.get(endpoint_work_intervals, params={'client': client['id']})
     assert response.status_code == 200
@@ -52,6 +55,7 @@ def deleteClientWorkIntervals(client):
     assert response.status_code == 200
     founds = json.loads(response.content.decode('utf8'))
     assert not founds or len(founds) == 0
+
 
 def createClientWorkIntervals(client, qty):
     createds = []
@@ -70,11 +74,13 @@ def createClientWorkIntervals(client, qty):
     print(f"created WorkIntervals({len(createds)=}) for Client[{client['id']=}]")
     return createds
 
+
 def readClientWorkIntervals(client, expected_qty):
     response = requests.get(endpoint_work_intervals, params={'client': client['id']})
     assert response.status_code == 200
     founds = json.loads(response.content.decode('utf8'))
     assert len(founds) == 3
+
 
 def updateWorkIntervalStop(interval):
     next_stop = str(timezone.now())
@@ -88,11 +94,25 @@ def updateWorkIntervalStop(interval):
     assert updated.get('stop_utcms') == utc_ts
     return updated
 
+
+def updateWorkIntervalDescription(interval):
+    old_description = interval.get('description')
+    next_description = f"next_description"
+    interval['description'] = next_description
+    edited = interval
+    response = requests.put(endpoint_work_intervals, json=edited)
+    assert response.status_code == 200
+    updated = json.loads(response.content.decode('utf8'))
+    assert updated['description'] == next_description
+    return updated
+
+
 def deleteWorkIntervalById(interval):
     response = requests.delete(endpoint_work_intervals, params={'id': interval['id']})
     assert response.status_code == 200
     response = requests.get(endpoint_work_intervals, params={'id': interval['id']})
     assert response.status_code == 404
+
 
 def confirmClientExists():
     response = requests.get(endpoint_clients, params={'search': TEST_NAME})
@@ -105,6 +125,7 @@ def confirmClientExists():
         founds = json.loads(json.loads(content))
         found = founds[0]
     return found
+
 
 def readWorkIntervals(*args, **kwargs):
     hours_ago = kwargs.get('hours_ago')
@@ -123,4 +144,3 @@ def readWorkIntervals(*args, **kwargs):
         return json.loads(loadable)
     else:
         return json.loads(loadable.decode('utf8'))
-

@@ -18,7 +18,7 @@
     grid-template-columns: 1fr 8fr;
   }
 </style>
-<div class="p-1 rounded w-full h-lvh flex flex-col text-center home-layout bg-mylow_white">
+<div class="p-1 rounded w-full h-lvh flex flex-col text-center home-layout bg-mylow_white" data-testid="home">
   <Nav></Nav>
   <div class="h-lvh bg-myhigh_white rounded pt-20">
     {#if mode === 'clients'}

@@ -32,13 +32,20 @@
     console.log(name)
   }
 </script>
-<div class="flex flex-col border-myroon-100 border p-3 ml-3 rounded w-2/12 text-myhigh_white" style="min-width: 226px;">
-  <div class="client-form-header bg-mywood-900 rounded mb-5">new client</div>
-  <div class="client-form-fields w-2/12 text-mywood-900">
-    <label>name</label>
-    <input type="text" style="width: 80px;" bind:value={name} on:keyup={keyupName}/>
+<div class="flex flex-col border-myroon-100 border p-3 ml-3 rounded w-2/12 text-myhigh_white" style="min-width: 226px;" data-testid="new_client">
+  <div class="client-form-header bg-mywood-900 rounded mb-5" data-testid="new_client_header">new client</div>
+  <div class="client-form-fields w-2/12 text-mywood-900" data-testid="new_client_form">
+    <label data-testid="new_client_name">name</label>
+    <input type="text" style="width: 80px;" bind:value={name} on:keyup={keyupName} data-testid="new_client_name_input"/>
   </div>
   <div class="mt-6 text-myhigh_white hover:drop-shadow">
-    <button type="button" on:click={createClient} value="create" class="bg-myroon-100 w-6/12 mt-3 rounded hover:border" style="margin: auto;">create</button>
+    <button on:click={createClient}
+            type="button"
+            value="create" class="bg-myroon-100 w-6/12 mt-3 rounded hover:border"
+            style="margin: auto;"
+            data-testid="create_client_button"
+    >
+      create
+    </button>
   </div>
 </div>

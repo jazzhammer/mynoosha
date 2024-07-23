@@ -22,6 +22,7 @@
   }
 </style>
 <script lang="ts">
+  import WorkIntervalDescription from './work_interval_description.svelte';
 
   import type {Client} from "../models/client";
   import type {WorkInterval} from "../models/work_interval";
@@ -32,6 +33,9 @@
 
   export let client: Client;
   export let workIntervalList: WorkInterval[];
+
+  let editableWorkInterval: WorkInterval | null = null
+  $: editableWorkInterval
 
   let tickedHourMinute = '';
   let tickInterval = setInterval(
@@ -71,9 +75,10 @@
                 const isoStop = DateTime.fromISO(created.stop)
                 const isoStopLocal = isoStop.toLocal();
                 created.localHHMMStop = `${isoStopLocal.hour > 9 ? isoStopLocal.hour : '0' + isoStopLocal.hour}:${isoStopLocal.minute > 9 ? isoStopLocal.minute : '0' + isoStopLocal.minute}`;
-                const HH = Math.floor((created.stop_utcms - created.start_utcms) / 3600);
-                const MM = Math.floor((created.stop_utcms - created.start_utcms) - HH * 3600);
-                created.hhmm = `${HH < 10 ? '0' + HH : HH}:${MM < 10 ? '0' + MM : MM}`;
+                const diff = (created.stop_utcms - created.start_utcms);
+                const HH = Math.floor(diff / 3600);
+                const MM = Math.floor((diff % 3600) / 60);
+                created.hhmm = `${padLeft(HH, 2)}:${padLeft(MM, 2)}`;
               }
 
               let nextWorkIntervalList = []
@@ -137,7 +142,9 @@
     }
   }
 
-
+  function openDescription(workInterval: WorkInterval): void {
+    editableWorkInterval = workInterval;
+  }
 </script>
 <div class="border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder" style="min-width: 400px; min-height: 200px; max-width: 450px; max-height: 250px;">
   <div class="h-2/12 text-center text-myhigh_white bg-myroon-100">{client.name}</div>
@@ -164,14 +171,21 @@
         </div>
       </div>
     {/if}
-    <div class="bg-myhigh_white">{workInterval.description ? workInterval.description : ''}</div>
-  </div>
-  {/each}
-  {/if}
-
-    <div on:click={() => createWorkInterval(null)}
+    <div class="bg-myhigh_white hover:bg-myblue-50"
+         on:click={() => openDescription(workInterval)}
          on:keyup={() => {}}
          tabindex="0"
          role="button"
-         class="bg-myblue-100 w-full text-xl cursor-pointer hover:border text-myhigh_white">+</div>
+    >{workInterval.description ? workInterval.description : ''}
+    </div>
+  </div>
+  {/each}
+  {/if}
+  <div on:click={() => createWorkInterval(null)}
+       on:keyup={() => {}}
+       tabindex="0"
+       role="button"
+       class="bg-myblue-100 w-full text-xl cursor-pointer hover:border text-myhigh_white">+
+  </div>
+  <WorkIntervalDescription workInterval={editableWorkInterval}></WorkIntervalDescription>
 </div>

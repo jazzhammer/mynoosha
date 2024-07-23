@@ -103,13 +103,18 @@ def work_intervals(request):
         # if serializer.is_valid(raise_exception=False):
         found = WorkInterval.objects.get(id=request.data['id'])
         if found:
-            stops = str(request.data['stop'])
-            if stops.endswith('Z'):
-                stops = stops[:-1]
-            found.stop = stops
+            if request.data.get('stop'):
+                stops = str(request.data['stop'])
+                if stops.endswith('Z'):
+                    stops = stops[:-1]
+                    found.stop = stops
 
-            utc_stop = timezone.datetime.fromisoformat(stops)
-            found.stop_utcms = utc_stop.timestamp()
+                    utc_stop = timezone.datetime.fromisoformat(stops)
+                    found.stop_utcms = utc_stop.timestamp()
+
+            if len(request.data.get('description')) >= 0:
+                next_description = request.data.get('description')
+                found.description = next_description
 
             found.save()
             updated = found
