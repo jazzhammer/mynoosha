@@ -7,7 +7,7 @@
     mode = next;
   }
 </script>
-<div class="p-1 h-full flex flex-col text-center">
+<div class="p-1 h-full flex flex-col text-center" style="font-size: 10pt;">
   {#if mode === 'home'}
     <Home></Home>
   {/if}
@@ -17,17 +17,18 @@
           data-testid="splash-logo"
     >
     <section style="z-index: 200; position: relative">
-      <div role="button" class="" style="position: absolute; top: -120px; width: 100%; text-align: center" data-testid="start-button">
-        <div on:click={() => go('home')}
-             on:keyup={() => go('home')}
-          class="bg-mymid_white p-2 w-2/12 rounded-xl drop-shadow-2xl shadow-mywood-900 cursor-pointer hover:border-2"
-          style="margin: auto;"
-          role="button"
-          tabindex="0"
+      <div role="button" class="" style="position: absolute; top: -120px; width: 100%; text-align: center" >
+        <button on:click={() => go('home')}
+                on:keyup={() => {}}
+                class="bg-mymid_white p-2 w-2/12 rounded-xl drop-shadow-2xl shadow-mywood-900 cursor-pointer hover:border-2"
+                style="margin: auto;"
+                role="button"
+                tabindex="0"
+                data-testid="start-button"
         >
           start posting time
-        </div>
+        </button>
       </div>
     </section>
-    {/if}
+  {/if}
 </div>

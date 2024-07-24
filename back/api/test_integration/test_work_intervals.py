@@ -1,18 +1,14 @@
 import os
 
-from .utils.time_utils import get_utc_timestamp
+from ..utils.time_utils import get_utc_timestamp, get_utc_string
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "back.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "back.back.settings")
 
 import django
 
 django.setup()
 
-from django.core.management import call_command
-
 import json
-from datetime import datetime
-from django.utils.timezone import make_aware as UTC
 import requests
 
 endpoint_clients = 'http://localhost:8001/api/v0/clients/'
@@ -26,64 +22,105 @@ timezone.activate(pytz.timezone('UTC'))
 
 
 def test_crud():
-    client = confirmClientExists()
-    deleteClientWorkIntervals(client)
-    created = createClientWorkIntervals(client, 1)[0]
+    client = confirmClientExists(TEST_NAME)
+    deleteClientWorkIntervalsByClientId(client.get('id'))
+    createds = createClientWorkIntervals(client, 3, -1)
+    assert len(createds) == 3
+    created = createds[0]
     updated = updateWorkIntervalStop(created)
     updated = updateWorkIntervalDescription(updated)
-    deleteWorkIntervalById(updated)
-    createClientWorkIntervals(client, 3)
-    readClientWorkIntervals(client, 3)
-    deleteClientWorkIntervals(client)
+    deleteWorkIntervalById(updated.get('id'))
+    deleteClientWorkIntervalsByClientId(client.get('id'))
+    createds = createClientWorkIntervals(client, 3, -1)
+    assert len(createds) == 3
+    reads = readClientWorkIntervals(client=client, hour_offset=-2)
+    assert len(reads) == 3
+    deleteClientWorkIntervalsByClientId(client.get('id'))
     # ============================================================
     # cRud, with getting by datetime boundaries
     # ============================================================
-    created = createClientWorkIntervals(client, 1)[0]
-    founds = readWorkIntervals(hours_ago=2)
+    created = createClientWorkInterval(client)
+    founds = readWorkIntervals(hours_offset=-2)
     assert len([instance for instance in founds if instance['id'] == created['id']]) > 0
-    founds = readWorkIntervals(hours_ahead=2)
+    founds = readWorkIntervals(hours_offset=2)
     assert len([instance for instance in founds if instance['id'] == created['id']]) == 0
+    # ============================================================
+    # updates & creates, relative to existing WorkIntervals' starts
+    # ============================================================
+    deleteClientWorkIntervalsByClientId(client.get('id'))
+    # earlier creation really should be earlier
+    later = createClientWorkInterval(client, description='later')
+    earlier = createClientWorkInterval(client, hours_offset=-1, description='earlier')
+    assert earlier.get('start_utcms') < later.get('start_utcms')
+    # creating with earlier start than another start must result in:
+    # the earlier created.stop set to the other's start
+    # the earlier would have been mutated by this exercise, so re-read:
+    earlier = readWorkIntervals(id=earlier.get('id'))[0]
+    assert later.get('start_utcms') == earlier.get('stop_utcms')
+
+def deleteClientWorkIntervalsByClientId(client_id):
+    intervals_response = requests.get(endpoint_work_intervals, params={'client': client_id})
+    if intervals_response.status_code == 200:
+        founds = json.loads(intervals_response.content.decode('utf8'))
+        for found in founds:
+            requests.delete(endpoint_work_intervals, params={'id': found['id']})
+    response = requests.get(endpoint_work_intervals, params={'client': client_id})
+    assert response.status_code == 404
 
 
-def deleteClientWorkIntervals(client):
-    response = requests.get(endpoint_work_intervals, params={'client': client['id']})
-    assert response.status_code == 200
-    founds = json.loads(response.content.decode('utf8'))
-    for found in founds:
-        requests.delete(endpoint_work_intervals, params={'id': found['id']})
-    response = requests.get(endpoint_work_intervals, params={'client': client['id']})
-    assert response.status_code == 200
-    founds = json.loads(response.content.decode('utf8'))
-    assert not founds or len(founds) == 0
-
-
-def createClientWorkIntervals(client, qty):
+# hours_offset negative => in the past
+# hours_offset positive => in the future
+# relative to now()
+def createClientWorkIntervals(client, qty, hours_offset):
+    print(f"createClientWorkIntervals({client=},{qty=})")
     createds = []
     for w in range(qty):
-        dt_str = str(timezone.now() - timezone.timedelta(hours=1))
-        post_parms = {
-            'start': dt_str,
-            'client': client['id'],
-            'description': 'a test interval'
-        }
-        response = requests.post(endpoint_work_intervals, json=post_parms)
-        created = json.loads(response.content.decode('utf8'))
-        assert created
-        assert response.status_code == 201
+        created = createClientWorkInterval(client, hours_offset)
         createds.append(created)
     print(f"created WorkIntervals({len(createds)=}) for Client[{client['id']=}]")
     return createds
 
 
-def readClientWorkIntervals(client, expected_qty):
-    response = requests.get(endpoint_work_intervals, params={'client': client['id']})
-    assert response.status_code == 200
+# hours_offset negative => in the past
+# hours_offset positive => in the future
+# relative to now()
+def createClientWorkInterval(client, *args, **kwargs):
+    hours_offset = kwargs.get('hours_offset')
+    if hours_offset:
+        dt_str = str(timezone.now() + timezone.timedelta(hours=hours_offset))
+    else:
+        dt_str = str(timezone.now())
+    description = 'a test interval'
+    if kwargs.get('description'):
+        description = kwargs.get('description')
+    post_parms = {
+        'start': dt_str,
+        'client': client['id'],
+        'description': description
+    }
+    response = requests.post(endpoint_work_intervals, json=post_parms)
+    created = json.loads(response.content.decode('utf8'))
+    assert created
+    assert response.status_code == 201
+    print(f"created WorkInterval({client=},{hours_offset=})")
+    return created
+
+
+def readClientWorkIntervals(*args, **kwargs):
+    client = kwargs.get('client')
+    hours_offset = kwargs.get('hours_offset')
+    params = {}
+    if client:
+        params['client'] = client.get('id')
+    if hours_offset:
+        params['pre_start'] = timezone.now() + timezone.timedelta(hours=hours_offset)
+    response = requests.get(endpoint_work_intervals, params=params)
     founds = json.loads(response.content.decode('utf8'))
-    assert len(founds) == 3
+    return founds
 
 
 def updateWorkIntervalStop(interval):
-    next_stop = str(timezone.now())
+    next_stop = get_utc_string()
     interval['stop'] = next_stop
     edited = interval
     response = requests.put(endpoint_work_intervals, json=edited)
@@ -107,40 +144,36 @@ def updateWorkIntervalDescription(interval):
     return updated
 
 
-def deleteWorkIntervalById(interval):
-    response = requests.delete(endpoint_work_intervals, params={'id': interval['id']})
+def deleteWorkIntervalById(interval_id):
+    response = requests.delete(endpoint_work_intervals, params={'id': interval_id})
     assert response.status_code == 200
-    response = requests.get(endpoint_work_intervals, params={'id': interval['id']})
+    response = requests.get(endpoint_work_intervals, params={'id': interval_id})
     assert response.status_code == 404
 
 
-def confirmClientExists():
-    response = requests.get(endpoint_clients, params={'search': TEST_NAME})
+def confirmClientExists(name):
+    response = requests.get(endpoint_clients, params={'search': name})
     if response.status_code != 200:
-        response = requests.post(endpoint_clients, json={'name': TEST_NAME})
+        response = requests.post(endpoint_clients, json={'name': name})
         assert response.status_code == 201
-        found = json.loads(json.loads(response.content))
+        found = json.loads(response.content.decode('utf8'))
     else:
-        content = response.content.decode('utf8')
-        founds = json.loads(json.loads(content))
+        founds = json.loads(response.content.decode('utf8', errors='strict'))
         found = founds[0]
     return found
 
 
 def readWorkIntervals(*args, **kwargs):
-    hours_ago = kwargs.get('hours_ago')
-    hours_ahead = kwargs.get('hours_ahead')
-    if hours_ago and hours_ahead:
-        raise Exception(f"unable to look in past and future at the same time: {hours_ago=}, {hours_ahead=}")
-    if hours_ago:
-        ago_delta = timezone.now() - timezone.timedelta(hours=hours_ago)
-    if hours_ahead:
-        ago_delta = timezone.now() + timezone.timedelta(hours=hours_ahead)
+    hours_offset = kwargs.get('hours_offset')
+    params = {}
+    if kwargs.get('hours_offset'):
+        ago_delta = timezone.now() + timezone.timedelta(hours=hours_offset)
+        params = {'pre_start': str(ago_delta)}
+    if kwargs.get('id'):
+        params['id'] = kwargs.get('id')
 
-    response = requests.get(endpoint_work_intervals, params={'pre_start': str(ago_delta)})
-    assert response.status_code == 200
-    loadable = response.content
-    if isinstance(loadable, str):
-        return json.loads(loadable)
+    response = requests.get(endpoint_work_intervals, params=params)
+    if response.status_code == 200:
+        return json.loads(response.content.decode('utf8'))
     else:
-        return json.loads(loadable.decode('utf8'))
+        return []

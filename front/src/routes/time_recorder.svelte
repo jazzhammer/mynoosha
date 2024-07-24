@@ -34,6 +34,10 @@
 
   export let client: Client;
   export let workIntervalList: WorkInterval[];
+  let firstTimeNow = DateTime.now();
+
+  let newWorkIntervalHH = firstTimeNow.hour;
+  let newWorkIntervalMM = firstTimeNow.minute;
 
   let editableWorkInterval: WorkInterval | null = null
   $: editableWorkInterval
@@ -51,49 +55,53 @@
     clearInterval(tickInterval);
   });
 
+  function createWorkIntervalForDTISO(dtIso: string): void {
+    WorkIntervalService.create({
+      start: dtIso,
+      client: client.id
+    }).then((response: any) => {
+      if (response.data) {
+        const created = response.data;
+
+        const isoStart = DateTime.fromISO(created.start)
+        const isoStartLocal = isoStart.toLocal();
+        created.localHHMMStart = `${isoStartLocal.hour > 9 ? isoStartLocal.hour : '0' + isoStartLocal.hour}:${isoStartLocal.minute > 9 ? isoStartLocal.minute : '0' + isoStartLocal.minute}`;
+
+        if (created.stop) {
+          const isoStop = DateTime.fromISO(created.stop)
+          const isoStopLocal = isoStop.toLocal();
+          created.localHHMMStop = `${isoStopLocal.hour > 9 ? isoStopLocal.hour : '0' + isoStopLocal.hour}:${isoStopLocal.minute > 9 ? isoStopLocal.minute : '0' + isoStopLocal.minute}`;
+          const diff = (created.stop_utcms - created.start_utcms);
+          const HH = Math.floor(diff / 3600);
+          const MM = Math.floor((diff % 3600) / 60);
+          created.hhmm = `${padLeft(HH, 2)}:${padLeft(MM, 2)}`;
+        }
+
+        let nextWorkIntervalList = []
+        workIntervalList = workIntervalList ? workIntervalList: [];
+        nextWorkIntervalList = [...workIntervalList, created];
+        workIntervalList = nextWorkIntervalList;
+        console.log(`created workInterval ${JSON.stringify(created)}`);
+      }
+    });
+  }
+
   let debouncedCreateWorkTimeInterval: any;
   function createWorkInterval(keyEvent: any): void {
-    // debugger;
     if (debouncedCreateWorkTimeInterval) {
       clearTimeout(debouncedCreateWorkTimeInterval);
     }
     if (!keyEvent || (keyEvent.code==='Enter' || keyEvent.code === 'Space')) {
       debouncedCreateWorkTimeInterval = setTimeout(
         () => {
-          const dt = DateTime.utc().toISO();
-          WorkIntervalService.create({
-            start: dt,
-            client: client.id
-          }).then((response: any) => {
-            if (response.data) {
-              const created = response.data;
-
-              const isoStart = DateTime.fromISO(created.start)
-              const isoStartLocal = isoStart.toLocal();
-              created.localHHMMStart = `${isoStartLocal.hour > 9 ? isoStartLocal.hour : '0' + isoStartLocal.hour}:${isoStartLocal.minute > 9 ? isoStartLocal.minute : '0' + isoStartLocal.minute}`;
-
-              if (created.stop) {
-                const isoStop = DateTime.fromISO(created.stop)
-                const isoStopLocal = isoStop.toLocal();
-                created.localHHMMStop = `${isoStopLocal.hour > 9 ? isoStopLocal.hour : '0' + isoStopLocal.hour}:${isoStopLocal.minute > 9 ? isoStopLocal.minute : '0' + isoStopLocal.minute}`;
-                const diff = (created.stop_utcms - created.start_utcms);
-                const HH = Math.floor(diff / 3600);
-                const MM = Math.floor((diff % 3600) / 60);
-                created.hhmm = `${padLeft(HH, 2)}:${padLeft(MM, 2)}`;
-              }
-
-              let nextWorkIntervalList = []
-              workIntervalList = workIntervalList ? workIntervalList: [];
-              nextWorkIntervalList = [...workIntervalList, created];
-              workIntervalList = nextWorkIntervalList;
-              console.log(`created workInterval ${JSON.stringify(created)}`);
-            }
-          });
+          const dtISO = DateTime.utc().toISO();
+          createWorkIntervalForDTISO(dtISO);
         },
         500
       );
     }
   }
+
   let debounceFinalizeWorkInterval: any;
   function finalizeWorkInterval(workInterval: WorkInterval, keyEvent: any): void {
     if (debounceFinalizeWorkInterval) {
@@ -101,12 +109,11 @@
     }
     if (!keyEvent || (keyEvent.code === 'Enter' || keyEvent.code === 'Space')) {
       debounceFinalizeWorkInterval = setTimeout(() => {
-        debugger;
-        const dt = DateTime.utc().toISO();
+        const dtISO = DateTime.utc().toISO();
         WorkIntervalService.update({
           id: workInterval.id,
           start: workInterval.start,
-          stop: dt,
+          stop: dtISO,
         }).then((response: any) => {
           if (response.data) {
             const updated = response.data;
@@ -146,6 +153,21 @@
   function openDescription(workInterval: WorkInterval): void {
     editableWorkInterval = workInterval;
   }
+
+  function keyupHHMM(e: any): void {
+    if (e.key == 'Enter') {
+      const utcNow = DateTime.utc();
+      const utcNewWorkInterval = DateTime.fromObject({
+        year: utcNow.year,
+        month: utcNow.month,
+        day: utcNow.day,
+        hour: parseInt(''+newWorkIntervalHH),
+        minute: parseInt('' + newWorkIntervalMM)
+      }).toUTC()
+      debugger;
+      createWorkIntervalForDTISO(utcNewWorkInterval.toISO() as string);
+    }
+  }
 </script>
 <div class="border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder" style="min-width: 400px; min-height: 200px; max-width: 450px; max-height: 250px;">
   <div class="h-2/12 text-center text-myhigh_white bg-myroon-100">{client.name}</div>
@@ -156,37 +178,62 @@
     <div>description</div>
   </div>
   {#if workIntervalList}
-  {#each workIntervalList as workInterval}
-  <div class="work-interval-list-row">
-    <div class="bg-myhigh_white">{workInterval.localHHMMStart}</div>
-    <div class="bg-myhigh_white">{workInterval.localHHMMStop ? workInterval.localHHMMStop : tickedHourMinute }</div>
-    {#if workInterval.localHHMMStop }
-      <div class="bg-myhigh_white">{workInterval.hhmm ? workInterval.hhmm : ''}</div>
-    {:else }
-      <div class="bg-myhigh_white" style="padding-top: 2px;">
-        <div on:click={() => finalizeWorkInterval(workInterval, null)}
+    {#each workIntervalList as workInterval, index}
+      {#if index > workIntervalList.length - 3}
+        <div class="work-interval-list-row">
+        <div class="bg-myhigh_white">{workInterval.localHHMMStart}</div>
+        <div class="bg-myhigh_white">{workInterval.localHHMMStop ? workInterval.localHHMMStop : tickedHourMinute }</div>
+        {#if workInterval.localHHMMStop }
+          <div class="bg-myhigh_white">{workInterval.hhmm ? workInterval.hhmm : ''}</div>
+        {:else }
+          <div class="bg-myhigh_white" style="padding-top: 2px;">
+            <div on:click={() => finalizeWorkInterval(workInterval, null)}
+                 on:keyup={() => {}}
+                 tabindex="0"
+                 role="button"
+                 class="rounded bg-blue-800 cursor-pointer hover:border-gray-300" style="height:12px; width: 12px; border-radius: 2px; margin: auto;">
+            </div>
+          </div>
+        {/if}
+        <div class="bg-myhigh_white hover:bg-myblue-50"
+             on:click={() => openDescription(workInterval)}
              on:keyup={() => {}}
              tabindex="0"
              role="button"
-             class="rounded bg-blue-800 cursor-pointer hover:border-gray-300" style="height:12px; width: 12px; border-radius: 2px; margin: auto;">
+        >{@html markdownify(workInterval.description)}
         </div>
-      </div>
-    {/if}
-    <div class="bg-myhigh_white hover:bg-myblue-50"
-         on:click={() => openDescription(workInterval)}
+        </div>
+      {/if}
+    {/each}
+  {/if}
+  <div class="bg-myblue-100 w-full text-xl cursor-pointer hover:border text-myhigh_white flex flex-row align-middle items-center" style="position: relative">
+    <div on:click={() => createWorkInterval(null)}
          on:keyup={() => {}}
          tabindex="0"
          role="button"
-    >{@html markdownify(workInterval.description)}
+         style="position:absolute; top: -5px; left: 10px; "
+    >
+      +
     </div>
-  </div>
-  {/each}
-  {/if}
-  <div on:click={() => createWorkInterval(null)}
-       on:keyup={() => {}}
-       tabindex="0"
-       role="button"
-       class="bg-myblue-100 w-full text-xl cursor-pointer hover:border text-myhigh_white">+
+    <div class="text-sm ml-10 border-l-mywood-900 flex flex-row">
+      <div>or using:</div>
+      <div><input type="text" placeholder="hh"
+                  class="ml-4 pl-1 text-center"
+                  style="width: 48px; height: 14px; font-size: 9pt; color: black"
+                  bind:value={newWorkIntervalHH}
+                  on:focus={(e) => (e.target?.select())}
+                  on:keyup={keyupHHMM}
+      />
+      </div>
+      <div><input type="text" placeholder="mm"
+                  class="ml-4 pl-1 text-center"
+                  style="width: 48px; height: 14px; font-size: 9pt; color: black"
+                  bind:value={newWorkIntervalMM}
+                  on:focus={(e) => (e.target?.select())}
+                  on:keyup={keyupHHMM}
+      />
+      </div>
+    </div>
   </div>
   <WorkIntervalDescription workInterval={editableWorkInterval}></WorkIntervalDescription>
 </div>

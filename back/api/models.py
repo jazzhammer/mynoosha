@@ -20,12 +20,16 @@ class WorkInterval(models.Model):
 
     def save(self, *args, **kwargs):
         if isinstance(self.start, str):
+            if self.start.endswith('Z'):
+                self.start = self.start[:-1]
             utc = timezone.datetime.fromisoformat(self.start)
         else:
             utc = self.start
         self.start_utcms = round(utc.timestamp())
         if self.stop:
             if isinstance(self.stop, str):
+                if self.stop.endswith('Z'):
+                    self.stop = self.stop[:-1]
                 utc = timezone.datetime.fromisoformat(self.stop)
             else:
                 utc = self.stop

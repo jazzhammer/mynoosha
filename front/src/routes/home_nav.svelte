@@ -15,7 +15,7 @@
   import WorkIntervalService from "../services/work_interval.service";
   import type {WorkInterval} from "../models/work_interval";
   import {padLeft} from "../utils/numbers";
-  // import {padStart} from "ts-luxon/dist/impl/util.js";
+
 
   let clients: Client[] = [];
 
@@ -33,7 +33,7 @@
 
   function refreshClients(): void {
     ClientService.find(null).then((founds: any) => {
-      clients = JSON.parse(founds.data);
+      clients = founds.data;
     })
   }
 
