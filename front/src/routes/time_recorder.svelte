@@ -168,9 +168,15 @@
       createWorkIntervalForDTISO(utcNewWorkInterval.toISO() as string);
     }
   }
+
+  function deleteEditableWorkInterval(): void {
+    WorkIntervalService.delete(editableWorkInterval).subscribe(() => {
+      editableWorkInterval = null;
+    });
+  }
 </script>
 <div class="border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder" style="min-width: 400px; min-height: 200px; max-width: 450px; max-height: 250px;">
-  <div class="h-2/12 text-center text-myhigh_white bg-myroon-100">{client.name}</div>
+  <div class="h-2/12 text-center text-myhigh_white bg-myroon-100">{client.name} intervals={!workIntervalList ? '(0)' : workIntervalList?.length}</div>
   <div class="work-interval-list-header-row">
     <div class="">start</div>
     <div>stop</div>
@@ -179,10 +185,10 @@
   </div>
   {#if workIntervalList}
     {#each workIntervalList as workInterval, index}
-      {#if index > workIntervalList.length - 3}
+      {#if index > workIntervalList.length - 4}
         <div class="work-interval-list-row">
         <div class="bg-myhigh_white">{workInterval.localHHMMStart}</div>
-        <div class="bg-myhigh_white">{workInterval.localHHMMStop ? workInterval.localHHMMStop : tickedHourMinute }</div>
+        <div class="bg-myhigh_white">{workInterval.localHHMMStop ? workInterval.localHHMMStop : `<${tickedHourMinute}>`}</div>
         {#if workInterval.localHHMMStop }
           <div class="bg-myhigh_white">{workInterval.hhmm ? workInterval.hhmm : ''}</div>
         {:else }
@@ -235,5 +241,17 @@
       </div>
     </div>
   </div>
-  <WorkIntervalDescription workInterval={editableWorkInterval}></WorkIntervalDescription>
+  <div class="flex flex-col w-full h-full">
+    <WorkIntervalDescription workInterval={editableWorkInterval}></WorkIntervalDescription>
+    {#if editableWorkInterval}
+      <div  on:click={deleteEditableWorkInterval}
+            on:keyup={() => {}}
+            tabindex="0"
+            role="button"
+            class="m-3 bg-myroon-100 text-myhigh_white p-1 rounded cursor-pointer hover:border"
+            style="height: 27px; width: 200px; margin-left: auto; margin-right: auto;"
+      >delete this interval
+      </div>
+    {/if}
+  </div>
 </div>

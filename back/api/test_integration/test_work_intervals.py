@@ -49,6 +49,7 @@ def test_crud():
     # ============================================================
     deleteClientWorkIntervalsByClientId(client.get('id'))
     # earlier creation really should be earlier
+    # create the later one first
     later = createClientWorkInterval(client, description='later')
     earlier = createClientWorkInterval(client, hours_offset=-1, description='earlier')
     assert earlier.get('start_utcms') < later.get('start_utcms')
@@ -57,6 +58,19 @@ def test_crud():
     # the earlier would have been mutated by this exercise, so re-read:
     earlier = readWorkIntervals(id=earlier.get('id'))[0]
     assert later.get('start_utcms') == earlier.get('stop_utcms')
+
+    # earlier creation really should be earlier
+    # create the later one first
+    deleteClientWorkIntervalsByClientId(client.get('id'))
+    later = createClientWorkInterval(client, description='later')
+    earlier = createClientWorkInterval(client, hours_offset=-1, description='earlier')
+    assert earlier.get('start_utcms') < later.get('start_utcms')
+    # creating with earlier start than another start must result in:
+    # the earlier created.stop set to the other's start
+    # the earlier would have been mutated by this exercise, so re-read:
+    earlier = readWorkIntervals(id=earlier.get('id'))[0]
+    assert later.get('start_utcms') == earlier.get('stop_utcms')
+
 
 def deleteClientWorkIntervalsByClientId(client_id):
     intervals_response = requests.get(endpoint_work_intervals, params={'client': client_id})

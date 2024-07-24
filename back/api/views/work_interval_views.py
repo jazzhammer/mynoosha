@@ -15,6 +15,17 @@ from ..utils.time_utils import get_utc_timestamp
 
 timezone.activate(pytz.timezone('UTC'))
 
+@api_view(['DELETE'])
+def work_interval(request, *args, **kwargs):
+    if request.method == 'DELETE':
+        try:
+            deletable = WorkInterval.objects.get(pk=request.data.get('id'))
+            deletable.delete()
+            return JsonResponse({}, status=200, safe=False)
+        except Exception as e:
+            return JsonResponse({'error': f"{e=}"}, status=404, safe=False)
+    else:
+        return JsonResponse({'error': f"unhandled request type"}, status=400, safe=False)
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
@@ -28,7 +39,7 @@ def work_intervals(request):
     client_id = request.GET.get('client')
     id = request.GET.get('id')
     if request.method == 'GET':
-        founds = WorkInterval.objects.all()
+        founds = WorkInterval.objects.all().order_by('start_utcms')
         dt_filtered = False
         if pre_start:
             utcms_from_start = round(get_utc_timestamp(pre_start))
@@ -40,7 +51,7 @@ def work_intervals(request):
             dt_filtered = True
         if pre_stop:
             utcms_from_stop = round(datetime.fromisoformat(pre_stop).timestamp())
-            founds = WorkInterval.objects.filter(stop_utcms__gte=utcms_from_stop)
+            founds = founds.filter(stop_utcms__gte=utcms_from_stop)
             dt_filtered = True
         if post_stop:
             utcms_justb4_stop = round(datetime.fromisoformat(post_stop).time())
@@ -66,27 +77,25 @@ def work_intervals(request):
                 if not founds.exists() or len(founds) == 0:
                     return JsonResponse({'error': f"no WorkIntervals[{client_id=}]"}, status=404, safe=False)
                 else:
-                    return JsonResponse([model_to_dict(found) for found in founds], status=200, safe=False)
+                    dicts = [model_to_dict(instance) for instance in founds]
+                    for adict in dicts:
+                        if adict['stop_utcms']:
+                            stop = adict['stop_utcms']
+                            start = adict['start_utcms']
+                            diff = stop - start  # seconds
+                            if diff < 3600:
+                                HH = 0
+                            else:
+                                HH = math.floor(diff / 3600)
+                            MM = math.floor((diff % 3600) / 60)
+                            hhstr = f'{HH}' if HH > 9 else f'0{HH}'
+                            mmstr = f'{MM}' if MM > 9 else f'0{MM}'
+                            hhmm = f'{hhstr}:{mmstr}'
+                            print(f"composed {hhmm}")
+                            adict['hhmm'] = hhmm
+                    return JsonResponse(dicts, status=200, safe=False)
             except WorkInterval.DoesNotExist:
                 return JsonResponse({'error': f'WorkInterval[{client_id=}] not found'}, status=404, safe=False)
-
-            dicts = [model_to_dict(instance) for instance in founds]
-            for adict in dicts:
-                if adict['stop_utcms']:
-                    stop = adict['stop_utcms']
-                    start = adict['start_utcms']
-                    diff = stop - start  # seconds
-                    if diff < 3600:
-                        HH = 0
-                    else:
-                        HH = math.floor(diff / 3600)
-                    MM = math.floor((diff % 3600) / 60)
-                    hhstr = f'{HH}' if HH > 9 else f'0{HH}'
-                    mmstr = f'{MM}' if MM > 9 else f'0{MM}'
-                    hhmm = f'{hhstr}:{mmstr}'
-                    print(f"composed {hhmm}")
-                    adict['hhmm'] = hhmm
-            return JsonResponse(dicts, status=200, safe=False)
         else:
             return JsonResponse({'error': f'operation not supported by this set of fields: {request.data}'}, status=400, safe=False)
     if request.method == 'POST':
@@ -142,6 +151,6 @@ def work_intervals(request):
         try:
             id = int(request.GET.get('id'))
             WorkInterval.objects.get(id=id).delete()
-            return JsonResponse({'detail': f'deleted WorkInterval[{id}]'}, status=200)
+            return JsonResponse({'detail': f'deleted WorkInterval[{id=}]'}, status=200)
         except Exception as e:
             return JsonResponse({'detail': f'deleted WorkInterval[{e}]'}, status=404)

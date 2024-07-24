@@ -6,12 +6,17 @@ const WorkIntervalService = {
   create: (toCreate: WorkInterval): Promise<WorkInterval> => {
     return axios.post(`${apiBaseUrl}work_intervals/`, toCreate);
   },
-  update: (toUpdate: Partial<WorkInterval>): Promise<WorkInterval> => {
-    return axios.put(`${apiBaseUrl}work_intervals/`, toUpdate);
-  },
   find: (search: {}): Promise<WorkInterval[]> => {
     const params = search
     return axios.get(`${apiBaseUrl}work_intervals/`, {params});
-  }
+  },
+  update: (toUpdate: Partial<WorkInterval>): Promise<WorkInterval> => {
+    return axios.put(`${apiBaseUrl}work_intervals/`, toUpdate);
+  },
+  delete: (toDelete: Partial<WorkInterval>): Promise<WorkInterval> => {
+    return axios.delete(`${apiBaseUrl}work_interval/`, {data: {
+      id: toDelete.id
+      }});
+  },
 };
 export default WorkIntervalService;
