@@ -1,0 +1,130 @@
+openapi: 3.0.3
+info:
+  title: mynoosha API
+  version: 1.0.0
+  description: mynoosha time-task attribution
+paths:
+  /api/v0/clients/:
+    get:
+      operationId: clients_retrieve
+      tags:
+      - clients
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: clients_create
+      tags:
+      - clients
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: clients_destroy
+      tags:
+      - clients
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v0/utils/time/utc_string/:
+    get:
+      operationId: utils_time_utc_string_retrieve
+      tags:
+      - utils
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/utils/time/utc_timestamp/:
+    get:
+      operationId: utils_time_utc_timestamp_retrieve
+      tags:
+      - utils
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/work_interval/:
+    delete:
+      operationId: work_interval_destroy
+      tags:
+      - work_interval
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v0/work_intervals/:
+    get:
+      operationId: work_intervals_retrieve
+      tags:
+      - work_intervals
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: work_intervals_create
+      tags:
+      - work_intervals
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: work_intervals_update
+      tags:
+      - work_intervals
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: work_intervals_destroy
+      tags:
+      - work_intervals
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

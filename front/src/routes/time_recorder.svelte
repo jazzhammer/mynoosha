@@ -31,6 +31,7 @@
   import {onDestroy} from "svelte";
   import {padLeft} from "../utils/numbers.js";
   import markdownify from "../utils/markdown.js";
+  import {crud, type WorkIntervalCrud, WorkIntervalStore} from "../stores";
 
   export let client: Client;
   export let workIntervalList: WorkInterval[];
@@ -40,7 +41,9 @@
   let newWorkIntervalMM = firstTimeNow.minute;
 
   let editableWorkInterval: WorkInterval | null = null
+
   $: editableWorkInterval
+  $: workIntervalList
 
   let tickedHourMinute = '';
   let tickInterval = setInterval(
@@ -54,6 +57,36 @@
   onDestroy(() => {
     clearInterval(tickInterval);
   });
+
+  const unsubWorkInterval = WorkIntervalStore.subscribe((wicrud: WorkIntervalCrud) => {
+    if (wicrud && wicrud.type === crud.DELETE) {
+      const nextWorkInterval = wicrid.payload as WorkInterval;
+      if (nextWorkInterval) {
+        const index = workIntervalList.findIndex((maybe: WorkInterval) => {
+          maybe.id === nextWorkInterval.id;
+        });
+        if (index > 0) {
+          const nextWorkIntervalList = structuredClone(workIntervalList);
+          nextWorkIntervalList.splice(index, 1);
+          workIntervalList = nextWorkIntervalList;
+        }
+      }
+    } else
+    if (wicrud && wicrud.type === crud.UPDATE) {
+      const nextWorkInterval = crud.payload as WorkInterval;
+      if (nextWorkInterval) {
+        const index = workIntervalList.findIndex((maybe: WorkInterval) => {
+          maybe.id === nextWorkInterval.id;
+        });
+        if (index > 0) {
+          const nextWorkIntervalList = structuredClone(workIntervalList);
+          nextWorkIntervalList[index] = nextWorkInterval;
+          workIntervalList = nextWorkIntervalList;
+        }
+      }
+    }
+  });
+  onDestroy(unsubWorkInterval)
 
   function createWorkIntervalForDTISO(dtIso: string): void {
     WorkIntervalService.create({
@@ -81,7 +114,6 @@
         workIntervalList = workIntervalList ? workIntervalList: [];
         nextWorkIntervalList = [...workIntervalList, created];
         workIntervalList = nextWorkIntervalList;
-        console.log(`created workInterval ${JSON.stringify(created)}`);
       }
     });
   }
@@ -152,6 +184,10 @@
 
   function openDescription(workInterval: WorkInterval): void {
     editableWorkInterval = workInterval;
+    WorkIntervalStore.set({
+      type: crud.READ,
+      payload: editableWorkInterval
+    })
   }
 
   function keyupHHMM(e: any): void {
@@ -170,9 +206,11 @@
   }
 
   function deleteEditableWorkInterval(): void {
-    WorkIntervalService.delete(editableWorkInterval).subscribe(() => {
-      editableWorkInterval = null;
-    });
+    if (editableWorkInterval) {
+      WorkIntervalService.delete(editableWorkInterval).then(() => {
+        editableWorkInterval = null;
+      });
+    }
   }
 </script>
 <div class="border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder" style="min-width: 400px; min-height: 200px; max-width: 450px; max-height: 250px;">
@@ -242,7 +280,7 @@
     </div>
   </div>
   <div class="flex flex-col w-full h-full">
-    <WorkIntervalDescription workInterval={editableWorkInterval}></WorkIntervalDescription>
+    <WorkIntervalDescription></WorkIntervalDescription>
     {#if editableWorkInterval}
       <div  on:click={deleteEditableWorkInterval}
             on:keyup={() => {}}

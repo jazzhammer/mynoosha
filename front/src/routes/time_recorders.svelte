@@ -8,7 +8,13 @@
 <script lang="ts">
   import TimeRecorder from './time_recorder.svelte';
   import type {Client} from "../models/client";
-  import {RecordableClientsStore, WorkIntervalListsByClient} from "../stores";
+  import {
+    crud,
+    RecordableClientsStore,
+    type WorkIntervalCrud,
+    WorkIntervalListsByClient,
+    WorkIntervalStore
+  } from "../stores";
   import {onDestroy} from "svelte";
   import type {WorkInterval} from "../models/work_interval";
 
@@ -24,6 +30,8 @@
   const unsubWorkIntervalLists = WorkIntervalListsByClient.subscribe((lists: {[key: number]: WorkInterval[]}) => {
     workIntervalListsByClient = lists;
   });
+  onDestroy(unsubWorkIntervalLists)
+
 
 </script>
 <div class="bg-mymid_white w-full h-lvh recorder-flow text-mywood-900">

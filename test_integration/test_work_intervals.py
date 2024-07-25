@@ -1,24 +1,12 @@
-import os
-
-from ..utils.time_utils import get_utc_timestamp, get_utc_string
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "back.back.settings")
-
-import django
-
-django.setup()
-
 import json
 import requests
+
+from test_integration.utils.time_utils import utc_dt, utc_ts
 
 endpoint_clients = 'http://localhost:8001/api/v0/clients/'
 endpoint_work_intervals = 'http://localhost:8001/api/v0/work_intervals/'
 TEST_NAME = 'busyclient'
 
-from django.utils import timezone
-import pytz
-
-timezone.activate(pytz.timezone('UTC'))
 
 
 def test_crud():
@@ -100,10 +88,7 @@ def createClientWorkIntervals(client, qty, hours_offset):
 # relative to now()
 def createClientWorkInterval(client, *args, **kwargs):
     hours_offset = kwargs.get('hours_offset')
-    if hours_offset:
-        dt_str = str(timezone.now() + timezone.timedelta(hours=hours_offset))
-    else:
-        dt_str = str(timezone.now())
+    dt_str = str(utc_dt(hours_offset=hours_offset))
     description = 'a test interval'
     if kwargs.get('description'):
         description = kwargs.get('description')
@@ -127,22 +112,21 @@ def readClientWorkIntervals(*args, **kwargs):
     if client:
         params['client'] = client.get('id')
     if hours_offset:
-        params['pre_start'] = timezone.now() + timezone.timedelta(hours=hours_offset)
+        params['pre_start'] = utc_dt(hours_offset=hours_offset)
     response = requests.get(endpoint_work_intervals, params=params)
     founds = json.loads(response.content.decode('utf8'))
     return founds
 
 
 def updateWorkIntervalStop(interval):
-    next_stop = get_utc_string()
+    next_stop = str(utc_dt())
     interval['stop'] = next_stop
     edited = interval
     response = requests.put(endpoint_work_intervals, json=edited)
     assert response.status_code == 200
     updated = json.loads(response.content.decode('utf8'))
     assert updated['stop'] == next_stop
-    utc_ts = round(get_utc_timestamp(next_stop))
-    assert updated.get('stop_utcms') == utc_ts
+    assert updated.get('stop_utcms') == round(utc_ts())
     return updated
 
 
@@ -181,7 +165,7 @@ def readWorkIntervals(*args, **kwargs):
     hours_offset = kwargs.get('hours_offset')
     params = {}
     if kwargs.get('hours_offset'):
-        ago_delta = timezone.now() + timezone.timedelta(hours=hours_offset)
+        ago_delta = utc_dt(hours_offset=hours_offset)
         params = {'pre_start': str(ago_delta)}
     if kwargs.get('id'):
         params['id'] = kwargs.get('id')

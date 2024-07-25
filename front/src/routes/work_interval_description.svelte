@@ -12,8 +12,20 @@
   import type {WorkInterval} from "../models/work_interval";
   import WorkIntervalService from "../services/work_interval.service";
   import markdownify from "../utils/markdown";
+  import type {WorkIntervalCrud} from "../stores";
+  import {crud, WorkIntervalStore} from "../stores";
+  import {onDestroy} from "svelte";
+  let workInterval: WorkInterval | null = null;
+  const unsubWorkIntervalStore = WorkIntervalStore.subscribe((wicrud: WorkIntervalCrud) => {
+    if (wicrud && wicrud.type === crud.READ) {
+      if (!Array.isArray(wicrud)) {
+        workInterval = wicrud.payload as WorkInterval;
+        nextWorkIntervalDescription = workInterval.description;
+      }
+    }
+  });
+  onDestroy(unsubWorkIntervalStore);
 
-  export let workInterval: WorkInterval;
   let nextWorkIntervalDescription = workInterval?.description;
   let nextMD = workInterval?.description;
 
@@ -35,8 +47,12 @@
             id: workInterval.id,
             description: workInterval.description
           }).then((response: any) => {
-            nextWorkIntervalDescription = workInterval.description;
-            nextMD = markdownify(workInterval.description);
+            nextWorkIntervalDescription = workInterval?.description;
+            nextMD = markdownify(workInterval?.description);
+            WorkIntervalStore.set({
+              type: crud.UPDATE,
+              payload: workInterval as WorkInterval
+            });
           });
         }
       }, 300
@@ -51,6 +67,8 @@
           bind:value={nextWorkIntervalDescription}
           on:keyup={updateWorkIntervalDescription}></textarea>
     </div>
+    {#if nextMD}
     <div style="width: 50%; height: 100%" class="p-2">{@html nextMD}</div>
+    {/if}
   {/if}
 </div>

@@ -1,4 +1,3 @@
-import json
 import math
 from datetime import datetime
 
@@ -6,12 +5,12 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
-from ..models import Client, WorkInterval
-from ..serializers import ClientSerializer, WorkIntervalSerializer
+from ..models import WorkInterval
+from ..serializers import WorkIntervalSerializer
 from django.utils import timezone
 import pytz
 
-from ..utils.time_utils import get_utc_timestamp
+from ..utils.time_utils import utc_ts
 
 timezone.activate(pytz.timezone('UTC'))
 
@@ -42,19 +41,19 @@ def work_intervals(request):
         founds = WorkInterval.objects.all().order_by('start_utcms')
         dt_filtered = False
         if pre_start:
-            utcms_from_start = round(get_utc_timestamp(pre_start))
+            utcms_from_start = round(utc_ts(iso_format=pre_start))
             founds = founds.filter(start_utcms__gte=utcms_from_start)
             dt_filtered = True
         if post_start:
-            utcms_justb4_start = round(datetime.fromisoformat(post_start).timestamp())
+            utcms_justb4_start = round(utc_ts(iso_format=post_start))
             founds = founds.filter(start_utcms__lt=utcms_justb4_start)
             dt_filtered = True
         if pre_stop:
-            utcms_from_stop = round(datetime.fromisoformat(pre_stop).timestamp())
+            utcms_from_stop = round(utc_ts(iso_format=pre_stop))
             founds = founds.filter(stop_utcms__gte=utcms_from_stop)
             dt_filtered = True
         if post_stop:
-            utcms_justb4_stop = round(datetime.fromisoformat(post_stop).time())
+            utcms_justb4_stop = round(utc_ts(iso_format=post_stop))
             founds = founds.filter(start_utcms__lt=utcms_justb4_stop)
             dt_filtered = True
         if client_id:
@@ -106,7 +105,7 @@ def work_intervals(request):
             utc_new_s = request.data['start']
         else:
             utc_new_s = timezone.now()
-        utc_new_ts = round(get_utc_timestamp(utc_new_s))
+        utc_new_ts = round(utc_ts(iso_format=str(utc_new_s)))
 
         stoppables = WorkInterval.objects.filter(client=client).filter(stop__isnull=True).order_by('start_utcms')
         for stoppable in stoppables:
@@ -134,7 +133,7 @@ def work_intervals(request):
         if found:
             if request.data.get('stop'):
                 found.stop = str(request.data['stop'])
-                found.stop_utcms = get_utc_timestamp(str(request.data['stop']))
+                found.stop_utcms = utc_ts(iso_format=str(request.data['stop']))
             if request.data.get('description') is None or len(request.data.get('description')) >= 0:
                 if request.data.get('description') is None:
                     request.data['description'] = ''
