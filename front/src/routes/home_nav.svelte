@@ -57,7 +57,6 @@
       workIntervalListsByClient = {};
     }
     const nextWorkIntervalListsByClient: {[key: number]: WorkInterval[]} = structuredClone(workIntervalListsByClient);
-    debugger;
     if (wic && wic.payload.constructor !== Array) {
       console.log(`!next WorkInterval ${wic.type}`)
       if (wic.type === crud.UPDATE || wic.type === crud.CREATE) {
@@ -122,7 +121,9 @@
 
 
   function addTimeRecorderClient(client: Client): void {
-    NavStore.set({type: 'home', value: 'time-recorders'})
+    ClientStore.set({type: crud.READ, payload: client});
+    NavStore.set({type: 'home', value: 'client'})
+    NavStore.set({type: 'client', value: 'time'})
     if (!recordableClients) {
       recordableClients = [];
     }
@@ -147,7 +148,7 @@
           }
         });
 
-        next[client.id] = founds;
+        next[client.id as unknown as number] = founds;
         WorkIntervalListsByClient.set(next);
       });
     }

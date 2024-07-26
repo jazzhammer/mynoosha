@@ -1,14 +1,17 @@
-<script lang="ts">
-  import NewClient from './new_client.svelte';
+ <script lang="ts">
+  import Client from './client.svelte';
   import Nav from './home_nav.svelte';
   import TimeRecorders from './time_recorders.svelte';
   import {type NavEvent, NavStore} from "../stores";
   import {onDestroy} from "svelte";
+  import Clients from './clients.svelte';
 
   let mode: string | null = 'clients'
 
   const unsubscribe = NavStore.subscribe((next) => {
-    mode = next ? next.value : mode;
+    if (next && next.type === 'home') {
+      mode = next ? next.value : mode;
+    }
   });
   onDestroy(unsubscribe);
 </script>
@@ -23,7 +26,12 @@
   <div class="h-lvh bg-myhigh_white rounded pt-20">
     {#if mode === 'clients'}
       <div class="bg-myhigh_white rounded-lg">
-        <NewClient></NewClient>
+        <Clients></Clients>
+      </div>
+    {/if}
+    {#if mode === 'client'}
+      <div class="bg-myhigh_white rounded-lg">
+        <Client></Client>
       </div>
     {/if}
     {#if mode === 'time-recorders'}

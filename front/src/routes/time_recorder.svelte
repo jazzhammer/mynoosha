@@ -35,11 +35,10 @@
 
   export let client: Client;
   export let workIntervalList: WorkInterval[];
-  let firstTimeNow = DateTime.now();
 
+  let firstTimeNow = DateTime.now();
   let newWorkIntervalHH = firstTimeNow.hour;
   let newWorkIntervalMM = firstTimeNow.minute;
-
   let editableWorkInterval: WorkInterval | null = null
 
   $: editableWorkInterval
@@ -73,7 +72,7 @@
       }
     } else
     if (wicrud && wicrud.type === crud.UPDATE) {
-      const nextWorkInterval = crud.payload as WorkInterval;
+      const nextWorkInterval = wicrud.payload as WorkInterval;
       if (nextWorkInterval) {
         const index = workIntervalList.findIndex((maybe: WorkInterval) => {
           maybe.id === nextWorkInterval.id;
@@ -98,12 +97,12 @@
 
         const isoStart = DateTime.fromISO(created.start)
         const isoStartLocal = isoStart.toLocal();
-        created.localHHMMStart = `${isoStartLocal.hour > 9 ? isoStartLocal.hour : '0' + isoStartLocal.hour}:${isoStartLocal.minute > 9 ? isoStartLocal.minute : '0' + isoStartLocal.minute}`;
+        created.localHHMMStart = `${padLeft(isoStartLocal.hour, 2)}:${padLeft(isoStartLocal.minute, 2)}`;
 
         if (created.stop) {
           const isoStop = DateTime.fromISO(created.stop)
           const isoStopLocal = isoStop.toLocal();
-          created.localHHMMStop = `${isoStopLocal.hour > 9 ? isoStopLocal.hour : '0' + isoStopLocal.hour}:${isoStopLocal.minute > 9 ? isoStopLocal.minute : '0' + isoStopLocal.minute}`;
+          created.localHHMMStop = `${padLeft(isoStopLocal.hour, 2)}:${padLeft(isoStopLocal.minute, 2)}`;
           const diff = (created.stop_utcms - created.start_utcms);
           const HH = Math.floor(diff / 3600);
           const MM = Math.floor((diff % 3600) / 60);
@@ -219,83 +218,85 @@
     }
   }
 </script>
-<div class="border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder" style="min-width: 400px; min-height: 200px; max-width: 450px; max-height: 250px;">
-  <div class="h-2/12 text-center text-myhigh_white bg-myroon-100">{client.name} intervals={!workIntervalList ? '(0)' : workIntervalList?.length}</div>
-  <div class="work-interval-list-header-row">
-    <div class="">start</div>
-    <div>stop</div>
-    <div>hh:mm</div>
-    <div>description</div>
-  </div>
-  {#if workIntervalList}
-    {#each workIntervalList as workInterval, index}
-      {#if index > workIntervalList.length - 4}
-        <div class="work-interval-list-row">
-        <div class="bg-myhigh_white">{workInterval.localHHMMStart}</div>
-        <div class="bg-myhigh_white">{workInterval.localHHMMStop ? workInterval.localHHMMStop : `<${tickedHourMinute}>`}</div>
-        {#if workInterval.localHHMMStop }
-          <div class="bg-myhigh_white">{workInterval.hhmm ? workInterval.hhmm : ''}</div>
-        {:else }
-          <div class="bg-myhigh_white" style="padding-top: 2px;">
-            <div on:click={() => finalizeWorkInterval(workInterval, null)}
-                 on:keyup={() => {}}
-                 tabindex="0"
-                 role="button"
-                 class="rounded bg-blue-800 cursor-pointer hover:border-gray-300" style="height:12px; width: 12px; border-radius: 2px; margin: auto;">
+{#if client}
+  <div class="border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder" style="min-width: 400px; min-height: 200px; max-width: 450px; max-height: 250px;">
+    <div class="h-2/12 text-center text-myhigh_white bg-myroon-100">{client.name} intervals={!workIntervalList ? '(0)' : workIntervalList?.length}</div>
+    <div class="work-interval-list-header-row">
+      <div class="">start</div>
+      <div>stop</div>
+      <div>hh:mm</div>
+      <div>description</div>
+    </div>
+    {#if workIntervalList}
+      {#each workIntervalList as workInterval, index}
+        {#if index > workIntervalList.length - 4}
+          <div class="work-interval-list-row">
+          <div class="bg-myhigh_white">{workInterval.localHHMMStart}</div>
+          <div class="bg-myhigh_white">{workInterval.localHHMMStop ? workInterval.localHHMMStop : `<${tickedHourMinute}>`}</div>
+          {#if workInterval.localHHMMStop }
+            <div class="bg-myhigh_white">{workInterval.hhmm ? workInterval.hhmm : ''}</div>
+          {:else }
+            <div class="bg-myhigh_white" style="padding-top: 2px;">
+              <div on:click={() => finalizeWorkInterval(workInterval, null)}
+                   on:keyup={() => {}}
+                   tabindex="0"
+                   role="button"
+                   class="rounded bg-blue-800 cursor-pointer hover:border-gray-300" style="height:12px; width: 12px; border-radius: 2px; margin: auto;">
+              </div>
             </div>
+          {/if}
+          <div class="bg-myhigh_white hover:bg-myblue-50"
+               on:click={() => openDescription(workInterval)}
+               on:keyup={() => {}}
+               tabindex="0"
+               role="button"
+          >{@html markdownify(workInterval.description)}
+          </div>
           </div>
         {/if}
-        <div class="bg-myhigh_white hover:bg-myblue-50"
-             on:click={() => openDescription(workInterval)}
-             on:keyup={() => {}}
-             tabindex="0"
-             role="button"
-        >{@html markdownify(workInterval.description)}
+      {/each}
+    {/if}
+    <div class="bg-myblue-100 w-full text-xl cursor-pointer hover:border text-myhigh_white flex flex-row align-middle items-center" style="position: relative">
+      <div on:click={() => createWorkInterval(null)}
+           on:keyup={() => {}}
+           tabindex="0"
+           role="button"
+           style="position:absolute; top: -5px; left: 10px; "
+      >
+        +
+      </div>
+      <div class="text-sm ml-10 border-l-mywood-900 flex flex-row">
+        <div>or using:</div>
+        <div><input type="text" placeholder="hh"
+                    class="ml-4 pl-1 text-center"
+                    style="width: 48px; height: 14px; font-size: 9pt; color: black"
+                    bind:value={newWorkIntervalHH}
+                    on:focus={(e) => (e.target?.select())}
+                    on:keyup={keyupHHMM}
+        />
         </div>
+        <div><input type="text" placeholder="mm"
+                    class="ml-4 pl-1 text-center"
+                    style="width: 48px; height: 14px; font-size: 9pt; color: black"
+                    bind:value={newWorkIntervalMM}
+                    on:focus={(e) => (e.target?.select())}
+                    on:keyup={keyupHHMM}
+        />
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col w-full h-full">
+      <WorkIntervalDescription></WorkIntervalDescription>
+      {#if editableWorkInterval}
+        <div  on:click={deleteEditableWorkInterval}
+              on:keyup={() => {}}
+              tabindex="0"
+              role="button"
+              class="m-3 bg-myroon-100 text-myhigh_white p-1 rounded cursor-pointer hover:border"
+              style="height: 27px; width: 200px; margin-left: auto; margin-right: auto;"
+        >delete this interval
         </div>
       {/if}
-    {/each}
-  {/if}
-  <div class="bg-myblue-100 w-full text-xl cursor-pointer hover:border text-myhigh_white flex flex-row align-middle items-center" style="position: relative">
-    <div on:click={() => createWorkInterval(null)}
-         on:keyup={() => {}}
-         tabindex="0"
-         role="button"
-         style="position:absolute; top: -5px; left: 10px; "
-    >
-      +
-    </div>
-    <div class="text-sm ml-10 border-l-mywood-900 flex flex-row">
-      <div>or using:</div>
-      <div><input type="text" placeholder="hh"
-                  class="ml-4 pl-1 text-center"
-                  style="width: 48px; height: 14px; font-size: 9pt; color: black"
-                  bind:value={newWorkIntervalHH}
-                  on:focus={(e) => (e.target?.select())}
-                  on:keyup={keyupHHMM}
-      />
-      </div>
-      <div><input type="text" placeholder="mm"
-                  class="ml-4 pl-1 text-center"
-                  style="width: 48px; height: 14px; font-size: 9pt; color: black"
-                  bind:value={newWorkIntervalMM}
-                  on:focus={(e) => (e.target?.select())}
-                  on:keyup={keyupHHMM}
-      />
-      </div>
     </div>
   </div>
-  <div class="flex flex-col w-full h-full">
-    <WorkIntervalDescription></WorkIntervalDescription>
-    {#if editableWorkInterval}
-      <div  on:click={deleteEditableWorkInterval}
-            on:keyup={() => {}}
-            tabindex="0"
-            role="button"
-            class="m-3 bg-myroon-100 text-myhigh_white p-1 rounded cursor-pointer hover:border"
-            style="height: 27px; width: 200px; margin-left: auto; margin-right: auto;"
-      >delete this interval
-      </div>
-    {/if}
-  </div>
-</div>
+{/if}
