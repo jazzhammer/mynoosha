@@ -146,13 +146,14 @@
           id: workInterval.id,
           start: workInterval.start,
           stop: dtISO,
+          description: workInterval.description
         }).then((response: any) => {
           if (response.data) {
             const updated = response.data;
 
             const isoStart = DateTime.fromISO(updated.start)
             const isoStartLocal = isoStart.toLocal();
-            updated.localHHMMStart = `${isoStartLocal.hour > 9 ? isoStartLocal.hour : '0' + isoStartLocal.hour}:${isoStartLocal.minute > 9 ? isoStartLocal.minute : '0' + isoStartLocal.minute}`;
+            updated.localHHMMStart = `${padLeft(isoStartLocal.hour, 2)}:${padLeft(isoStartLocal.minute, 2)}`;
 
             if (updated.stop) {
               const isoStop = DateTime.fromISO(updated.stop)

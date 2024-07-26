@@ -67,8 +67,6 @@
           bind:value={nextWorkIntervalDescription}
           on:keyup={updateWorkIntervalDescription}></textarea>
     </div>
-    {#if nextMD}
-    <div style="width: 50%; height: 100%" class="p-2">{@html nextMD}</div>
-    {/if}
+
   {/if}
 </div>
