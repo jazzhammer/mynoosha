@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DateTime } from "luxon";
+  import {DateTime} from "luxon";
 
   import {
     type ClientCrud,
@@ -7,7 +7,9 @@
     crud,
     NavStore,
     RecordableClientsStore,
-    WorkIntervalListsByClient
+    type WorkIntervalCrud,
+    WorkIntervalListsByClient,
+    WorkIntervalStore
   } from "../stores";
   import type {Client} from "../models/client";
   import ClientService from "../services/client.service";
@@ -18,14 +20,94 @@
 
 
   let clients: Client[] = [];
+  let mode = 'clients';
+  let recordableClients: Client[] = [];
+  let workIntervalListsByClient: {[key: number]: WorkInterval[]};
+  $: workIntervalListsByClient
+  $: clients
+  $: mode
+  $: recordableClients
 
-  ClientStore.subscribe((event: ClientCrud) => {
+  /**
+                 ,d
+   ,adPPYba,  MM88MMM  ,adPPYba,   8b,dPPYba,   ,adPPYba,
+    `"Y8ba,     88    8b       d8  88          8PP"""""""
+   `"YbbdP"'    "Y888  `"YbbdP"'   88           `"Ybbd8"'
+   */
+  const unsubscribeClients = ClientStore.subscribe((event: ClientCrud) => {
     if (event && (event.type === crud.CREATE)) {
       clients = [...clients, event.payload as Client];
     }
   })
+  onDestroy(unsubscribeClients);
+//---------------------------------------------------------------
+  const unsubscribe = RecordableClientsStore.subscribe((founds: Client[]) => {
+    recordableClients = founds;
+  })
+  onDestroy(unsubscribe);
+  //---------------------------------------------------------------
+  const unsubWorkIntervalListsByClient = WorkIntervalListsByClient.subscribe((next) => {
+    workIntervalListsByClient = next;
+  });
+  onDestroy(unsubWorkIntervalListsByClient);
+  //---------------------------------------------------------------
+  const unsubscribeWorkInterval = WorkIntervalStore.subscribe((wic: WorkIntervalCrud) => {
+    console.log(`!WorkIntervalCrud`);
+    if (!workIntervalListsByClient) {
+      workIntervalListsByClient = {};
+    }
+    const nextWorkIntervalListsByClient: {[key: number]: WorkInterval[]} = structuredClone(workIntervalListsByClient);
+    debugger;
+    if (wic && wic.payload.constructor !== Array) {
+      console.log(`!next WorkInterval ${wic.type}`)
+      if (wic.type === crud.UPDATE || wic.type === crud.CREATE) {
+        const nextWI: WorkInterval = wic.payload as unknown as WorkInterval;
+        let wil: WorkInterval[] = nextWorkIntervalListsByClient[nextWI.client as number]
+        if (!wil) {
+          wil = [];
+          nextWorkIntervalListsByClient[nextWI.client as number] = wil;
+        }
+        if (wic.type === crud.UPDATE) {
+          const index = wil.findIndex((one: WorkInterval) => {
+            return one.id === nextWI.id;
+          });
+          if (index >= 0) {
+            wil[index] = nextWI;
+          }
+        } else {
+          wil.push(nextWI);
+        }
+        WorkIntervalListsByClient.set(nextWorkIntervalListsByClient);
+      } else
+      if (wic.type === crud.DELETE) {
+        const deletedWI: WorkInterval = wic.payload as unknown as WorkInterval;
+        let wil: WorkInterval[] = nextWorkIntervalListsByClient[deletedWI.client as number]
+        if (!wil) {
+          wil = [];
+        }
+        const index = wil.findIndex((one: WorkInterval) => {
+          return one.id === deletedWI.id;
+        });
+        if (index >= 0) {
+          wil.splice(index, 1);
+        }
+        WorkIntervalListsByClient.set(nextWorkIntervalListsByClient);
+      }
 
-  let mode = 'clients';
+    } else {
+      console.log(`!WorkIntervalStore(wic=${JSON.stringify(wic)})`);
+    }
+  });
+  onDestroy(unsubscribeWorkInterval);
+  //---------------------------------------------------------------
+  const unsubscribeWorkIntervalListsByClient = WorkIntervalListsByClient.subscribe((wilbc) => {
+    workIntervalListsByClient = wilbc;
+    console.log('!next workIntervalListsByClient');
+  });
+  onDestroy(unsubscribeWorkIntervalListsByClient);
+  //---------------------------------------------------------------
+
+
   function go(next: string): void {
     mode = next;
     NavStore.set({type: 'home', value: mode});
@@ -36,21 +118,8 @@
       clients = founds.data;
     })
   }
-
   refreshClients();
 
-  let recordableClients: Client[] = [];
-
-  const unsubscribe = RecordableClientsStore.subscribe((founds: Client[]) => {
-    recordableClients = founds;
-  })
-  onDestroy(unsubscribe);
-
-  let workIntervalListsByClient: {[key: number]: WorkInterval[]};
-  const unsubWorkIntervalListsByClient = WorkIntervalListsByClient.subscribe((next) => {
-    workIntervalListsByClient = next;
-  });
-  onDestroy(unsubWorkIntervalListsByClient);
 
   function addTimeRecorderClient(client: Client): void {
     NavStore.set({type: 'home', value: 'time-recorders'})
@@ -84,6 +153,7 @@
     }
     RecordableClientsStore.set(nextRecordables);
   }
+
 
 </script>
 <div class="bg-mylow_white flex flex-col" style="min-width: 150px;">

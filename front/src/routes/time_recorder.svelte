@@ -27,7 +27,7 @@
   import type {Client} from "../models/client";
   import type {WorkInterval} from "../models/work_interval";
   import WorkIntervalService from "../services/work_interval.service";
-  import { DateTime } from "luxon";
+  import {DateTime} from "luxon";
   import {onDestroy} from "svelte";
   import {padLeft} from "../utils/numbers.js";
   import markdownify from "../utils/markdown.js";
@@ -60,7 +60,7 @@
 
   const unsubWorkInterval = WorkIntervalStore.subscribe((wicrud: WorkIntervalCrud) => {
     if (wicrud && wicrud.type === crud.DELETE) {
-      const nextWorkInterval = wicrid.payload as WorkInterval;
+      const nextWorkInterval = wicrud.payload as WorkInterval;
       if (nextWorkInterval) {
         const index = workIntervalList.findIndex((maybe: WorkInterval) => {
           maybe.id === nextWorkInterval.id;
@@ -208,7 +208,12 @@
   function deleteEditableWorkInterval(): void {
     if (editableWorkInterval) {
       WorkIntervalService.delete(editableWorkInterval).then(() => {
+        const deleted = structuredClone(editableWorkInterval)
         editableWorkInterval = null;
+        WorkIntervalStore.set({
+          type: crud.DELETE,
+          payload: deleted as WorkInterval
+        });
       });
     }
   }
