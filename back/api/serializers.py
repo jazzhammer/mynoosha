@@ -13,7 +13,11 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = [
-            'name'
+            'name',
+            'address_street',
+            'address_city',
+            'address_province_state',
+            'address_postal_zip_code',
         ]
 
 

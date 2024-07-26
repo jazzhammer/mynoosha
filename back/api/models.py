@@ -7,7 +7,10 @@ timezone.activate(pytz.timezone('UTC'))
 
 class Client(models.Model):
     name = models.CharField(max_length=64)
-
+    address_street = models.CharField(max_length=64, null=True, blank=True)
+    address_city = models.CharField(max_length=64, null=True, blank=True)
+    address_province_state = models.CharField(max_length=32, null=True, blank=True)
+    address_postal_zip_code = models.CharField(max_length=7, null=True, blank=True)
 
 class WorkInterval(models.Model):
     # id = modelObjectIdField(db_column="_id", primary_key=True)
