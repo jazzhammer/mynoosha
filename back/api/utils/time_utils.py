@@ -3,21 +3,21 @@ import datetime
 
 
 def utc_dt(*args, **kwargs):
-    days_offset = None
-    hours_offset = None
-    minutes_offset = None
+    days_offset = kwargs.get('days_offset')
+    hours_offset = kwargs.get('hours_offset')
+    minutes_offset = kwargs.get('minutes_offset')
     iso_format = kwargs.get('iso_format')
-    if len(args) >= 1:
+    if days_offset is None and len(args) >= 1:
         days_offset = args[0]
         if days_offset is None:
             days_offset = kwargs.get('days_offset')
 
-    if len(args) >= 2:
+    if hours_offset is None and len(args) >= 2:
         hours_offset = args[1]
         if hours_offset is None:
             hours_offset = kwargs.get('hours_offset')
 
-    if len(args) >= 3:
+    if minutes_offset is None and len(args) >= 3:
         minutes_offset = args[2]
         if minutes_offset is None:
             minutes_offset = kwargs.get('minutes_offset')
