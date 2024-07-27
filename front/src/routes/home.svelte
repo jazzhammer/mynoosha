@@ -7,7 +7,6 @@
   import Clients from './clients.svelte';
 
   let mode: string | null = 'clients'
-
   const unsubscribe = NavStore.subscribe((next) => {
     if (next && next.type === 'home') {
       mode = next ? next.value : mode;

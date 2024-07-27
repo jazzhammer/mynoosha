@@ -1,7 +1,7 @@
 <style>
   .client-form-fields {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     width: 180px;
   }
 
@@ -15,7 +15,7 @@
   }
 
   .client-form-header {
-    width: 268px;
+    width: 262px;
   }
 </style>
 <script lang="ts">
@@ -56,44 +56,53 @@
   }
 </script>
 <div class="flex flex-col border-myroon-100 border p-3 ml-3 rounded w-4/12 text-myhigh_white"
-     style="min-width: 226px; max-width: 300px; font-size: 10pt;" data-testid="new_client">
+     style="min-width: 226px; max-width: 300px; font-size: 10pt;" data-testid="new_client"
+>
   <div class="client-form-header bg-mywood-900 rounded mb-5" data-testid="new_client_header" id="new_client_header">new client</div>
   <div class="client-form-fields w-3/12 text-mywood-900" data-testid="new_client_form">
-    <label class="field-label" data-testid="new_client_name">name</label>
-    <input type="text"
-           bind:value={name}
-           on:keyup={keyupName}
-           class="field-input"
-           style="width: 157px; height: 24px; font-size: 10pt; padding-left: 2px; padding-right: 2px;"
-           data-testid="new_client_name_input"/>
-    <label class="field-label" data-testid="new_client_name">street</label>
-    <input type="text"
-           bind:value={address_street}
-           on:keyup={() => {}}
-           class="field-input"
-           style="width: 157px; height: 24px; font-size: 10pt; padding-left: 2px; padding-right: 2px;"
-           data-testid="new_client_street_input"/>
-    <label class="field-label" data-testid="new_client_name">city</label>
-    <input type="text"
-           bind:value={address_city}
-           on:keyup={() => {}}
-           class="field-input"
-           style="width: 157px; height: 24px; font-size: 10pt; padding-left: 2px; padding-right: 2px;"
-           data-testid="new_client_city_input"/>
-    <label class="field-label" data-testid="new_client_name">province/state</label>
-    <input type="text"
-           bind:value={address_province_state}
-           on:keyup={() => {}}
-           class="field-input"
-           style="width: 157px; height: 24px; font-size: 10pt; padding-left: 2px; padding-right: 2px;"
-           data-testid="new_client_province_state_input"/>
-    <label class="field-label" data-testid="new_client_name">zip/postal</label>
-    <input type="text"
-           bind:value={address_postal_zip_code}
-           on:keyup={() => {}}
-           class="field-input"
-           style="width: 157px; height: 24px; font-size: 10pt; padding-left: 2px; padding-right: 2px;"
-           data-testid="new_client_postal_zip_code_input"/>
+    <label class="field-label" data-testid="new_client_name">name
+      <input type="text"
+             bind:value={name}
+             on:keyup={keyupName}
+             class="field-input"
+             style="width: 260px; height: 24px; font-size: 10pt; padding-left: 2px; padding-right: 2px;"
+             id="new_client_name"
+             data-testid="new_client_name_input"/>
+    </label>
+    <label class="field-label" data-testid="new_client_name">street
+      <input type="text"
+             bind:value={address_street}
+             on:keyup={() => {}}
+             class="field-input"
+             style="width: 260px; height: 24px; font-size: 10pt; padding-left: 2px; padding-right: 2px;"
+             id="new_client_street_input"
+             data-testid="new_client_street_input"
+      />
+    </label>
+    <label class="field-label" data-testid="new_client_name">city
+      <input type="text"
+             bind:value={address_city}
+             on:keyup={() => {}}
+             class="field-input"
+             style="width: 260px; height: 24px; font-size: 10pt; padding-left: 2px; padding-right: 2px;"
+             data-testid="new_client_city_input"/>
+    </label>
+    <label class="field-label" data-testid="new_client_name">province/state
+      <input type="text"
+             bind:value={address_province_state}
+             on:keyup={() => {}}
+             class="field-input"
+             style="width: 260px; height: 24px; font-size: 10pt; padding-left: 2px; padding-right: 2px;"
+             data-testid="new_client_province_state_input"/>
+    </label>
+    <label class="field-label" data-testid="new_client_name">zip/postal
+      <input type="text"
+             bind:value={address_postal_zip_code}
+             on:keyup={() => {}}
+             class="field-input"
+             style="width: 260px; height: 24px; font-size: 10pt; padding-left: 2px; padding-right: 2px;"
+             data-testid="new_client_postal_zip_code_input"/>
+    </label>
   </div>
   <div class="mt-6 text-myhigh_white hover:drop-shadow">
     <button on:click={createClient}

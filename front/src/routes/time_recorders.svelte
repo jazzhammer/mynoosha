@@ -25,12 +25,12 @@
   });
   onDestroy(unsubscribe);
 
-  let workIntervalListsByClient: {[key: number]: WorkInterval[]} = {};
-
-  const unsubWorkIntervalLists = WorkIntervalListsByClient.subscribe((lists: {[key: number]: WorkInterval[]}) => {
-    workIntervalListsByClient = lists;
-  });
-  onDestroy(unsubWorkIntervalLists)
+  // let workIntervalListsByClient: {[key: number]: WorkInterval[]} = {};
+  // $: workIntervalListsByClient
+  // const unsubWorkIntervalLists = WorkIntervalListsByClient.subscribe((lists: {[key: number]: WorkInterval[]}) => {
+  //   workIntervalListsByClient = lists;
+  // });
+  // onDestroy(unsubWorkIntervalLists)
 
 
 </script>
@@ -38,7 +38,6 @@
   {#each clients as client}
     <TimeRecorder
       client={client}
-      workIntervalList={workIntervalListsByClient[client.id]}
     ></TimeRecorder>
   {/each}
 </div>

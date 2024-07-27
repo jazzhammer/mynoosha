@@ -22,7 +22,6 @@
                 on:keyup={() => {}}
                 class="bg-mymid_white p-2 w-2/12 rounded-xl drop-shadow-2xl shadow-mywood-900 cursor-pointer hover:border-2"
                 style="margin: auto;"
-                role="button"
                 tabindex="0"
                 data-testid="start-button"
         >

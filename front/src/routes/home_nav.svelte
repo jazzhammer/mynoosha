@@ -19,13 +19,9 @@
   import {padLeft} from "../utils/numbers";
 
 
-  let clients: Client[] = [];
-  let mode = 'clients';
   let recordableClients: Client[] = [];
   let workIntervalListsByClient: {[key: number]: WorkInterval[]};
   $: workIntervalListsByClient
-  $: clients
-  $: mode
   $: recordableClients
 
   /**
@@ -34,6 +30,8 @@
     `"Y8ba,     88    8b       d8  88          8PP"""""""
    `"YbbdP"'    "Y888  `"YbbdP"'   88           `"Ybbd8"'
    */
+  let clients: Client[] = [];
+  $: clients
   const unsubscribeClients = ClientStore.subscribe((event: ClientCrud) => {
     if (event && (event.type === crud.CREATE)) {
       clients = [...clients, event.payload as Client];
@@ -52,13 +50,11 @@
   onDestroy(unsubWorkIntervalListsByClient);
   //---------------------------------------------------------------
   const unsubscribeWorkInterval = WorkIntervalStore.subscribe((wic: WorkIntervalCrud) => {
-    console.log(`!WorkIntervalCrud`);
     if (!workIntervalListsByClient) {
       workIntervalListsByClient = {};
     }
     const nextWorkIntervalListsByClient: {[key: number]: WorkInterval[]} = structuredClone(workIntervalListsByClient);
     if (wic && wic.payload.constructor !== Array) {
-      console.log(`!next WorkInterval ${wic.type}`)
       if (wic.type === crud.UPDATE || wic.type === crud.CREATE) {
         const nextWI: WorkInterval = wic.payload as unknown as WorkInterval;
         let wil: WorkInterval[] = nextWorkIntervalListsByClient[nextWI.client as number]
@@ -70,6 +66,7 @@
           const index = wil.findIndex((one: WorkInterval) => {
             return one.id === nextWI.id;
           });
+          // console.log(`!home nav WorkInterval index ${index}`)
           if (index >= 0) {
             wil[index] = nextWI;
           }
@@ -105,8 +102,8 @@
   });
   onDestroy(unsubscribeWorkIntervalListsByClient);
   //---------------------------------------------------------------
-
-
+  let mode = 'clients';
+  $: mode
   function go(next: string): void {
     mode = next;
     NavStore.set({type: 'home', value: mode});

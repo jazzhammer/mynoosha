@@ -20,10 +20,14 @@
   .work-interval-list-row > * {
     text-align: center;
   }
+  .editor-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 </style>
 <script lang="ts">
   import WorkIntervalDescription from './work_interval_description.svelte';
-
+  import WorkIntervalTimeEditor from './work_interval_time_editor.svelte';
   import type {Client} from "../models/client";
   import type {WorkInterval} from "../models/work_interval";
   import WorkIntervalService from "../services/work_interval.service";
@@ -31,10 +35,9 @@
   import {onDestroy} from "svelte";
   import {padLeft} from "../utils/numbers.js";
   import markdownify from "../utils/markdown.js";
-  import {crud, type WorkIntervalCrud, WorkIntervalStore} from "../stores";
+  import {crud, type WorkIntervalCrud, WorkIntervalListsByClient, WorkIntervalStore} from "../stores";
 
   export let client: Client;
-  export let workIntervalList: WorkInterval[];
 
   let firstTimeNow = DateTime.now();
   let newWorkIntervalHH = firstTimeNow.hour;
@@ -42,7 +45,7 @@
   let editableWorkInterval: WorkInterval | null = null
 
   $: editableWorkInterval
-  $: workIntervalList
+
 
   let tickedHourMinute = '';
   let tickInterval = setInterval(
@@ -56,6 +59,16 @@
   onDestroy(() => {
     clearInterval(tickInterval);
   });
+
+  let workIntervalList: WorkInterval[];
+  $: workIntervalList
+  let workIntervalListsByClient: {[key: number]: WorkInterval[]} = {};
+  $: workIntervalListsByClient
+  const unsubWorkIntervalLists = WorkIntervalListsByClient.subscribe((lists: {[key: number]: WorkInterval[]}) => {
+    workIntervalListsByClient = lists;
+    workIntervalList = workIntervalListsByClient[client?.id as unknown as number];
+  });
+  onDestroy(unsubWorkIntervalLists)
 
   const unsubWorkInterval = WorkIntervalStore.subscribe((wicrud: WorkIntervalCrud) => {
     if (wicrud && wicrud.type === crud.DELETE) {
@@ -72,6 +85,8 @@
       }
     } else
     if (wicrud && wicrud.type === crud.UPDATE) {
+      console.log(`recorder: updated wi`);
+      debugger;
       const nextWorkInterval = wicrud.payload as WorkInterval;
       if (nextWorkInterval) {
         const index = workIntervalList.findIndex((maybe: WorkInterval) => {
@@ -82,6 +97,8 @@
           nextWorkIntervalList[index] = nextWorkInterval;
           workIntervalList = nextWorkIntervalList;
         }
+      } else {
+        console.log(`false alarm: no workInterval`)
       }
     }
   });
@@ -286,7 +303,10 @@
       </div>
     </div>
     <div class="flex flex-col w-full h-full">
-      <WorkIntervalDescription></WorkIntervalDescription>
+      <div class="flex flex-row editor-controls">
+        <WorkIntervalDescription></WorkIntervalDescription>
+        <WorkIntervalTimeEditor></WorkIntervalTimeEditor>
+      </div>
       {#if editableWorkInterval}
         <div  on:click={deleteEditableWorkInterval}
               on:keyup={() => {}}

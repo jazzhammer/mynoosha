@@ -27,11 +27,9 @@
   onDestroy(unsubWorkIntervalStore);
 
   let nextWorkIntervalDescription = workInterval?.description;
-  let nextMD = workInterval?.description;
 
   $: workInterval
   $: nextWorkIntervalDescription
-  $: nextMD
 
 
   let debounceWorkIntervalDescription: any;
@@ -48,7 +46,6 @@
             description: workInterval.description
           }).then((response: any) => {
             nextWorkIntervalDescription = workInterval?.description;
-            nextMD = markdownify(workInterval?.description);
             WorkIntervalStore.set({
               type: crud.UPDATE,
               payload: workInterval as WorkInterval
@@ -59,14 +56,13 @@
     );
   }
 </script>
-<div class="flex flex-row w-full h-full" style="font-size:8pt;">
+<div class="flex flex-row h-full" style="font-size:8pt;">
   {#if workInterval}
-    <div style="width: 50%; height: 100%">
+    <div style="width: 100%; height: 100%">
       <textarea style="font-size:8pt; line-height: 100%"
                 class="editor"
           bind:value={nextWorkIntervalDescription}
           on:keyup={updateWorkIntervalDescription}></textarea>
     </div>
-
   {/if}
 </div>

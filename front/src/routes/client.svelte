@@ -12,7 +12,6 @@
     ClientStore,
     crud, type NavEvent,
     NavStore,
-    type WorkIntervalCrud,
     WorkIntervalListsByClient
   } from "../stores";
   import {type WorkInterval} from "../models/work_interval";
@@ -21,7 +20,7 @@
 
   let workIntervalList: WorkInterval[];
   $: workIntervalList
-
+  // MODE ------------------------------------------------------------
   let mode = 'time';
   $: mode
   const unsubNav = NavStore.subscribe((nav: NavEvent) => {
@@ -30,14 +29,17 @@
     }
   });
   onDestroy(unsubNav)
-
+  function setMode(next: string): void {
+    mode = next;
+  }
+  // ------------------------------------------------------------
   let workIntervalListsByClient: {[key: number]: WorkInterval[]};
   $: workIntervalListsByClient
   const unsubWorkIntervalListByClients = WorkIntervalListsByClient.subscribe((lists: {[key: number]: WorkInterval[]}) => {
     workIntervalListsByClient = lists;
   });
   onDestroy(unsubWorkIntervalListByClients)
-
+  // ------------------------------------------------------------
   let client: Client;
   $: client
   const unsubClient = ClientStore.subscribe((ccrud: ClientCrud) => {
@@ -48,12 +50,6 @@
   });
   onDestroy(unsubClient)
 
-
-
-
-  function setMode(next: string): void {
-    mode = next;
-  }
 </script>
 <div class="">
   <div class="flex flex-row ml-3 mb-3 w-2/12">

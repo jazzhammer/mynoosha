@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api',
     'drf_spectacular',
+    'config',
 ]
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:8002',

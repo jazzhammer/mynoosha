@@ -1,14 +1,12 @@
 <style>
 </style>
 <script lang="ts">
-  import ClientService from '../services/client.service';
   import {type ClientCrud, ClientStore, crud} from "../stores";
   import type {Client} from "../models/client";
   import {onDestroy} from "svelte";
 
   let client: Client;
   $: client
-
   const unsubClient = ClientStore.subscribe((ccrud: ClientCrud) => {
     if (ccrud && ccrud.type === crud.READ) {
       client = ccrud.payload as Client
