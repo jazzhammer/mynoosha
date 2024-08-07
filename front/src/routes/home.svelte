@@ -2,11 +2,16 @@
   import Client from './client.svelte';
   import Nav from './home_nav.svelte';
   import TimeRecorders from './time_recorders.svelte';
-  import {type NavEvent, NavStore} from "../stores";
+  import {NavStore} from "../stores";
   import {onDestroy} from "svelte";
   import Clients from './clients.svelte';
+  import Invoices from './invoices.svelte';
+  import BillableTypes from './billable_types.svelte';
+  import Workers from './workers.svelte';
 
   let mode: string | null = 'clients'
+  $: mode
+
   const unsubscribe = NavStore.subscribe((next) => {
     if (next && next.type === 'home') {
       mode = next ? next.value : mode;
@@ -26,6 +31,21 @@
     {#if mode === 'clients'}
       <div class="bg-myhigh_white rounded-lg">
         <Clients></Clients>
+      </div>
+    {/if}
+    {#if mode === 'invoices'}
+      <div class="bg-myhigh_white rounded-lg">
+        <Invoices></Invoices>
+      </div>
+    {/if}
+    {#if mode === 'workers'}
+      <div class="bg-myhigh_white rounded-lg">
+        <Workers></Workers>
+      </div>
+    {/if}
+    {#if mode === 'billable types'}
+      <div class="bg-myhigh_white rounded-lg">
+        <BillableTypes></BillableTypes>
       </div>
     {/if}
     {#if mode === 'client'}

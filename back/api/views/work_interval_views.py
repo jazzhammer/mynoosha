@@ -1,15 +1,15 @@
 import math
-from datetime import datetime
+
 
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
-from ..models import WorkInterval
-from ..serializers import WorkIntervalSerializer
+from ..model.work_interval import WorkInterval, WorkIntervalSerializer
 from django.utils import timezone
 import pytz
 
+from ..model.worker import get_default_worker, Worker
 from ..utils.time_utils import utc_ts
 
 timezone.activate(pytz.timezone('UTC'))
@@ -74,7 +74,7 @@ def work_intervals(request):
             # print(founds.query)
             try:
                 if not founds.exists() or len(founds) == 0:
-                    return JsonResponse({'error': f"no WorkIntervals[{client_id=}]"}, status=404, safe=False)
+                    return JsonResponse([], status=201, safe=False)
                 else:
                     dicts = [model_to_dict(instance) for instance in founds]
                     for adict in dicts:
@@ -123,8 +123,22 @@ def work_intervals(request):
 
             stoppable.save()
         serializer = WorkIntervalSerializer(data=request.data)
+
         if serializer.is_valid(raise_exception=True):
             created = serializer.save()
+            created = WorkInterval.objects.get(id=created.id)
+            # automate the worker assignment for this new workInterval if not provided
+            worker = None
+            try:
+                worker = Worker.objects.get(id=request.data.get('worker'))
+            except Exception as e:
+                print(f"no worker for {request.data.get('worker')=}")
+            if worker is None:
+                default_worker = get_default_worker()
+                created.worker = default_worker
+            else:
+                created.worker = worker
+            created.save()
             return JsonResponse(model_to_dict(created), status=201, safe=False)
     if request.method == 'PUT':
         # serializer = WorkIntervalSerializer(data=request.data)
@@ -153,3 +167,4 @@ def work_intervals(request):
             return JsonResponse({'detail': f'deleted WorkInterval[{id=}]'}, status=200)
         except Exception as e:
             return JsonResponse({'detail': f'deleted WorkInterval[{e}]'}, status=404)
+

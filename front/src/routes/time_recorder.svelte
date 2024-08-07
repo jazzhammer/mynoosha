@@ -35,18 +35,33 @@
   import {onDestroy} from "svelte";
   import {padLeft} from "../utils/numbers.js";
   import markdownify from "../utils/markdown.js";
-  import {crud, type WorkIntervalCrud, WorkIntervalListsByClient, WorkIntervalStore} from "../stores";
+  import {
+    type ClientCrud,
+    ClientStore,
+    crud,
+    type WorkIntervalCrud,
+    WorkIntervalListsByClient,
+    WorkIntervalStore
+  } from "../stores";
+  let workIntervalList: WorkInterval[];
+  $: workIntervalList
 
-  export let client: Client;
+  let workIntervalListsByClient: {[key: number]: WorkInterval[]} = {};
+  $: workIntervalListsByClient
 
-  let firstTimeNow = DateTime.now();
-  let newWorkIntervalHH = firstTimeNow.hour;
-  let newWorkIntervalMM = firstTimeNow.minute;
+  let client: Client;
+  $: client
+
   let editableWorkInterval: WorkInterval | null = null
-
   $: editableWorkInterval
 
 
+  // ------------------------------------------------------------
+  let firstTimeNow = DateTime.now();
+  let newWorkIntervalHH = firstTimeNow.hour;
+  let newWorkIntervalMM = firstTimeNow.minute;
+  // ------------------------------------------------------------
+  // hour- & minute-updater for currently unfinalized WorkInterval
   let tickedHourMinute = '';
   let tickInterval = setInterval(
     () => {
@@ -60,13 +75,30 @@
     clearInterval(tickInterval);
   });
 
-  let workIntervalList: WorkInterval[];
-  $: workIntervalList
-  let workIntervalListsByClient: {[key: number]: WorkInterval[]} = {};
-  $: workIntervalListsByClient
+
+
+  // ------------------------------------------------------------
+  // listen for store events related to Clients:
+  const unsubClient = ClientStore.subscribe((ccrud: ClientCrud) => {
+    if (ccrud && ccrud.type === crud.READ) {
+      if (!Array.isArray(ccrud.payload)) {
+        client = ccrud.payload;
+        workIntervalList = workIntervalListsByClient[client?.id as unknown as number];
+      }
+    }
+  });
+  onDestroy(unsubClient)
+
+  // ------------------------------------------------------------
+  // listen for store events related to WorkIntervals:
+  // WorkIntervalListsByClient and
+  // WorkInterval
+
   const unsubWorkIntervalLists = WorkIntervalListsByClient.subscribe((lists: {[key: number]: WorkInterval[]}) => {
+    console.log(`WorkIntervalListsByClient event>...`);
     workIntervalListsByClient = lists;
     workIntervalList = workIntervalListsByClient[client?.id as unknown as number];
+    console.log(`workIntervalList now length: ${workIntervalList ? workIntervalList.length : 'none'}`);
   });
   onDestroy(unsubWorkIntervalLists)
 
@@ -85,8 +117,7 @@
       }
     } else
     if (wicrud && wicrud.type === crud.UPDATE) {
-      console.log(`recorder: updated wi`);
-      debugger;
+      // debugger;
       const nextWorkInterval = wicrud.payload as WorkInterval;
       if (nextWorkInterval) {
         const index = workIntervalList.findIndex((maybe: WorkInterval) => {
@@ -105,6 +136,8 @@
   onDestroy(unsubWorkInterval)
 
   function createWorkIntervalForDTISO(dtIso: string): void {
+    console.log(`createWorkIntervalForDTISO(${dtIso})`)
+    // debugger;
     WorkIntervalService.create({
       start: dtIso,
       client: client.id
@@ -112,12 +145,12 @@
       if (response.data) {
         const created = response.data;
 
-        const isoStart = DateTime.fromISO(created.start)
+        const isoStart = DateTime.fromISO(created.start, {zone: 'utc'})
         const isoStartLocal = isoStart.toLocal();
         created.localHHMMStart = `${padLeft(isoStartLocal.hour, 2)}:${padLeft(isoStartLocal.minute, 2)}`;
 
         if (created.stop) {
-          const isoStop = DateTime.fromISO(created.stop)
+          const isoStop = DateTime.fromISO(created.stop, {zone: 'utc'})
           const isoStopLocal = isoStop.toLocal();
           created.localHHMMStop = `${padLeft(isoStopLocal.hour, 2)}:${padLeft(isoStopLocal.minute, 2)}`;
           const diff = (created.stop_utcms - created.start_utcms);
@@ -126,10 +159,14 @@
           created.hhmm = `${padLeft(HH, 2)}:${padLeft(MM, 2)}`;
         }
 
-        let nextWorkIntervalList = []
-        workIntervalList = workIntervalList ? workIntervalList: [];
-        nextWorkIntervalList = [...workIntervalList, created];
-        workIntervalList = nextWorkIntervalList;
+        WorkIntervalStore.set({
+          type: crud.CREATE,
+          payload: created
+        });
+        // let nextWorkIntervalList = []
+        // workIntervalList = workIntervalList ? workIntervalList: [];
+        // nextWorkIntervalList = [...workIntervalList, created];
+        // workIntervalList = nextWorkIntervalList;
       }
     });
   }
@@ -167,13 +204,15 @@
           if (response.data) {
             const updated = response.data;
 
-            const isoStart = DateTime.fromISO(updated.start)
+            const isoStart = DateTime.fromISO(updated.start, {zone: 'utc'})
             const isoStartLocal = isoStart.toLocal();
             updated.localHHMMStart = `${padLeft(isoStartLocal.hour, 2)}:${padLeft(isoStartLocal.minute, 2)}`;
 
             if (updated.stop) {
-              const isoStop = DateTime.fromISO(updated.stop)
+              console.log(`updated stop: ${updated.stop}`);
+              const isoStop = DateTime.fromISO(updated.stop, {zone: 'utc'})
               const isoStopLocal = isoStop.toLocal();
+              console.log(`isoStopLocal.hour: ${isoStopLocal.hour}`);
               updated.localHHMMStop = `${padLeft(isoStopLocal.hour,2)}:${padLeft(isoStopLocal.minute, 2)}`;
               const diff = (updated.stop_utcms - updated.start_utcms);
               const HH = Math.floor(diff / 3600);
@@ -217,7 +256,7 @@
         hour: parseInt(''+newWorkIntervalHH),
         minute: parseInt('' + newWorkIntervalMM)
       }).toUTC()
-      debugger;
+      // debugger;
       createWorkIntervalForDTISO(utcNewWorkInterval.toISO() as string);
     }
   }

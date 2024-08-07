@@ -8,7 +8,7 @@
   import EditClient from './edit_client.svelte';
   import BrowseClients from './browse_clients.svelte';
   // ------------------------------------------------------------
-  let mode = 'browse';
+  let mode = 'new';
   $: mode
   function setMode(next: string): void {
     mode = next;

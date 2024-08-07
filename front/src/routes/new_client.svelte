@@ -52,7 +52,6 @@
     if (event.key === 'Enter') {
       createClient();
     }
-    console.log(name)
   }
 </script>
 <div class="flex flex-col border-myroon-100 border p-3 ml-3 rounded w-4/12 text-myhigh_white"

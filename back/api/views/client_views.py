@@ -1,16 +1,9 @@
-import json
-from datetime import datetime
 
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
-from ..models import Client, WorkInterval
-from ..serializers import ClientSerializer, WorkIntervalSerializer
-from django.utils import timezone
-import pytz
-
-timezone.activate(pytz.timezone('UTC'))
+from ..model.client import Client, ClientSerializer
 
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -35,7 +28,7 @@ def get_clients(request, *args, **kwargs):
         else:
             return JsonResponse(
                 {'detail': f'empty result for search={search}'},
-                status=404,
+                status=201,
                 safe=False
             )
     else:

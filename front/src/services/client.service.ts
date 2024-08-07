@@ -9,7 +9,7 @@ const ClientService = {
   update: (toUpdate: Partial<Client>): Promise<Client> => {
     return axios.put(`${apiBaseUrl}clients/`, toUpdate);
   },
-  find: (search: string | null): Promise<Client[]> => {
+  find: (search: any | null): Promise<Client[]> => {
     const params = {search}
     return axios.get(`${apiBaseUrl}clients/`, {params});
   }

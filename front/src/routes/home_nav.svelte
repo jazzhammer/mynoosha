@@ -88,10 +88,11 @@
           wil.splice(index, 1);
         }
         WorkIntervalListsByClient.set(nextWorkIntervalListsByClient);
+      } else {
+        console.log(`!WorkIntervalStore unhandled crud type: ${wic.type}:(wic=${JSON.stringify(wic)})`);
       }
-
     } else {
-      console.log(`!WorkIntervalStore(wic=${JSON.stringify(wic)})`);
+      console.log(`workIntervalListEvent !!!`);
     }
   });
   onDestroy(unsubscribeWorkInterval);
@@ -135,11 +136,11 @@
         workIntervalListsByClient = !workIntervalListsByClient ? {} : workIntervalListsByClient;
         const next = structuredClone(workIntervalListsByClient);
         founds.forEach((each: WorkInterval) => {
-          const isoStart = DateTime.fromISO(each.start)
+          const isoStart = DateTime.fromISO(each.start, {zone: 'utc'})
           const isoStartLocal = isoStart.toLocal();
           each.localHHMMStart = `${padLeft(isoStartLocal.hour, 2)}:${padLeft(isoStartLocal.minute, 2)}`;
           if (each.stop) {
-            const isoStop = DateTime.fromISO(each.stop)
+            const isoStop = DateTime.fromISO(each.stop, {zone: 'utc'})
             const isoStopLocal = isoStop.toLocal();
             each.localHHMMStop = `${padLeft(isoStopLocal.hour, 2)}:${padLeft(isoStopLocal.minute, 2)}`;
           }
@@ -177,4 +178,28 @@
       {/each}
     </ul>
   </div>
+  <div  on:click={() => {go('invoices')}}
+        on:keyup={() => {go('invoices')}}
+        role="button"
+        tabindex="0"
+        class="cursor-pointer hover:border hover:border-myroon-900 text-left ml-2 mt-2 bg-myhigh_white pl-2 rounded w-11/12">
+    invoices
+  </div>
+
+  <div  on:click={() => {go('workers')}}
+        on:keyup={() => {go('workers')}}
+        role="button"
+        tabindex="0"
+        class="cursor-pointer hover:border hover:border-myroon-900 text-left ml-2 mt-2 bg-myhigh_white pl-2 rounded w-11/12">
+    workers
+  </div>
+
+  <div  on:click={() => {go('billable types')}}
+        on:keyup={() => {go('billable types')}}
+        role="button"
+        tabindex="0"
+        class="cursor-pointer hover:border hover:border-myroon-900 text-left ml-2 mt-2 bg-myhigh_white pl-2 rounded w-11/12">
+    billable types
+  </div>
+
 </div>
