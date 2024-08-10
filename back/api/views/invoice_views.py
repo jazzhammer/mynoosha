@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
 from ..model.invoice import Invoice, InvoiceSerializer
+from ..utils.time_utils import utc_dt
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
@@ -22,6 +23,9 @@ def invoices(request, *args, **kwargs):
 
 
 def get_invoices(request, *args, **kwargs):
+
+
+
     if request.GET.get('search'):
         search = request.GET.get('search')
         founds = Invoice.objects.filter(name__contains=search)
@@ -42,6 +46,14 @@ def get_invoices(request, *args, **kwargs):
     if request.GET.get('client'):
         client = request.GET.get('client')
         founds = Invoice.objects.filter(client__id=client)
+        ymdIssueFrom = request.GET.get('ymdIssueFrom')
+        if ymdIssueFrom:
+            dt_from = utc_dt(iso_format=ymdIssueFrom)
+            founds.filter(issued__gte=dt_from)
+        ymdIssueThrough = request.GET.get('ymdIssueThrough')
+        if ymdIssueThrough:
+            dt_through = utc_dt(iso_format=ymdIssueThrough)
+            founds.filter(issued__lt=dt_through)
         if founds.exists():
             dicts = []
             for instance in founds:

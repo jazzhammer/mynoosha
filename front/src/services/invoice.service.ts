@@ -10,9 +10,8 @@ const InvoiceService = {
   update: (toUpdate: Partial<Invoice>): Promise<Invoice> => {
     return axios.put(`${apiBaseUrl}invoices/`, toUpdate);
   },
-  find: (search: string | null): Promise<Invoice[]> => {
-    const params = {search}
-    return axios.get(`${apiBaseUrl}invoices/`, {params});
+  find: (search: any): Promise<Invoice[]> => {
+    return axios.get(`${apiBaseUrl}invoices/`, {params: search});
   }
 };
 export default InvoiceService;

@@ -8,6 +8,7 @@ class Project(models.Model):
     name = models.CharField(max_length=64)
     description = models.TextField(null=True);
     agreement = models.ForeignKey(Agreement, null=True, on_delete=models.PROTECT)
+    created = models.DateTimeField(auto_now=True)
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:

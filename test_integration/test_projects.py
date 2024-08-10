@@ -7,15 +7,15 @@ TEST_NAME = 'testingONLY'
 TEST_DESCRIPTION = 'testDescription'
 
 def test_get():
-    created = createProject(
+    created = create_project(
         TEST_NAME,
         TEST_DESCRIPTION,
     )
-    deleteProjectsForName(created.get('name'))
-    founds = getProjectsForName(TEST_NAME)
-    assert founds is None
+    delete_projects_for_name(created.get('name'))
+    founds = get_projects_for_name(TEST_NAME)
+    assert founds == []
 
-def createProject(
+def create_project(
         name,
         test_description
     ):
@@ -30,7 +30,7 @@ def createProject(
     assert created.get('description') == test_description
     return created
 
-def getProjectsForName(name):
+def get_projects_for_name(name):
     response = requests.get(endpoint_projects, params={'search': name})
     if response.status_code == 200:
         content = response.content.decode('utf8')
@@ -39,10 +39,12 @@ def getProjectsForName(name):
     else:
         return None
 
-def deleteProjectsForName(name):
-    founds = getProjectsForName(name)
+def delete_projects_for_name(name):
+    founds = get_projects_for_name(name)
     for found in founds:
         response = requests.delete(endpoint_projects, params={'id': found['id']})
         assert response.status_code == 200
     response = requests.get(endpoint_projects, params={'search': name})
-    assert response.status_code == 404
+    assert response.status_code == 200
+    founds = json.loads(response.content.decode('utf8'))
+    assert len(founds) == 0

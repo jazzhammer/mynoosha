@@ -23,12 +23,16 @@ def get_projects(request, *args, **kwargs):
         search = request.GET.get('search')
         founds = Project.objects.filter(name__contains=search)
         if founds.exists():
-            dicts = [model_to_dict(instance) for instance in founds]
+            dicts = []
+            for instance in founds:
+                dict = model_to_dict(instance)
+                dict['created'] = str(instance.created)
+                dicts.append(dict)
             return JsonResponse(dicts, status=200, safe=False)
         else:
             return JsonResponse(
-                {'detail': f'empty result for search={search}'},
-                status=404,
+                [],
+                status=200,
                 safe=False
             )
     else:

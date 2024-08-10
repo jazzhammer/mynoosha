@@ -16,6 +16,7 @@
   import {type ClientCrud, ClientStore, type InvoiceCrud, InvoiceStore} from "../stores";
   import NewClientInvoice from './new_client_invoice.svelte';
   import EditClientInvoice from './edit_client_invoice.svelte';
+  import BrowseClientInvoice from './browser_client_invoice.svelte';
   import {onDestroy} from "svelte";
   import type {Invoice} from "../models/invoice";
 
@@ -80,5 +81,8 @@
   {/if}
   {#if mode==='edit'}
     <EditClientInvoice></EditClientInvoice>
+  {/if}
+  {#if mode==='browse'}
+    <BrowseClientInvoice></BrowseClientInvoice>
   {/if}
 </div>
