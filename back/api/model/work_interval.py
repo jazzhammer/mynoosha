@@ -21,7 +21,6 @@ class WorkInterval(models.Model):
     description = models.TextField(null=True, blank=True)
     client = models.ForeignKey(Client, null=False, on_delete=models.PROTECT)
     invoice_item = models.ForeignKey(InvoiceItem, null=True, on_delete=models.PROTECT)
-    type = models.ForeignKey(WorkType, null=True, on_delete=models.PROTECT)
     worker = models.ForeignKey(Worker, null=True, on_delete=models.PROTECT)
 
     def save(self, *args, **kwargs):

@@ -1,37 +1,31 @@
 import json
+from .test_clients import create_default_client, delete_client
 
 import requests
 
 endpoint_invoices = 'http://localhost:8001/api/v0/invoices/'
-TEST_NAME = 'testingONLY'
-TEST_DESCRIPTION = 'testDescription'
 
 def test_get():
-    created = createInvoice(
-        TEST_NAME,
-        TEST_DESCRIPTION,
+    client = create_default_client()
+    created = create_invoice(
+        client
     )
-    deleteInvoicesForName(created.get('name'))
-    founds = getInvoicesForName(TEST_NAME)
-    assert founds is None
+    createds = get_invoices_for_client(client)
+    assert len(createds) == 1
+    delete_invoices_for_client(client)
+    delete_client(client)
 
-def createInvoice(
-        name,
-        test_description
-    ):
+def create_invoice(client):
     response = requests.post(endpoint_invoices, json={
-        'name': name,
-        'description': test_description
+        'client': client.get('id')
     })
     assert response.status_code == 201
-
     created = json.loads(response.content.decode('utf8'))
-    assert created.get('name') == name
-    assert created.get('description') == test_description
+    assert created.get('client') == client.get('id')
     return created
 
-def getInvoicesForName(name):
-    response = requests.get(endpoint_invoices, params={'search': name})
+def get_invoices_for_client(client):
+    response = requests.get(endpoint_invoices, params={'client': client.get('id')})
     if response.status_code == 200:
         content = response.content.decode('utf8')
         founds = json.loads(content)
@@ -39,10 +33,10 @@ def getInvoicesForName(name):
     else:
         return None
 
-def deleteInvoicesForName(name):
-    founds = getInvoicesForName(name)
+def delete_invoices_for_client(client):
+    founds = get_invoices_for_client(client)
     for found in founds:
         response = requests.delete(endpoint_invoices, params={'id': found['id']})
         assert response.status_code == 200
-    response = requests.get(endpoint_invoices, params={'search': name})
-    assert response.status_code == 404
+    founds = get_invoices_for_client(client)
+    assert len(founds) == 0

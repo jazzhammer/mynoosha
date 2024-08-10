@@ -31,9 +31,21 @@ def get_invoices(request, *args, **kwargs):
                 status=404,
                 safe=False
             )
+    if request.GET.get('client'):
+        client = request.GET.get('client')
+        founds = Invoice.objects.filter(client__id=client)
+        if founds.exists():
+            dicts = [model_to_dict(instance) for instance in founds]
+            return JsonResponse(dicts, status=200, safe=False)
+        else:
+            return JsonResponse(
+                [],
+                status=200,
+                safe=False
+            )
     else:
         return JsonResponse(
-            [model_to_dict(instance) for instance in Invoice.objects.all().order_by('name')],
+            [model_to_dict(instance) for instance in Invoice.objects.all()],
             status=200,
             safe=False)
 

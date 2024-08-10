@@ -10,7 +10,7 @@ TEST_ADDRESS_PROVINCE_STATE = 'testProvinceState'
 TEST_ADDRESS_POSTAL_ZIP_CODE = '1234567'
 
 def test_get():
-    created = createClient(
+    created = create_client(
         TEST_NAME,
         TEST_ADDRESS_STREET,
         TEST_ADDRESS_CITY,
@@ -21,7 +21,17 @@ def test_get():
     founds = getClientsForName(TEST_NAME)
     assert founds is None
 
-def createClient(
+def create_default_client():
+    created = create_client(
+        TEST_NAME,
+        TEST_ADDRESS_STREET,
+        TEST_ADDRESS_CITY,
+        TEST_ADDRESS_PROVINCE_STATE,
+        TEST_ADDRESS_POSTAL_ZIP_CODE
+    )
+    return created
+
+def create_client(
         name,
         test_address_street,
         test_address_city,
@@ -61,3 +71,9 @@ def deleteClientsForName(name):
         assert response.status_code == 200
     response = requests.get(endpoint_clients, params={'search': name})
     assert response.status_code == 404
+
+def delete_client(client):
+    response = requests.delete(endpoint_clients, params={'id': client.get('id')})
+    assert response.status_code == 200
+    response = requests.get(endpoint_clients, params={'id': client.get('id')})
+    assert response.status_code == 200
