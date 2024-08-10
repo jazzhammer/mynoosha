@@ -27,7 +27,6 @@
 </style>
 <script lang="ts">
   import WorkIntervalDescription from './work_interval_description.svelte';
-  import WorkIntervalTimeEditor from './work_interval_time_editor.svelte';
   import type {Client} from "../models/client";
   import type {WorkInterval} from "../models/work_interval";
   import WorkIntervalService from "../services/work_interval.service";
@@ -312,7 +311,8 @@
         {/if}
       {/each}
     {/if}
-    <div class="bg-myblue-100 w-full text-xl cursor-pointer hover:border text-myhigh_white flex flex-row align-middle items-center" style="position: relative">
+    <div class="bg-myblue-100 w-full text-xl cursor-pointer hover:border text-myhigh_white flex flex-row align-middle items-center"
+         style="position: relative">
       <div on:click={() => createWorkInterval(null)}
            on:keyup={() => {}}
            tabindex="0"

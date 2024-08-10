@@ -6,6 +6,7 @@
 <script lang="ts">
   import NewClient from './new_client.svelte';
   import TimeRecorder from './time_recorder.svelte';
+  import ClientManager from './client_manager.svelte';
   import type {Client} from "../models/client";
   import {
     type ClientCrud,
@@ -88,6 +89,9 @@
     <EditClient></EditClient>
   {/if}
   {#if mode === 'time'}
-    <TimeRecorder client={client} workIntervalList={workIntervalList}></TimeRecorder>
+    <div class="flex flex-row">
+      <TimeRecorder></TimeRecorder>
+      <ClientManager></ClientManager>
+    </div>
   {/if}
 </div>

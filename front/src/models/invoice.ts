@@ -1,7 +1,6 @@
 export interface Invoice {
-  id?: number;
+  id: number;
   client: number;
-  created?: string;
-  issued?: string;
-
+  created: string;
+  issued: string;
 }

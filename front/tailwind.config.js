@@ -1,7 +1,15 @@
 /** @type {import('tailwindcss').Config} */
+import { join } from 'path';
 import flowbitePlugin from 'flowbite/plugin'
+import { skeleton } from '@skeletonlabs/tw-plugin';
+
 export default {
-  content: ['./src/**/*.{html,js,svelte,ts}'],
+  content: ['./src/**/*.{html,js,svelte,ts}'
+  ,join(require.resolve(
+        '@skeletonlabs/skeleton'),
+      '../**/*.{html,js,svelte,ts}'
+    )
+  ],
   theme: {
     extend: {
       colors: {
@@ -39,6 +47,14 @@ export default {
       }
     },
   },
-  plugins: [flowbitePlugin],
+
+  plugins: [
+    skeleton({
+      themes: { preset: [ "sahara" ] }
+    }),
+    flowbitePlugin
+  ]
+
+
 }
 

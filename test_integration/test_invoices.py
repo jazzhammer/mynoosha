@@ -1,4 +1,6 @@
 import json
+from datetime import datetime, timedelta
+
 from .test_clients import create_default_client, delete_client
 
 import requests
@@ -12,6 +14,14 @@ def test_get():
     )
     createds = get_invoices_for_client(client)
     assert len(createds) == 1
+    created = createds[0]
+    dt = datetime.fromisoformat(created['issued'])
+    dt_10d = dt + timedelta(days=10)
+    response = requests.put(endpoint_invoices, data={
+        "id": created.get('id'),
+        "issued": dt_10d.isoformat()
+    })
+    updated = json.loads(response.content.decode('utf8'))
     delete_invoices_for_client(client)
     delete_client(client)
 
