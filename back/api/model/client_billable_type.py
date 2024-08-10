@@ -1,8 +1,9 @@
 from rest_framework import serializers
 from django.db import models
 
-from ..model.client import Client
-from ..model.billable_type import BillableType
+from .agreement import Agreement
+from .client import Client
+from .billable_type import BillableType
 
 """ 
 we assign a billable type to a client any time a worker would want to attribute work_intervals to the client, of that type of work. 
@@ -16,6 +17,7 @@ likely captured elsewhere, eg, in a signed document. contracts in a series, year
 class ClientBillableType(models.Model):
     client = models.ForeignKey(Client, on_delete=models.PROTECT)
     billable_type = models.ForeignKey(BillableType, on_delete=models.PROTECT)
+    agreement = models.ForeignKey(Agreement, on_delete=models.PROTECT)
     amount = models.IntegerField()
 
 

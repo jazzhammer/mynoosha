@@ -3,6 +3,9 @@ recording time for various clients, projects, and tasks
 
 # build
 
+## seed the database
+
+
 ## install tkinter: 
 
 for macos: 

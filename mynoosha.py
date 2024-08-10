@@ -1,20 +1,56 @@
 import os.path
 import sys
+import requests
+import json
+
 from tkinter import *
-from tkinter import messagebox
 
 checks = []
 window = None
+
+endpoint_work_types = 'http://localhost:8001/api/v0/work_types/'
+
 
 def mynoosha():
     args = sys.argv
     if len(args) >= 2:
         if 'pythonpath' in args:
             python_path()
+        elif 'seed' in args:
+            seed()
         else:
             print_usage(None)
     else:
         print_usage(None)
+
+
+def seed():
+    # work_types
+    for name in ["milestone", "piece", "time"]:
+        confirmed = confirm_work_type(name)
+        if confirmed:
+            print(f"confirmed work type:{confirmed}")
+        else:
+            print(f"NOT confirmed work type:{name}")
+
+def confirm_work_type(name):
+    found = get_work_type(name)
+    if not found:
+        return create_work_type(name)
+    return found
+
+def create_work_type(name):
+    response = requests.post(endpoint_work_types, data={"name": name})
+    return json.loads(response.content.decode('utf8'))
+
+
+def get_work_type(name):
+    response = requests.get(endpoint_work_types, params={"name": name})
+    founds = json.loads(response.content.decode('utf8'))
+    if len(founds) > 0:
+        return founds[0]
+    return None
+
 
 def python_path():
     command = 'pythonpath'
@@ -28,8 +64,10 @@ def python_path():
         '~/.bashrc',
         'some_other_file'
     ]
-    founds = [possible for possible in [possible if file_exists(possible) else None for possible in possibles] if possible is not None]
-    alreadys = [found for found in [found if found_has_pythonpath_entry(found) else None for found in founds] if found is not None]
+    founds = [possible for possible in [possible if file_exists(possible) else None for possible in possibles] if
+              possible is not None]
+    alreadys = [found for found in [found if found_has_pythonpath_entry(found) else None for found in founds] if
+                found is not None]
     editables = [found for found in founds if found not in alreadys]
 
     questions = [
@@ -65,6 +103,7 @@ def python_path():
 
     window.mainloop()
 
+
 def update_config_files():
     print(f"to append to config files: \r\n{python_path_to_append}")
     for check in checks:
@@ -79,6 +118,7 @@ def update_config_files():
             append_target.write(f"\n{python_path_to_append}\n")
             append_target.close()
     window.destroy()
+
 
 def found_has_pythonpath_entry(name):
     cwd = os.getcwd()
@@ -95,11 +135,13 @@ def found_has_pythonpath_entry(name):
         else:
             return False
 
+
 def file_exists(name):
     if '~' in name:
         return os.path.exists(os.path.expanduser('~/.profile'))
     else:
         return os.path.isfile(name)
+
 
 def logo(command, details):
     # this ascii font face:
@@ -162,7 +204,6 @@ def print_usage_command(command, details):
             print(f"no help renderer for command: {command}")
 
 
-
 def print_usage_python_path(details):
     if details is not None:
         print(details)
@@ -170,5 +211,7 @@ def print_usage_python_path(details):
     pythonpath <shellconfigfile>:       adds current directory to PYTHONPATH environment variable to <shellconfigfile>
                                         eg. ~/.profile  
     """)
-if __name__=="__main__":
+
+
+if __name__ == "__main__":
     mynoosha()

@@ -344,7 +344,7 @@
     <div class="flex flex-col w-full h-full">
       <div class="flex flex-row editor-controls">
         <WorkIntervalDescription></WorkIntervalDescription>
-        <WorkIntervalTimeEditor></WorkIntervalTimeEditor>
+<!--        <WorkIntervalTimeEditor></WorkIntervalTimeEditor>-->
       </div>
       {#if editableWorkInterval}
         <div  on:click={deleteEditableWorkInterval}

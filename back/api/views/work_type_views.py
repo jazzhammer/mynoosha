@@ -19,16 +19,19 @@ def work_types(request, *args, **kwargs):
 
 
 def get_work_types(request, *args, **kwargs):
-    if request.GET.get('search'):
+    if request.GET.get('search') or request.GET.get('name'):
         search = request.GET.get('search')
-        founds = WorkType.objects.filter(name__contains=search)
+        if not search:
+            founds = WorkType.objects.filter(name=request.GET.get('name'))
+        else:
+            founds = WorkType.objects.filter(name__contains=request.GET.get('search'))
         if founds.exists():
             dicts = [model_to_dict(instance) for instance in founds]
             return JsonResponse(dicts, status=200, safe=False)
         else:
             return JsonResponse(
-                {'detail': f'empty result for search={search}'},
-                status=404,
+                [],
+                status=200,
                 safe=False
             )
     else:
@@ -39,7 +42,9 @@ def get_work_types(request, *args, **kwargs):
 
 
 def post_work_types(request, *args, **kwargs):
-    if not WorkType.objects.filter(name=request.GET.get('name')).exists():
+    name = request.data['name']
+    model_found = WorkType.objects.filter(name=name).first()
+    if not model_found:
         serializer = WorkTypeSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             created = serializer.save()

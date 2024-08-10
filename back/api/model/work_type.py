@@ -6,7 +6,7 @@ eg, name='time' | 'piece' | 'milestone'
 """
 class WorkType(models.Model):
     name = models.CharField(max_length=24)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True, default='')
 
 class WorkTypeSerializer(serializers.ModelSerializer):
     class Meta:
