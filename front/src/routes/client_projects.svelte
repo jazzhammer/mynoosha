@@ -1,5 +1,5 @@
 <style>
-  .client-invoices {
+  .client-projects {
 
   }
   .menu-item {
@@ -13,33 +13,33 @@
 </style>
 <script lang="ts">
   import {type Client} from '../models/client';
-  import {type ClientCrud, ClientStore, type InvoiceCrud, InvoiceStore} from "../stores";
-  import NewClientInvoice from './new_client_invoice.svelte';
-  import EditClientInvoice from './edit_client_invoice.svelte';
-  import BrowseClientInvoice from './browse_client_invoice.svelte';
+  import {type ClientCrud, ClientStore, type ProjectCrud, ProjectStore} from "../stores";
+  import NewClientProject from './new_client_project.svelte';
+  import EditClientProject from './edit_client_project.svelte';
+  import BrowseClientProject from './browse_client_project.svelte';
   import {onDestroy} from "svelte";
-  import type {Invoice} from "../models/invoice";
+  import type {Project} from "../models/project";
 
 
-  let mode = 'invoices';
+  let mode = 'projects';
   $: mode
 
   const setMode = (next: string) => {
     mode = next;
   }
 
-  let invoice: Invoice;
-  $: invoice
-  const unsubInvoice = InvoiceStore.subscribe((icrud: InvoiceCrud) => {
+  let project: Project;
+  $: project
+  const unsubProject = ProjectStore.subscribe((icrud: ProjectCrud) => {
     if (icrud) {
       if (!Array.isArray(icrud.payload)) {
-        invoice = icrud.payload as Invoice;
+        project = icrud.payload as Project;
         mode = 'edit';
       }
     }
   });
 
-  onDestroy(unsubInvoice)
+  onDestroy(unsubProject)
   let client: Client;
   $: client
   const unsubClient = ClientStore.subscribe((ccrud: ClientCrud) => {
@@ -55,7 +55,7 @@
 </script>
 <div class="client-manager border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder pb-4"
      style="min-width: 400px; min-height: 200px; max-width: 450px;">
-  <div class="bg-myroon-100 text-myhigh_white">invoices</div>
+  <div class="bg-myroon-100 text-myhigh_white">projects</div>
   <div class="flex flex-row ml-3 mb-3 w-2/12 mt-4">
     {#if mode!=='browse'}
       <div on:click={() => {setMode('browse')}}
@@ -77,12 +77,12 @@
     {/if}
   </div>
   {#if mode==='new'}
-    <NewClientInvoice></NewClientInvoice>
+    <NewClientProject></NewClientProject>
   {/if}
   {#if mode==='edit'}
-    <EditClientInvoice></EditClientInvoice>
+    <EditClientProject></EditClientProject>
   {/if}
   {#if mode==='browse'}
-    <BrowseClientInvoice></BrowseClientInvoice>
+    <BrowseClientProject></BrowseClientProject>
   {/if}
 </div>

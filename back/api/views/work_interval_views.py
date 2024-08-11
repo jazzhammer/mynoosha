@@ -9,11 +9,11 @@ from ..model.invoice_item import InvoiceItem
 from ..model.work_interval import WorkInterval, WorkIntervalSerializer
 from django.utils import timezone
 import pytz
+timezone.activate(pytz.timezone('UTC'))
 
 from ..model.worker import get_default_worker, Worker
 from ..utils.time_utils import utc_ts
 
-timezone.activate(pytz.timezone('UTC'))
 
 @api_view(['DELETE'])
 def work_interval(request, *args, **kwargs):

@@ -4,6 +4,8 @@ from rest_framework import serializers
 class Worker(models.Model):
     last_name = models.CharField(max_length=64)
     first_name = models.CharField(max_length=64)
+    created = models.DateTimeField(auto_now=True, null=True)
+    ymd_birth = models.DateField(null=True)
 
 def get_default_worker():
     defaults = Worker.objects.filter(last_name='default', first_name='worker')

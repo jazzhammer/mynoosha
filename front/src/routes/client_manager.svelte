@@ -57,6 +57,15 @@
         invoices
       </div>
     {/if}
+    {#if mode!=='projects'}
+      <div on:click={() => {setMode('projects')}}
+           on:keyup={() => {}}
+           tabindex="0"
+           role="button"
+           class="menu-item border border-t-1 rounded-md border-l-1 border-r-1 border-myblue-500 cursor-pointer hover:border-myblue-500 pl-6 pr-6">
+        projects
+      </div>
+    {/if}
     {#if mode!=='invoicables'}
       <div on:click={() => {setMode('invoicables')}}
            on:keyup={() => {}}
@@ -69,5 +78,8 @@
   </div>
   {#if mode==='invoices'}
     <ClientInvoices></ClientInvoices>
+  {/if}
+  {#if mode==='invoices'}
+    <ClientProjects></ClientProjects>
   {/if}
 </div>

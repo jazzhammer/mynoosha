@@ -6,11 +6,13 @@ from .views.invoice_item_views import invoice_items
 from .views.invoice_views import invoices
 from .views.project_views import projects
 from .views.utc_views import utc
+from .views.utc_views import utc_iso
 from .views.work_interval_views import work_intervals
 from .views.work_interval_views import work_interval
 from .views.work_type_views import work_types
 from .views.billable_type_views import billable_types
 from .views.client_billable_type_views import client_billable_types
+from .views.worker_views import workers
 
 urlpatterns = [
     path('agreements/', agreements),
@@ -20,9 +22,11 @@ urlpatterns = [
     path('invoices/', invoices),
     path('invoice_items/', invoice_items),
     path('projects/', projects),
+    path('workers/', workers),
     path('work_interval/', work_interval),
     path('work_intervals/', work_intervals),
     path('work_types/', work_types),
-    path('utc/', utc)
+    path('utc/', utc),
+    path('utc/iso', utc_iso)
 ]
 

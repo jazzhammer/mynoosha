@@ -6,6 +6,7 @@ import type {Agreement} from "./models/agreement";
 import type {Invoice} from "./models/invoice";
 import type {InvoiceItem} from "./models/invoice_item";
 import type {WorkType} from "./models/work_type";
+import type {Project} from "./models/project";
 
 
 export enum crud {
@@ -68,6 +69,12 @@ export interface WorkTypeCrud {
   payload: WorkType | WorkType[];
 }
 export const WorkTypeStore = writable<WorkTypeCrud>();
+
+export interface ProjectCrud {
+  type: crud;
+  payload: Project | Project[];
+}
+export const ProjectStore = writable<ProjectCrud>();
 
 export interface InvoiceItemCrud {
   type: crud;
