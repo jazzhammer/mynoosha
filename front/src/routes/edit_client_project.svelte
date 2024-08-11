@@ -15,11 +15,6 @@
     margin-bottom: 2px;
   }
 
-  .field-label {
-    text-align: left;
-    width: 110px;
-  }
-
   .new-project {
     font-size: 9pt;
   }
@@ -43,9 +38,8 @@
     type ClientCrud,
     ClientStore,
     crud,
-    type ProjectCrud, ProjectItemStore,
-    ProjectStore,
-    WorkIntervalListsByClient, WorkTypeStore
+    type ProjectCrud,
+    ProjectStore, WorkTypeStore,
   } from "../stores";
 
   import { DatePicker } from "@svelte-plugins/datepicker";
@@ -56,7 +50,6 @@
   import {type Project} from "../models/project";
   import WorkIntervalService from "../services/work_interval.service";
   import type {WorkInterval} from "../models/work_interval";
-  import ProjectItemService from "../services/project_item.service";
   import WorkTypeService from "../services/work_type.service";
   import type {WorkType} from "../models/work_type";
 
@@ -88,7 +81,7 @@
       if (!Array.isArray(icrud.payload)) {
         project = icrud.payload as Project;
 
-        startDate = new Date(project.issued);
+        startDate = new Date(project.created);
         formattedYmdIssue = formatDate(startDate);
       }
     }
@@ -96,10 +89,9 @@
   onDestroy(unsubProject)
   $: formattedYmdIssue = formatDate(startDate);
   function updateProject(): void {
-    project.issued = (new Date(formattedYmdIssue)).toUTCString();
+    project.created = (new Date(formattedYmdIssue)).toUTCString();
     ProjectService.update({
-      client: client.id,
-      issued: project.issued
+
     }).then((response: any) => {
       const created = response.data;
       ProjectStore.set({
@@ -113,9 +105,6 @@
   $: mode
   function setMode(next: string): void {
     mode = next;
-    if (mode === 'projectables') {
-      retrieveProjectables();
-    }
   }
 
   let projectableWorkIntervals: WorkInterval[];
@@ -123,59 +112,11 @@
   let projectableChecks: boolean[] = [];
   $: projectableChecks
 
-  function retrieveProjectables(): void {
-    projectableChecks = [];
-    WorkIntervalService.find({
-      client: client.id,
-      project_item: 'isnull'
-    }).then((response: any) => {
-      // debugger;
-      const founds = response.data;
-      projectableWorkIntervals = founds
-      projectableWorkIntervals.forEach((interval: WorkInterval) => {
-        projectableChecks[interval.id] = false;
-      });
-    });
-  }
-
   let workTypes: WorkType[] = [];
   $: workTypes
   let workTypesByName: {[key: string]: WorkType} = {};
   $: workTypesByName
-  function retrieveWorkTypes(): void {
-    WorkTypeService.find({}).then((response: any) => {
-      workTypes = response.data;
-      workTypesByName = {}
-      workTypes.forEach((wt: WorkType) => {
-        workTypesByName[wt.name] = wt;
-      });
-      WorkTypeStore.set({
-        type: crud.READ,
-        payload: workTypes
-      });
-    });
-  }
 
-  function addProjectables(): void {
-    const work_type = workTypesByName['time'];
-    projectableWorkIntervals.forEach((wi: WorkInterval) => {
-      if (projectableChecks[wi.id]) {
-        ProjectItemService.create({
-          project: project.id,
-          work_interval: wi.id,
-          work_type: work_type.id
-        }).then((response: any) => {
-          const created = response.data;
-          if (created) {
-            ProjectItemStore.set({
-              type: crud.CREATE,
-              payload: created
-            });
-          }
-        });
-      }
-    });
-  }
 
   let projectablesToAdd = 0;
   $: projectablesToAdd
@@ -256,18 +197,6 @@
         <div class="hover:bg-myblue-100 cursor-pointer">{projectable.hhmm}</div>
         <div class="hover:bg-myblue-100 cursor-pointer">{projectable.description}</div>
       {/each}
-    </div>
-    {/if}
-    {#if projectablesToAdd > 0}
-    <div class="mt-6 text-myhigh_white hover:drop-shadow w-full">
-      <button on:click={addProjectables}
-              type="button"
-              value="create" class="bg-myroon-100 w-6/12 mt-3 rounded hover:border"
-              style="margin: auto; width: 220px;"
-              data-testid="create_client_button"
-      >
-        add {projectablesToAdd} projectable{projectablesToAdd && projectablesToAdd === 1 ? '' : 's'} to project
-      </button>
     </div>
     {/if}
   {/if}

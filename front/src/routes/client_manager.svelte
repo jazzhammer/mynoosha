@@ -15,6 +15,7 @@
   import {type Client} from '../models/client';
   import {type ClientCrud, ClientStore, crud, type InvoiceCrud, InvoiceStore} from "../stores";
   import ClientInvoices from './client_invoices.svelte';
+  import ClientProjects from './client_projects.svelte';
   import {onDestroy} from "svelte";
   import {type Invoice} from "../models/invoice";
   let client: Client;

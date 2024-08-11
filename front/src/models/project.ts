@@ -3,4 +3,5 @@ export interface Project {
   name: string;
   description: string;
   agreement_id: number;
+  created: string;
 }
