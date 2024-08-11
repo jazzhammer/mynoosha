@@ -4,6 +4,8 @@ import type {WorkInterval} from "./models/work_interval";
 import type {BillableType} from "./models/billable_type";
 import type {Agreement} from "./models/agreement";
 import type {Invoice} from "./models/invoice";
+import type {InvoiceItem} from "./models/invoice_item";
+import type {WorkType} from "./models/work_type";
 
 
 export enum crud {
@@ -60,6 +62,18 @@ export interface WorkIntervalCrud {
   payload: WorkInterval | WorkInterval[];
 }
 export const WorkIntervalStore = writable<WorkIntervalCrud>();
+
+export interface WorkTypeCrud {
+  type: crud;
+  payload: WorkType | WorkType[];
+}
+export const WorkTypeStore = writable<WorkTypeCrud>();
+
+export interface InvoiceItemCrud {
+  type: crud;
+  payload: InvoiceItem | InvoiceItem[];
+}
+export const InvoiceItemStore = writable<InvoiceItemCrud>();
 
 
 export interface MynooshaEvent {

@@ -4,7 +4,7 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
-from ..model import WorkType
+from ..model import WorkType, Invoice, WorkInterval
 from ..model.invoice_item import InvoiceItem, InvoiceItemSerializer
 from ..utils.time_utils import utc_dt
 
@@ -75,31 +75,45 @@ def get_invoice_items(request, *args, **kwargs):
 
 
 def post_invoice_items(request, *args, **kwargs):
-    serializer = InvoiceItemSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        created = serializer.save()
-        created = model_to_dict(created)
-        return JsonResponse(created, status=201, safe=False)
+    invoice = request.data.get('invoice')
+    work_interval = request.data.get('work_interval')
+    work_type = request.data.get('work_type')
+
+    if invoice and work_interval and work_type:
+
+        invoice_item = InvoiceItem.objects.create(
+            invoice=Invoice.objects.get(pk=invoice),
+            work_type=WorkType.objects.get(pk=work_type)
+        )
+        created_invoice_item = model_to_dict(invoice_item)
+        # update the work_interval for invoice_item
+        work_interval = WorkInterval.objects.get(pk=work_interval)
+        work_interval.invoice_item = invoice_item
+        work_interval.save()
+
+        return JsonResponse(created_invoice_item, status=201, safe=False)
     else:
-        return JsonResponse({'error': 'invalid data for InvoiceItem'}, status=400, safe=False)
+        return JsonResponse(None, safe=False, status=400)
+
 
 def put_invoice_items(request, *args, **kwargs):
     found = InvoiceItem.objects.get(pk=request.data.get('id'))
     amount_total = request.data.get('amount_total')
     detail = request.data.get('detail')
-    type = request.data.get('type')
+    work_type = request.data.get('work_type')
 
     if amount_total:
         found.amount_total = amount_total
     if detail:
         found.detail = detail
-    if type:
-        work_type = WorkType.objects.get(pk=int(type))
-        found.type = work_type
+    if work_type:
+        work_type = WorkType.objects.get(pk=int(work_type))
+        found.work_type = work_type
     found.save()
     updated = InvoiceItem.objects.get(pk=request.data.get('id'))
     dict = model_to_dict(updated)
     return JsonResponse(dict, status=200, safe=False)
+
 
 def delete_invoice_items(request, *args, **kwargs):
     id = request.GET.get('id')

@@ -19,27 +19,24 @@ def work_types(request, *args, **kwargs):
 
 
 def get_work_types(request, *args, **kwargs):
-    if request.GET.get('search') or request.GET.get('name'):
-        search = request.GET.get('search')
-        if not search:
-            founds = WorkType.objects.filter(name=request.GET.get('name'))
-        else:
-            founds = WorkType.objects.filter(name__contains=request.GET.get('search'))
-        if founds.exists():
-            dicts = [model_to_dict(instance) for instance in founds]
-            return JsonResponse(dicts, status=200, safe=False)
-        else:
-            return JsonResponse(
-                [],
-                status=200,
-                safe=False
-            )
+    search = request.GET.get('search')
+    name = request.GET.get('name')
+    if name:
+        founds = WorkType.objects.filter(name=request.GET.get('name'))
+    elif search:
+        founds = WorkType.objects.filter(name__contains=request.GET.get('search'))
+    else:
+        founds = WorkType.objects.all()
+
+    if founds.exists():
+        dicts = [model_to_dict(instance) for instance in founds]
+        return JsonResponse(dicts, status=200, safe=False)
     else:
         return JsonResponse(
-            [model_to_dict(instance) for instance in WorkType.objects.all().order_by('name')],
+            [],
             status=200,
-            safe=False)
-
+            safe=False
+        )
 
 def post_work_types(request, *args, **kwargs):
     name = request.data['name']

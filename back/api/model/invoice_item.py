@@ -9,7 +9,7 @@ class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.PROTECT)
     amount_total = models.IntegerField(default=0)
     detail = models.TextField(null=True, blank=True)
-    type = models.ForeignKey(WorkType, null=True, on_delete=models.PROTECT)
+    work_type = models.ForeignKey(WorkType, null=True, on_delete=models.PROTECT)
 
 class InvoiceItemSerializer(serializers.ModelSerializer):
     class Meta:
