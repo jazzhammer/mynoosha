@@ -2,7 +2,7 @@ import json
 
 import requests
 
-endpoint_projects = 'http://localhost:8001/api/v0/work_types/'
+endpoint_work_types = 'http://localhost:8001/api/v0/work_types/'
 TEST_NAME = 'testingONLY'
 TEST_DESCRIPTION = 'testDescription'
 
@@ -19,7 +19,7 @@ def createWorkType(
         name,
         test_description
     ):
-    response = requests.post(endpoint_projects, json={
+    response = requests.post(endpoint_work_types, json={
         'name': name,
         'description': test_description
     })
@@ -30,8 +30,17 @@ def createWorkType(
     assert created.get('description') == test_description
     return created
 
+def get_work_type_for_name(name):
+    response = requests.get(endpoint_work_types, params={'name': name})
+    if response.status_code == 200:
+        content = response.content.decode('utf8')
+        found = json.loads(content)[0]
+        return found
+    else:
+        return None
+
 def getWorkTypesForName(name):
-    response = requests.get(endpoint_projects, params={'search': name})
+    response = requests.get(endpoint_work_types, params={'search': name})
     if response.status_code == 200:
         content = response.content.decode('utf8')
         founds = json.loads(content)
@@ -42,7 +51,7 @@ def getWorkTypesForName(name):
 def deleteWorkTypesForName(name):
     founds = getWorkTypesForName(name)
     for found in founds:
-        response = requests.delete(endpoint_projects, params={'id': found['id']})
+        response = requests.delete(endpoint_work_types, params={'id': found['id']})
         assert response.status_code == 200
-    response = requests.get(endpoint_projects, params={'search': name})
+    response = requests.get(endpoint_work_types, params={'search': name})
     assert response.status_code == 404

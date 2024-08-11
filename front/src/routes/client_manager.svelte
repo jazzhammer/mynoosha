@@ -13,9 +13,10 @@
 </style>
 <script lang="ts">
   import {type Client} from '../models/client';
-  import {type ClientCrud, ClientStore} from "../stores";
+  import {type ClientCrud, ClientStore, crud, type InvoiceCrud, InvoiceStore} from "../stores";
   import ClientInvoices from './client_invoices.svelte';
   import {onDestroy} from "svelte";
+  import {type Invoice} from "../models/invoice";
   let client: Client;
   $: client
 
@@ -32,6 +33,15 @@
     }
   });
   onDestroy(unsubClient)
+
+  let invoice: Invoice;
+  $: invoice
+  const unsubInvoice = InvoiceStore.subscribe((ccrud: InvoiceCrud) => {
+    if (ccrud && ccrud.type === crud.READ) {
+      invoice = ccrud.payload as Invoice
+    }
+  });
+  onDestroy(unsubInvoice);
 
 </script>
 <div class="client-manager border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder"

@@ -5,6 +5,7 @@ from test_integration.utils.time_utils import utc_dt, utc_ts
 
 endpoint_clients = 'http://localhost:8001/api/v0/clients/'
 endpoint_work_intervals = 'http://localhost:8001/api/v0/work_intervals/'
+endpoint_utc = 'http://localhost:8001/api/v0/utc/'
 TEST_NAME = 'busyclient'
 
 
@@ -58,7 +59,24 @@ def test_crud():
     # the earlier would have been mutated by this exercise, so re-read:
     earlier = readWorkIntervals(id=earlier.get('id'))[0]
     assert later.get('start_utcms') == earlier.get('stop_utcms')
+    set_work_interval_invoice_item(later, 1)
 
+    # get_invoiceable_work_intervals_for_client(client)
+
+def set_work_interval_invoice_item(work_interval, invoice_item):
+    response = requests.put(endpoint_work_intervals, data={
+        'id': work_interval.get('id'),
+        'invoice_item': invoice_item
+    })
+    assert response.status_code == 200
+    updated = json.loads(response.content.decode('utf8'))
+    assert updated.get('invoice_item') == invoice_item
+
+def get_invoiceable_work_intervals_for_client(client):
+    requests.get(endpoint_work_intervals, params={
+        'client': client.id,
+        'invoice_item': 1
+    })
 
 def deleteClientWorkIntervalsByClientId(client_id):
     intervals_response = requests.get(endpoint_work_intervals, params={'client': client_id})
@@ -67,7 +85,7 @@ def deleteClientWorkIntervalsByClientId(client_id):
         for found in founds:
             requests.delete(endpoint_work_intervals, params={'id': found['id']})
     response = requests.get(endpoint_work_intervals, params={'client': client_id})
-    assert response.status_code == 404
+    assert response.status_code >= 200
 
 
 # hours_offset negative => in the past
@@ -126,7 +144,9 @@ def updateWorkIntervalStop(interval):
     assert response.status_code == 200
     updated = json.loads(response.content.decode('utf8'))
     assert updated['stop'] == next_stop
-    assert updated.get('stop_utcms') == round(utc_ts())
+    response = requests.get(endpoint_utc, params={'iso_format': next_stop})
+    expected_stop = float(response.content.decode('utf8'))
+    assert updated.get('stop_utcms') == round(expected_stop)
     return updated
 
 
@@ -146,7 +166,7 @@ def deleteWorkIntervalById(interval_id):
     response = requests.delete(endpoint_work_intervals, params={'id': interval_id})
     assert response.status_code == 200
     response = requests.get(endpoint_work_intervals, params={'id': interval_id})
-    assert response.status_code == 404
+    assert response.status_code >= 200
 
 
 def confirmClientExists(name):

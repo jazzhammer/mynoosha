@@ -1,8 +1,8 @@
 <style>
   .invoice-form-fields {
     display: grid;
-    grid-template-columns: 1fr;
-    width: 200px;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
   }
   .invoice-form-fields > * {
     margin-bottom: 2px;
@@ -15,8 +15,9 @@
   }
   .field-input {
     text-align: left;
-    width: 200px;
+    width: 100px;
     margin-left: 3px;
+    font-size: 9pt;
   }
 </style>
 <script lang="ts">
@@ -56,18 +57,13 @@
     })
   }
 
-  function keyupName(event: any) {
-    if (event.key === 'Enter') {
-      updateInvoice();
-    }
-    console.log(name)
-  }
 </script>
 <div class="flex flex-col border-myroon-100 border p-3 ml-3 rounded w-4/12 text-myhigh_white"
      style="min-width: 226px; max-width: 300px; font-size: 10pt;" data-testid="new_invoice">
   <div class="invoice-form-header bg-mywood-900 rounded mb-5" data-testid="new_invoice_header" id="new_invoice_header">edit invoice</div>
-  <div class="invoice-form-fields w-3/12 text-mywood-900" data-testid="new_invoice_form">
-    <label class="field-label" data-testid="new_invoice_name">issued
+  <div class="invoice-form-fields text-mywood-900" data-testid="new_invoice_form">
+    <div class="field-label" data-testid="new_invoice_name">issued</div>
+    <div>
       <input type="text"
              bind:value={issued}
              on:keyup={() => {}}
@@ -76,7 +72,7 @@
              id="new_invoice_issued_input"
              data-testid="new_invoice_issued_input"
       />
-    </label>
+    </div>
   </div>
   <div class="mt-6 text-myhigh_white hover:drop-shadow">
     <button on:click={updateInvoice}

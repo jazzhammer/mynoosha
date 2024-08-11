@@ -7,6 +7,8 @@ def utc_dt(*args, **kwargs):
     hours_offset = kwargs.get('hours_offset')
     minutes_offset = kwargs.get('minutes_offset')
     iso_format = kwargs.get('iso_format')
+    if iso_format is None and len(args) > 0:
+        iso_format  = args[0]
     if days_offset is None and len(args) >= 1:
         days_offset = args[0]
         if days_offset is None:

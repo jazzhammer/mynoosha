@@ -32,9 +32,11 @@
 
   import { DatePicker } from "@svelte-plugins/datepicker";
   import { format } from 'date-fns';
-  import {type Client} from "../models/client";
-  import {onDestroy} from "svelte";
+  import { type Client } from "../models/client";
+  import { onDestroy}  from "svelte";
   import InvoiceService from "../services/invoice.service";
+  import { type Invoice } from "../models/invoice";
+  import InvoiceList from './invoice_list.svelte';
 
   let dateFormat = 'yyyy-MM-dd';
 
@@ -46,7 +48,10 @@
   $: ymdFrom
   $: ymdThrough
 
-  function previousMonth(): void {
+  let invoices: Invoice[] = [];
+  $: invoices
+
+  function previousMonth() : void {
     ymdFrom.setMonth(ymdFrom.getMonth() - 1)
     ymdThrough.setMonth(ymdThrough.getMonth() - 1)
     formattedYmdIssueFrom = formatDate(ymdFrom);
@@ -137,16 +142,23 @@
             client: client.id
           }).then((response: any) => {
             const founds = response.data;
-            console.log(`founds: ${founds ? founds.length : 'none'}`);
+            invoices = founds;
           });
         } else {
-          console.log(`invalid invoice search interval:`);
-          console.log(`from:    ${ymdFrom ? ymdFrom.getTime() : 'none'}`)
-          console.log(`through: ${ymdThrough ? ymdThrough.getTime() : 'none'}`)
+          // console.log(`invalid invoice search interval:`);
+          // console.log(`from:    ${ymdFrom ? ymdFrom.getTime() : 'none'}`)
+          // console.log(`through: ${ymdThrough ? ymdThrough.getTime() : 'none'}`)
         }
       },
       500
     );
+  }
+
+  function selectInvoice(selected: Invoice): void {
+    InvoiceStore.set({
+      type: crud.READ,
+      payload: selected
+    })
   }
 </script>
 <div class="new-invoice flex flex-col border-myroon-100 border p-3 mr-6 ml-3 rounded w-full text-myhigh_white"
@@ -185,14 +197,7 @@
          style="height: 18px; margin-top: 3px; font-size: 8pt; padding-top: 0px; font-weight: bold; position: relative; margin-left: 2px; margin-right: 2px;"
     ><div class="" style="position: absolute; left: 4px; top: -3px; margin: 0;">&gt;</div></div>
   </div>
-  <div class="mt-6 text-myhigh_white hover:drop-shadow">
-    <button on:click={createInvoice}
-            type="button"
-            value="create" class="bg-myroon-100 w-6/12 mt-3 rounded hover:border"
-            style="margin: auto;"
-            data-testid="create_client_button"
-    >
-      create
-    </button>
+  <div class="invoice-list-container">
+    <InvoiceList invoices={invoices} selectInvoice={selectInvoice}></InvoiceList>
   </div>
 </div>

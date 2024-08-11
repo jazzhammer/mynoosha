@@ -5,6 +5,7 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
+from ..model.invoice_item import InvoiceItem
 from ..model.work_interval import WorkInterval, WorkIntervalSerializer
 from django.utils import timezone
 import pytz
@@ -36,6 +37,8 @@ def work_intervals(request):
     post_stop = request.GET.get('post_stop')
 
     client_id = request.GET.get('client')
+    invoice_item = request.GET.get('invoice_item')
+
     id = request.GET.get('id')
     if request.method == 'GET':
         founds = WorkInterval.objects.all().order_by('start_utcms')
@@ -70,6 +73,11 @@ def work_intervals(request):
                 return JsonResponse({'error': f"invalid {id=}"}, status=400)
             founds = founds.filter(id=id)
             dt_filtered = True
+        if invoice_item:
+            if invoice_item == 'isnull':
+                founds = founds.filter(invoice_item__isnull=True)
+            else:
+                founds = founds.filter(invoice_item=invoice_item)
         if dt_filtered:
             # print(founds.query)
             try:
@@ -148,11 +156,15 @@ def work_intervals(request):
             if request.data.get('stop'):
                 found.stop = str(request.data['stop'])
                 found.stop_utcms = utc_ts(iso_format=str(request.data['stop']))
+                print(f"calculated {found.stop_utcms=} from {request.data['stop']}")
             if request.data.get('description') is None or len(request.data.get('description')) >= 0:
                 if request.data.get('description') is None:
-                    request.data['description'] = ''
-                next_description = request.data.get('description')
-                found.description = next_description
+                    found.description = ''
+                else:
+                    found.description = request.data.get('description')
+            if request.data.get('invoice_item'):
+                invoice_item = InvoiceItem.objects.get(pk=int(request.data.get('invoice_item')))
+                found.invoice_item = invoice_item
 
             found.save()
             updated = found

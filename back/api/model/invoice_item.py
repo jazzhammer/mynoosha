@@ -3,8 +3,6 @@ from django.db import models
 
 from .work_type import WorkType
 from .invoice import Invoice
-from .client import Client
-from .billable_type import BillableType
 
 
 class InvoiceItem(models.Model):

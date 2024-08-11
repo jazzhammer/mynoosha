@@ -9,7 +9,7 @@ endpoint_invoices = 'http://localhost:8001/api/v0/invoices/'
 
 def test_get():
     client = create_default_client()
-    created = create_invoice(
+    created = create_invoice_for_client(
         client
     )
     createds = get_invoices_for_client(client)
@@ -25,7 +25,7 @@ def test_get():
     delete_invoices_for_client(client)
     delete_client(client)
 
-def create_invoice(client):
+def create_invoice_for_client(client):
     response = requests.post(endpoint_invoices, json={
         'client': client.get('id')
     })
