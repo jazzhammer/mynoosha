@@ -3,5 +3,5 @@ export interface InvoiceItem {
   amount_total?: number;
   detail?: string;
   invoice_id: number;
-  type_id?: number;
+  work_type_id?: number;
 }

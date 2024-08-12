@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 
 from ..model import WorkType, Invoice, WorkInterval
 from ..model.invoice_item import InvoiceItem, InvoiceItemSerializer
-from ..utils.time_utils import utc_dt
+
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
@@ -24,55 +24,35 @@ def invoice_items(request, *args, **kwargs):
 
 
 def get_invoice_items(request, *args, **kwargs):
-    if request.GET.get('search'):
-        search = request.GET.get('search')
-        founds = InvoiceItem.objects.filter(name__contains=search)
-        if founds.exists():
-            dicts = []
-            for instance in founds:
-                dict = model_to_dict(instance)
-                dicts.append(dict)
-            return JsonResponse(dicts, status=200, safe=False)
+    search = request.GET.get('search')
+    detail = request.GET.get('detail')
+    invoice = request.GET.get('invoice')
+    work_type = request.GET.get('work_type')
+    filtered = False
+    founds = InvoiceItem.objects.all()
+    if search or detail:
+        filtered = True
+        if search:
+            founds = founds.filter(detail__contains=search)
         else:
-            return JsonResponse(
-                {'detail': f'empty result for search={search}'},
-                status=404,
-                safe=False
-            )
-    if request.GET.get('client'):
-        client = request.GET.get('client')
-        founds = InvoiceItem.objects.filter(client__id=client)
-        ymdIssueFrom = request.GET.get('ymdIssueFrom')
-        if ymdIssueFrom:
-            dt_from = utc_dt(iso_format=ymdIssueFrom)
-            founds = founds.filter(issued__gte=dt_from)
-        ymdIssueThrough = request.GET.get('ymdIssueThrough')
-        if ymdIssueThrough:
-            dt_through = utc_dt(iso_format=ymdIssueThrough)
-            founds = founds.filter(issued__lt=dt_through)
+            founds = founds.filter(detail__contains=detail)
+    if invoice:
+        filtered = True
+        founds = founds.filter(invoice_id=invoice)
+    if work_type:
+        filtered = True
+        founds = founds.filter(work_type_id=work_type)
+    if filtered:
         if founds.exists():
-            dicts = []
-            for instance in founds:
-                dict = model_to_dict(instance)
-                dicts.append(dict)
-            return JsonResponse(dicts, status=200, safe=False)
+            return JsonResponse([model_to_dict(instance) for instance in founds], status=200, safe=False)
         else:
-            return JsonResponse(
-                [],
-                status=200,
-                safe=False
-            )
+            return JsonResponse([], status=200, safe=False)
     else:
-        founds = InvoiceItem.objects.all()
-        dicts = []
-        for instance in founds:
-            dict = model_to_dict(instance)
-            dicts.append(dict)
         return JsonResponse(
-            dicts,
-            status=200,
-            safe=False)
-
+            {'detail': 'require search params among: invoice | work_type | detail'},
+            status=400,
+            safe=False
+        )
 
 def post_invoice_items(request, *args, **kwargs):
     invoice = request.data.get('invoice')

@@ -12,7 +12,7 @@ const InvoiceItemService = {
   create: (toCreate: InvoiceItemDto): Promise<InvoiceItem> => {
     return axios.post(`${apiBaseUrl}invoice_items/`, toCreate);
   },
-  find: (search: {}): Promise<InvoiceItem[]> => {
+  find: (search: Partial<InvoiceItem>): Promise<InvoiceItem[]> => {
     const params = search
     return axios.get(`${apiBaseUrl}invoice_items/`, {params});
   },

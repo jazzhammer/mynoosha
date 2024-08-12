@@ -13,7 +13,14 @@ def test_get():
     )
     deleteWorkTypesForName(created.get('name'))
     founds = getWorkTypesForName(TEST_NAME)
-    assert founds is None
+    assert founds == []
+    founds = get_all_work_types()
+
+def get_all_work_types():
+    response = requests.get(endpoint_work_types, params={})
+    assert response.status_code == 200
+    founds = json.loads(response.content.decode('utf8'))
+    assert len(founds) == 3
 
 def createWorkType(
         name,
@@ -54,4 +61,4 @@ def deleteWorkTypesForName(name):
         response = requests.delete(endpoint_work_types, params={'id': found['id']})
         assert response.status_code == 200
     response = requests.get(endpoint_work_types, params={'search': name})
-    assert response.status_code == 404
+    assert response.status_code == 200

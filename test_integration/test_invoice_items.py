@@ -36,6 +36,15 @@ def test_invoice_items():
     set_invoice_item_detail(created, TEST_DETAIL_0)
     set_invoice_item_work_type(created, work_type)
 
+    founds = get_invoice_items_for_invoice(invoice)
+    assert len(founds) > 0
+
+def get_invoice_items_for_invoice(invoice):
+    response = requests.get(endpoint_invoice_items, params={'invoice': invoice.get('id')})
+    founds = json.loads(response.content.decode('utf8'))
+    for found in founds:
+        assert found.get('invoice') == invoice.get('id')
+    return founds
 
 def set_invoice_item_work_type(invoice_item, work_type):
     response = requests.put(endpoint_invoice_items, data={

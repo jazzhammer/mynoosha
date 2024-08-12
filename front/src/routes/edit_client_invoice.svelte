@@ -59,6 +59,7 @@
   import InvoiceItemService from "../services/invoice_item.service";
   import WorkTypeService from "../services/work_type.service";
   import type {WorkType} from "../models/work_type";
+  import type {InvoiceItem} from "../models/invoice_item";
 
   let startDate = new Date();
   $: startDate
@@ -116,7 +117,29 @@
     if (mode === 'invoiceables') {
       retrieveInvoiceables();
     }
+    else if (mode === 'invoice-items') {
+      retrieveInvoiceItems();
+    }
   }
+
+  let invoiceItems: InvoiceItem[];
+  $: invoiceItems
+  let invoiceItemChecks: boolean[] = [];
+  $: invoiceItemChecks
+
+  function retrieveInvoiceItems(): void {
+    invoiceableChecks = [];
+    InvoiceItemService.find({
+      invoice_id: invoice.id
+    }).then((response: any) => {
+      const founds = response.data;
+      invoiceItems = founds
+      invoiceItems.forEach((invoiceItem: InvoiceItem) => {
+        invoiceableChecks[invoiceItem.id] = false;
+      });
+    });
+  }
+
 
   let invoiceableWorkIntervals: WorkInterval[];
   $: invoiceableWorkIntervals
@@ -142,6 +165,7 @@
   $: workTypes
   let workTypesByName: {[key: string]: WorkType} = {};
   $: workTypesByName
+  retrieveWorkTypes();
   function retrieveWorkTypes(): void {
     WorkTypeService.find({}).then((response: any) => {
       workTypes = response.data;
@@ -171,16 +195,47 @@
               type: crud.CREATE,
               payload: created
             });
+            retrieveInvoiceables();
           }
         });
       }
     });
   }
 
+  function removeInvoiceItems(): void {
+    invoiceItems.forEach((ii: InvoiceItem) => {
+      if (invoiceItemChecks[ii.id]) {
+        InvoiceItemService.delete({
+          id: ii.id,
+        }).then((response) => {
+          const created = response.data;
+          if (created) {
+            InvoiceItemStore.set({
+              type: crud.DELETE,
+              payload: deleted
+            });
+            retrieveInvoiceItems();
+          }
+        });
+      }
+    });
+  }
+
+  let invoiceItemsToRemove = 0;
+  $: invoiceItemsToRemove
+  function countInvoiceItemsToRemove(next: InvoiceItem): number {
+    invoiceItemChecks[next.id] = !invoiceItemChecks[next.id];
+    let trues = 0;
+    invoiceItemChecks.forEach((checked: boolean) => {
+      trues += checked ? 1 : 0;
+    })
+    invoiceItemsToRemove = trues;
+    return trues;
+  }
+
   let invoiceablesToAdd = 0;
   $: invoiceablesToAdd
   function countInvoiceablesToAdd(next: WorkInterval): number {
-    debugger;
     invoiceableChecks[next.id] = !invoiceableChecks[next.id];
     let trues = 0;
     invoiceableChecks.forEach((checked: boolean) => {
@@ -245,7 +300,7 @@
   {#if mode==='invoiceables'}
     <div class="bg-mywood-100 rounded mb-5 w-full"
          data-testid="edit_invoice_header"
-         id="invoiceables_header">invoiceables</div>
+         id="invoiceables_header">invoiceables {!invoiceableWorkIntervals || invoiceableWorkIntervals.length == 0 ? ' (none)':""}</div>
     {#if invoiceableWorkIntervals}
     <div class="invoiceable-work-intervals">
       {#each invoiceableWorkIntervals as invoiceable}
@@ -269,6 +324,35 @@
         add {invoiceablesToAdd} invoiceable{invoiceablesToAdd && invoiceablesToAdd === 1 ? '' : 's'} to invoice
       </button>
     </div>
+    {/if}
+  {/if}
+  {#if mode==='invoiced-items'}
+    <div class="bg-mywood-100 rounded mb-5 w-full"
+         data-testid="edit_invoice_header"
+         id="invoice_item_header">invoice items {!invoiceItems || invoiceItems.length == 0 ? ' (none)':""}</div>
+    {#if invoiceItems}
+      <div class="invoiceable-work-intervals">
+        {#each invoiceItems as invoiceItem}
+          <div><input type="checkbox"
+                      on:click={() => countInvoiceItemsToRemove(invoiceItem)}
+          ></div>
+          <div class="hover:bg-myblue-100 cursor-pointer">{invoiceItem.work_type_id}</div>
+          <div class="hover:bg-myblue-100 cursor-pointer">{invoiceItem.detail}</div>
+          <div class="hover:bg-myblue-100 cursor-pointer">{invoiceItem.amount_total}</div>
+        {/each}
+      </div>
+    {/if}
+    {#if invoiceItemsToRemove > 0}
+      <div class="mt-6 text-myhigh_white hover:drop-shadow w-full">
+        <button on:click={removeInvoiceItems}
+                type="button"
+                value="create" class="bg-myroon-100 w-6/12 mt-3 rounded hover:border"
+                style="margin: auto; width: 220px;"
+                data-testid="create_client_button"
+        >
+          remove {invoiceItemsToRemove} ivoice item{invoiceItemsToRemove && invoiceItemsToRemove === 1 ? '' : 's'} from invoice
+        </button>
+      </div>
     {/if}
   {/if}
 </div>
