@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from datetime import datetime
 
+from ..model import Agreement
 from ..model.worker import Worker, WorkerSerializer
 
 from django.utils import timezone
@@ -116,8 +117,12 @@ def post_workers(request, *args, **kwargs):
 
 def delete_workers(request, *args, **kwargs):
     id = request.GET.get('id')
-    if Worker.objects.filter(id=id).exists():
-        Worker.objects.filter(id=id).delete()
-        return JsonResponse({}, status=200, safe=False)
-    else:
-        return JsonResponse({'error': f'not found to delete: {id=}'}, status=404, safe=False)
+    worker = Worker.objects.get(pk=id)
+    deleted = 0
+    if worker:
+        agreements = Agreement.objects.filter(worker_id=id)
+        for agreement in agreements:
+            agreement.delete()
+            deleted += 1
+        worker.delete()
+    return JsonResponse({'detail': f'{deleted}'}, status=200, safe=False)

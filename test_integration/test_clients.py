@@ -55,6 +55,15 @@ def create_client(
     assert created.get('address_postal_zip_code') == test_address_postal_zip_code
     return created
 
+def create_client_for_name(name):
+    return create_client(
+        name,
+        TEST_ADDRESS_STREET,
+        TEST_ADDRESS_CITY,
+        TEST_ADDRESS_PROVINCE_STATE,
+        TEST_ADDRESS_POSTAL_ZIP_CODE
+    )
+
 def getClientsForName(name):
     response = requests.get(endpoint_clients, params={'search': name})
     if response.status_code == 200:

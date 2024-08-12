@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
 from ..model.client import Client, ClientSerializer
+from ..model.agreement import Agreement
 
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -51,8 +52,15 @@ def post_clients(request, *args, **kwargs):
 
 def delete_clients(request, *args, **kwargs):
     id = request.GET.get('id')
-    if Client.objects.filter(id=id).exists():
-        Client.objects.filter(id=id).delete()
-        return JsonResponse({}, status=200, safe=False)
+    client = Client.objects.get(pk=id)
+    if client:
+        # delete dependent agreements
+        agreements = Agreement.objects.filter(client_id=id)
+        deleted = 0
+        for agreement in agreements:
+            agreement.delete()
+            deleted += 1
+        client.delete()
+        return JsonResponse({'detail': f'{deleted=}'}, status=200, safe=False)
     else:
         return JsonResponse({'error': f'not found to delete: {id=}'}, status=404, safe=False)
