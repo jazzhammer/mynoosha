@@ -38,6 +38,13 @@ def test_invoice_items():
 
     founds = get_invoice_items_for_invoice(invoice)
     assert len(founds) > 0
+    delete_invoice_items(founds)
+    founds = get_invoice_items_for_invoice(invoice)
+    assert len(founds) == 0
+
+def delete_invoice_items(invoice_items):
+    for invoice_item in invoice_items:
+        requests.delete(endpoint_invoice_items, params={'id': invoice_item.get('id')})
 
 def get_invoice_items_for_invoice(invoice):
     response = requests.get(endpoint_invoice_items, params={'invoice': invoice.get('id')})

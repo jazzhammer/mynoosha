@@ -208,8 +208,8 @@
         InvoiceItemService.delete({
           id: ii.id,
         }).then((response) => {
-          const created = response.data;
-          if (created) {
+          const deleted = response.data;
+          if (deleted) {
             InvoiceItemStore.set({
               type: crud.DELETE,
               payload: deleted

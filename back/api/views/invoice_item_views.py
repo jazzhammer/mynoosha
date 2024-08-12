@@ -97,8 +97,21 @@ def put_invoice_items(request, *args, **kwargs):
 
 def delete_invoice_items(request, *args, **kwargs):
     id = request.GET.get('id')
-    if InvoiceItem.objects.filter(id=id).exists():
-        InvoiceItem.objects.filter(id=id).delete()
-        return JsonResponse({}, status=200, safe=False)
+    invoice_item = InvoiceItem.objects.get(pk=id)
+    if invoice_item:
+        # remove references by workintervals
+        work_intervals = WorkInterval.objects.filter(invoice_item_id=id)
+        deleted_work_intervals = 0
+        for work_interval in work_intervals:
+            work_interval.invoice_item = None
+            work_interval.save()
+            deleted_work_intervals += 1
+        invoice_item.delete()
+        return JsonResponse(model_to_dict(invoice_item), status=200, safe=False)
     else:
         return JsonResponse({'error': f'not found to delete: {id=}'}, status=404, safe=False)
+    # if InvoiceItem.objects.filter(id=id).exists():
+    #     InvoiceItem.objects.filter(id=id).delete()
+    #     return JsonResponse({}, status=200, safe=False)
+    # else:
+    #     return JsonResponse({'error': f'not found to delete: {id=}'}, status=404, safe=False)
