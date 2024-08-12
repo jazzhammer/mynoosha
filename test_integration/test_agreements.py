@@ -70,6 +70,22 @@ def test_get():
     assert updated.get('worker') == worker.get('id')
     assert updated.get('name') == TEST_AGREEMENT_NAME_2
 
+    delete_agreements_for_name(TEST_AGREEMENT_NAME_1)
+
+
+    delete_agreements_for_name(TEST_AGREEMENT_NAME_2)
+
+def delete_agreements_for_name(name):
+    agreements = get_agreements_for_name(name)
+    for agreement in agreements:
+        requests.delete(endpoint_agreements, params={'id': agreement.get('id')})
+    agreements = get_agreements_for_name(name)
+    assert len(agreements) == 0
+
+def get_agreements_for_name(name):
+    response = requests.get(endpoint_agreements, params={'name': name})
+    return json.loads(response.content.decode('utf8'))
+
 def get_agreements_for_worker(worker):
     response = requests.get(endpoint_agreements, params={'worker': worker.get("id")})
     assert response.status_code == 200

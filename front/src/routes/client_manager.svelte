@@ -16,6 +16,7 @@
   import {type ClientCrud, ClientStore, crud, type InvoiceCrud, InvoiceStore} from "../stores";
   import ClientInvoices from './client_invoices.svelte';
   import ClientProjects from './client_projects.svelte';
+  import ClientAgreements from './client_agreements.svelte';
   import {onDestroy} from "svelte";
   import {type Invoice} from "../models/invoice";
   let client: Client;
@@ -80,7 +81,10 @@
   {#if mode==='invoices'}
     <ClientInvoices></ClientInvoices>
   {/if}
-  {#if mode==='invoices'}
+  {#if mode==='projects'}
     <ClientProjects></ClientProjects>
+  {/if}
+  {#if mode==='agreements'}
+    <ClientAgreements></ClientAgreements>
   {/if}
 </div>

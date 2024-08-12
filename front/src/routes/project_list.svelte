@@ -25,7 +25,7 @@
 
 </script>
 <div class="project-list w-full border border-myblue-50">
-  <div class="project-list-header bg-mylow_white">ymdIssue</div>
+  <div class="project-list-header bg-mylow_white">ymdCreate</div>
   {#each projects as project}
     <div class="project-field text-black cursor-pointer hover:bg-myblue-100" on:click={() => {selectProject(project)}}>
       {project.name}

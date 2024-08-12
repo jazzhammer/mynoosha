@@ -4,7 +4,7 @@ with
         from api_client, api_workinterval
         where
             api_client.id = api_workinterval.client_id
-        and api_client.name = 'testingONLY'
+        and api_client.name like 'test%'
     )
 delete from api_workinterval
 using
@@ -19,7 +19,7 @@ with
         where
             api_client.id = api_invoice.client_id
         and api_invoice.id = api_invoiceitem.invoice_id
-        and api_client.name = 'testingONLY'
+        and api_client.name like 'test%'
     )
 delete from api_invoiceitem
 using
@@ -34,7 +34,7 @@ with
         from api_client, api_invoice
         where
             api_client.id = api_invoice.client_id
-        and api_client.name = 'testingONLY'
+        and api_client.name like 'test%'
     )
 delete from api_invoice
 using
@@ -44,5 +44,5 @@ where api_invoice.id = invoice_ids.invoice_id
 
 delete from api_client
 where
-    api_client.name = 'testingONLY'
+    api_client.name like 'test%'
 ;
