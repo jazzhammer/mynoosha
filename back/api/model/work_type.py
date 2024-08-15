@@ -8,6 +8,9 @@ class WorkType(models.Model):
     name = models.CharField(max_length=24)
     description = models.TextField(null=True, blank=True, default='')
 
+    class Meta:
+        indexes = [models.Index(fields=['name'])]
+
 class WorkTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkType

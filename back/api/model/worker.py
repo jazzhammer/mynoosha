@@ -7,6 +7,13 @@ class Worker(models.Model):
     created = models.DateTimeField(auto_now=True, null=True)
     ymd_birth = models.DateField(null=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['last_name']),
+            models.Index(fields=['first_name']),
+            models.Index(fields=['ymd_birth'])
+        ]
+
 def get_default_worker():
     defaults = Worker.objects.filter(last_name='default', first_name='worker')
     if defaults.count() == 0:

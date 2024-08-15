@@ -7,6 +7,7 @@ import type {Invoice} from "./models/invoice";
 import type {InvoiceItem} from "./models/invoice_item";
 import type {WorkType} from "./models/work_type";
 import type {Project} from "./models/project";
+import type {Medium} from "./models/medium";
 
 
 export enum crud {
@@ -81,6 +82,12 @@ export interface InvoiceItemCrud {
   payload: InvoiceItem | InvoiceItem[];
 }
 export const InvoiceItemStore = writable<InvoiceItemCrud>();
+
+export interface MediumCrud {
+  type: crud;
+  payload: Medium | Medium[];
+}
+export const MediumStore = writable<MediumCrud>();
 
 
 export interface MynooshaEvent {

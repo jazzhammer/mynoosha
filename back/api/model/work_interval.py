@@ -8,7 +8,6 @@ from django.db import models
 
 from .worker import Worker
 from .invoice_item import InvoiceItem
-from .work_type import WorkType
 from .client import Client
 
 
@@ -22,6 +21,9 @@ class WorkInterval(models.Model):
     client = models.ForeignKey(Client, null=False, on_delete=models.PROTECT)
     invoice_item = models.ForeignKey(InvoiceItem, null=True, on_delete=models.PROTECT)
     worker = models.ForeignKey(Worker, null=True, on_delete=models.PROTECT)
+
+    class Meta:
+        indexes = [models.Index(fields=['start_utcms'])]
 
     def save(self, *args, **kwargs):
         if isinstance(self.start, str):

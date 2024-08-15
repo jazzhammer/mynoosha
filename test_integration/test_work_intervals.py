@@ -161,6 +161,8 @@ def updateWorkIntervalDescription(interval):
     assert updated['description'] == next_description
     return updated
 
+def delete_work_interval(work_interval):
+    deleteWorkIntervalById(work_interval.get('id'))
 
 def deleteWorkIntervalById(interval_id):
     response = requests.delete(endpoint_work_intervals, params={'id': interval_id})

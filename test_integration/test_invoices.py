@@ -50,3 +50,9 @@ def delete_invoices_for_client(client):
         assert response.status_code == 200
     founds = get_invoices_for_client(client)
     assert len(founds) == 0
+
+def delete_invoice(invoice):
+    response = requests.delete(endpoint_invoices, params={'id': invoice.get('id')})
+    assert response.status_code == 200
+    response = requests.get(endpoint_invoices, params={'id': invoice.get('id')})
+    assert response.status_code == 404

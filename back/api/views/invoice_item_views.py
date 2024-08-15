@@ -24,6 +24,13 @@ def invoice_items(request, *args, **kwargs):
 
 
 def get_invoice_items(request, *args, **kwargs):
+    id = request.GET.get('id')
+    if id:
+        try:
+            InvoiceItem.objects.get(pk=id)
+        except Exception:
+            return JsonResponse({'detail': f"not found for {id=}"}, status=404, safe=False)
+
     search = request.GET.get('search')
     detail = request.GET.get('detail')
     invoice = request.GET.get('invoice')

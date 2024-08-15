@@ -202,4 +202,12 @@
     billable types
   </div>
 
+  <div  on:click={() => {go('media')}}
+        on:keyup={() => {go('media')}}
+        role="button"
+        tabindex="0"
+        class="cursor-pointer hover:border hover:border-myroon-900 text-left ml-2 mt-2 bg-myhigh_white pl-2 rounded w-11/12">
+    media
+  </div>
+
 </div>

@@ -14,6 +14,28 @@ endpoint_invoice_items = 'http://localhost:8001/api/v0/invoice_items/'
 
 TEST_DETAIL_0 = "test detail 0"
 TEST_DETAIL_1 = "test detail 1"
+
+def create_invoice_item():
+    client = create_default_client()
+    # setup for create
+    invoice = create_invoice_for_client(client)
+    work_type = get_work_type_for_name('milestone')
+    work_interval = createClientWorkInterval(client)
+
+    # create with partial and fullset of foreign keys : invoice, work_interval, work_type
+    response = requests.post(endpoint_invoice_items, data={
+        'invoice': invoice.get('id'),
+        'work_interval': work_interval.get('id'),
+        'work_type': work_type.get('id')
+    })
+    assert response.status_code == 201
+    invoice_item = json.loads(response.content.decode('utf8'))
+    return {
+        'invoice': invoice,
+        'work_interval': work_interval,
+        'invoice_item': invoice_item
+    }
+
 def test_invoice_items():
     client = create_default_client()
     # setup for create
@@ -45,6 +67,12 @@ def test_invoice_items():
 def delete_invoice_items(invoice_items):
     for invoice_item in invoice_items:
         requests.delete(endpoint_invoice_items, params={'id': invoice_item.get('id')})
+
+def delete_invoice_item(invoice_item):
+    response = requests.delete(endpoint_invoice_items, params={'id': invoice_item.get('id')})
+    assert response.status_code == 200
+    response = requests.get(endpoint_invoice_items, params={'id': invoice_item.get('id')})
+    assert response.status_code == 404
 
 def get_invoice_items_for_invoice(invoice):
     response = requests.get(endpoint_invoice_items, params={'invoice': invoice.get('id')})

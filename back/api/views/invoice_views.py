@@ -4,7 +4,9 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
+from ..model import WorkInterval
 from ..model.invoice import Invoice, InvoiceSerializer
+from ..model.invoice_item import InvoiceItem
 from ..utils.time_utils import utc_dt
 
 
@@ -23,6 +25,13 @@ def invoices(request, *args, **kwargs):
 
 
 def get_invoices(request, *args, **kwargs):
+    if request.GET.get('id'):
+        try:
+            found = Invoice.objects.get(pk=request.GET.get('id'))
+        except Exception as dne:
+            return JsonResponse({'detail': f'not found for {request.GET.get("id")}'}, status=404, safe=False)
+        return JsonResponse(model_to_dict(found), status=200, safe=False)
+
     if request.GET.get('search'):
         search = request.GET.get('search')
         founds = Invoice.objects.filter(name__contains=search)
@@ -108,8 +117,15 @@ def put_invoices(request, *args, **kwargs):
 
 def delete_invoices(request, *args, **kwargs):
     id = request.GET.get('id')
-    if Invoice.objects.filter(id=id).exists():
-        Invoice.objects.filter(id=id).delete()
+    invoice = Invoice.objects.get(pk=id)
+    if invoice:
+        invoice_items = InvoiceItem.objects.filter(invoice_id=invoice.id)
+        for invoice_item in invoice_items:
+            work_intervals = WorkInterval.objects.filter(invoice_item_id=invoice_item.id)
+            for work_interval in work_intervals:
+                work_interval.delete()
+            invoice_item.delete()
+        invoice.delete()
         return JsonResponse({}, status=200, safe=False)
     else:
         return JsonResponse({'error': f'not found to delete: {id=}'}, status=404, safe=False)
