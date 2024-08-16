@@ -68,13 +68,13 @@
         projects
       </div>
     {/if}
-    {#if mode!=='invoicables'}
-      <div on:click={() => {setMode('invoicables')}}
+    {#if mode!=='invoiceables'}
+      <div on:click={() => {setMode('invoiceables')}}
            on:keyup={() => {}}
            tabindex="0"
            role="button"
            class="menu-item border border-t-1 rounded-md border-l-1 border-r-1 border-myblue-500 cursor-pointer hover:border-myblue-500 pl-6 pr-6">
-        invoicables
+        invoiceables
       </div>
     {/if}
   </div>

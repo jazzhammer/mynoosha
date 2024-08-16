@@ -63,21 +63,20 @@ class WorkIntervalSerializer(serializers.ModelSerializer):
         )
 
     def get_hhmm(self, instance):
-        print(f"composing hhmm")
         if instance['stop_utcms']:
-            stop = instance['stop_utcms']
-            start = instance['start_utcms']
-            diff = stop - start # seconds
-            if diff < 3600:
-                HH = 0
-            else:
-                HH = math.floor(diff / 3600)
-            MM = math.floor((diff % 3600) / 60)
-            hhstr = f'{HH}' if HH > 9 else f'0{HH}'
-            mmstr = f'{MM}' if MM > 9 else f'0{MM}'
-            hhmm = f'{hhstr}:{mmstr}'
-            print(f"composed {hhmm}")
-            return hhmm
+            return work_interval_hhmm(instance['start_utcms'], instance['stop_utcms'])
         else:
-            print(f"unable to compose with missing stop_utcms")
             return ''
+
+def work_interval_hhmm(start, stop):
+    if not start or not stop:
+        return ''
+    diff = stop - start  # seconds
+    if diff < 3600:
+        HH = 0
+    else:
+        HH = math.floor(diff / 3600)
+    MM = math.floor((diff % 3600) / 60)
+    hhstr = f'{HH}' if HH > 9 else f'0{HH}'
+    mmstr = f'{MM}' if MM > 9 else f'0{MM}'
+    return f'{hhstr}:{mmstr}'

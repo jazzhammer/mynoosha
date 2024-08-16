@@ -13,6 +13,7 @@ class InvoiceItem(models.Model):
 
 class InvoiceItemSerializer(serializers.ModelSerializer):
     class Meta:
+
         model = InvoiceItem
         fields = [
             'invoice',

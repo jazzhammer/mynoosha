@@ -10,6 +10,7 @@ from ..model.worker import Worker, WorkerSerializer
 from django.utils import timezone
 import pytz
 
+from ..model.worker_rate import WorkerRate
 from ..utils.time_utils import utc_dt
 
 timezone.activate(pytz.timezone('UTC'))
@@ -27,6 +28,13 @@ def workers(request, *args, **kwargs):
 
 
 def get_workers(request, *args, **kwargs):
+    id = request.GET.get('id')
+    if id:
+        try:
+            found = Worker.objects.get(pk=id)
+            return JsonResponse(model_to_dict(found), status=200, safe=False)
+        except:
+            return JsonResponse({"detail": f"not found for {id=}"}, status=404, safe=False)
     search = request.GET.get('search')
     name = request.GET.get('name')
     last_name = request.GET.get('last_name')
@@ -122,6 +130,9 @@ def delete_workers(request, *args, **kwargs):
     if worker:
         agreements = Agreement.objects.filter(worker_id=id)
         for agreement in agreements:
+            worker_rates = WorkerRate.objects.filter(agreement_id=agreement.id)
+            for worker_rate in worker_rates:
+                worker_rate.delete()
             agreement.delete()
             deleted += 1
         worker.delete()

@@ -81,6 +81,15 @@ def get_worker_for_name(name):
     else:
         return None
 
+def get_worker_for_id(id):
+    response = requests.get(endpoint_workers, params={'id': id})
+    if response.status_code == 200:
+        content = response.content.decode('utf8')
+        found = json.loads(content)
+        return found
+    else:
+        return None
+
 
 def getWorkersForNames(last_name, first_name):
     response = requests.get(endpoint_workers, params={'last_name': last_name, 'first_name': first_name})

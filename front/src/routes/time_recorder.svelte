@@ -5,7 +5,7 @@
   }
   .work-interval-list-header-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 5fr;
+    grid-template-columns: 1fr 1fr 1fr 5fr 1fr;
     font-size: 9pt;
   }
   .work-interval-list-header-row > * {
@@ -14,7 +14,7 @@
   }
   .work-interval-list-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 5fr;
+    grid-template-columns: 1fr 1fr 1fr 5fr 1fr;
     font-size: 9pt;
   }
   .work-interval-list-row > * {
@@ -275,39 +275,42 @@
   }
 </script>
 {#if client}
-  <div class="border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder" style="min-width: 400px; min-height: 200px; max-width: 450px; max-height: 250px;">
-    <div class="h-2/12 text-center text-myhigh_white bg-myroon-100">{client.name} intervals={!workIntervalList ? '(0)' : workIntervalList?.length}</div>
+  <div class="border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder"
+       style="min-width: 400px; min-height: 200px; width: 650px; max-height: 250px;">
+    <div class="h-4/12 text-center text-myhigh_white bg-myroon-100">{client.name} intervals={!workIntervalList ? '(0)' : workIntervalList?.length}</div>
     <div class="work-interval-list-header-row">
       <div class="">start</div>
       <div>stop</div>
       <div>hh:mm</div>
       <div>description</div>
+      <div>invoice</div>
     </div>
     {#if workIntervalList}
       {#each workIntervalList as workInterval, index}
         {#if index > workIntervalList.length - 4}
           <div class="work-interval-list-row">
-          <div class="bg-myhigh_white">{workInterval.localHHMMStart}</div>
-          <div class="bg-myhigh_white">{workInterval.localHHMMStop ? workInterval.localHHMMStop : `<${tickedHourMinute}>`}</div>
-          {#if workInterval.localHHMMStop }
-            <div class="bg-myhigh_white">{workInterval.hhmm ? workInterval.hhmm : ''}</div>
-          {:else }
-            <div class="bg-myhigh_white" style="padding-top: 2px;">
-              <div on:click={() => finalizeWorkInterval(workInterval, null)}
-                   on:keyup={() => {}}
-                   tabindex="0"
-                   role="button"
-                   class="rounded bg-blue-800 cursor-pointer hover:border-gray-300" style="height:12px; width: 12px; border-radius: 2px; margin: auto;">
+            <div class="bg-myhigh_white">{workInterval.localHHMMStart}</div>
+            <div class="bg-myhigh_white">{workInterval.localHHMMStop ? workInterval.localHHMMStop : `<${tickedHourMinute}>`}</div>
+            {#if workInterval.localHHMMStop }
+              <div class="bg-myhigh_white">{workInterval.hhmm ? workInterval.hhmm : ''}</div>
+            {:else }
+              <div class="bg-myhigh_white" style="padding-top: 2px;">
+                <div on:click={() => finalizeWorkInterval(workInterval, null)}
+                     on:keyup={() => {}}
+                     tabindex="0"
+                     role="button"
+                     class="rounded bg-blue-800 cursor-pointer hover:border-gray-300" style="height:12px; width: 12px; border-radius: 2px; margin: auto;">
+                </div>
               </div>
+            {/if}
+            <div class="bg-myhigh_white hover:bg-myblue-50"
+                 on:click={() => openDescription(workInterval)}
+                 on:keyup={() => {}}
+                 tabindex="0"
+                 role="button"
+            >{@html markdownify(workInterval.description)}
             </div>
-          {/if}
-          <div class="bg-myhigh_white hover:bg-myblue-50"
-               on:click={() => openDescription(workInterval)}
-               on:keyup={() => {}}
-               tabindex="0"
-               role="button"
-          >{@html markdownify(workInterval.description)}
-          </div>
+            <div>{workInterval.invoice_item}</div>
           </div>
         {/if}
       {/each}

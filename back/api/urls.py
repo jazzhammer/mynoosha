@@ -15,6 +15,7 @@ from .views.work_piece_views import work_pieces
 from .views.work_type_views import work_types
 from .views.billable_type_views import billable_types
 from .views.client_billable_type_views import client_billable_types
+from .views.worker_rate_views import worker_rates
 from .views.worker_views import workers
 
 urlpatterns = [
@@ -32,6 +33,7 @@ urlpatterns = [
     path('work_intervals/', work_intervals),
     path('work_pieces/', work_pieces),
     path('work_types/', work_types),
+    path('worker_rates/', worker_rates),
     path('utc/', utc),
     path('utc/iso', utc_iso)
 ]

@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 
 from ..model import WorkType, Invoice, WorkInterval
 from ..model.invoice_item import InvoiceItem, InvoiceItemSerializer
-
+from ..model.work_interval import WorkIntervalSerializer, work_interval_hhmm
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
@@ -51,7 +51,17 @@ def get_invoice_items(request, *args, **kwargs):
         founds = founds.filter(work_type_id=work_type)
     if filtered:
         if founds.exists():
-            return JsonResponse([model_to_dict(instance) for instance in founds], status=200, safe=False)
+            dicts = []
+            for instance in founds:
+                adict = model_to_dict(instance)
+                work_intervals = WorkInterval.objects.filter(invoice_item_id=instance.id)
+                if (work_intervals.exists()):
+                    work_interval = work_intervals.first()
+                    work_interval_dict = model_to_dict(work_interval)
+                    adict['work_interval'] = work_interval_dict
+                    adict['work_interval']['hhmm'] = work_interval_hhmm(work_interval_dict.get('start_utcms'), work_interval_dict.get('stop_utcms'))
+                dicts.append(adict)
+            return JsonResponse(dicts, status=200, safe=False)
         else:
             return JsonResponse([], status=200, safe=False)
     else:
@@ -61,6 +71,10 @@ def get_invoice_items(request, *args, **kwargs):
             safe=False
         )
 
+'''
+connecting invoices and invoicables type = workinterval / time / milestones
+amounts are calculated differently for each
+'''
 def post_invoice_items(request, *args, **kwargs):
     invoice = request.data.get('invoice')
     work_interval = request.data.get('work_interval')
@@ -77,7 +91,9 @@ def post_invoice_items(request, *args, **kwargs):
         work_interval = WorkInterval.objects.get(pk=work_interval)
         work_interval.invoice_item = invoice_item
         work_interval.save()
-
+        # calculate the amount
+        # agreement connects client + worker
+        # work_intervals are performed by a worker for a client
         return JsonResponse(created_invoice_item, status=201, safe=False)
     else:
         return JsonResponse(None, safe=False, status=400)

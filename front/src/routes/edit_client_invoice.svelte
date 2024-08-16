@@ -112,12 +112,16 @@
 
   let mode = 'invoiced-items';
   $: mode
+  let invoiceableChecks: boolean[] = [];
+  $: invoiceableChecks
+
+  retrieveInvoiceItems()
   function setMode(next: string): void {
     mode = next;
     if (mode === 'invoiceables') {
       retrieveInvoiceables();
     }
-    else if (mode === 'invoice-items') {
+    else if (mode === 'invoiced-items') {
       retrieveInvoiceItems();
     }
   }
@@ -130,7 +134,7 @@
   function retrieveInvoiceItems(): void {
     invoiceableChecks = [];
     InvoiceItemService.find({
-      invoice_id: invoice.id
+      invoice: invoice.id
     }).then((response: any) => {
       const founds = response.data;
       invoiceItems = founds
@@ -143,8 +147,7 @@
 
   let invoiceableWorkIntervals: WorkInterval[];
   $: invoiceableWorkIntervals
-  let invoiceableChecks: boolean[] = [];
-  $: invoiceableChecks
+
 
   function retrieveInvoiceables(): void {
     invoiceableChecks = [];
@@ -165,13 +168,17 @@
   $: workTypes
   let workTypesByName: {[key: string]: WorkType} = {};
   $: workTypesByName
+  let workTypesById: {[key: number]: WorkType} = {};
+  $: workTypesById
   retrieveWorkTypes();
   function retrieveWorkTypes(): void {
     WorkTypeService.find({}).then((response: any) => {
       workTypes = response.data;
       workTypesByName = {}
+      workTypesById = {}
       workTypes.forEach((wt: WorkType) => {
         workTypesByName[wt.name] = wt;
+        workTypesById[wt.id] = wt;
       });
       WorkTypeStore.set({
         type: crud.READ,
@@ -250,7 +257,7 @@
 <div class="new-invoice flex flex-col border-myroon-100 border p-3 mr-6 ml-3 rounded w-full text-myhigh_white"
      style="min-width: 226px; max-width: 375px; font-size: 10pt;" data-testid="edit_invoice"
 >
-  <div class="bg-mywood-900 rounded mb-5 w-full" data-testid="edit_invoice_header" id="edit_invoice_header">edit invoice</div>
+  <div class="bg-mywood-900 rounded mb-5 w-full" data-testid="edit_invoice_header" id="edit_invoice_header">edit invoice [{invoice?.id}]</div>
   <div class="client-form-fields text-mywood-900" data-testid="edit_invoice_form">
     <div><div class="" data-testid="edit_invoice_name">ymd issue:</div></div>
     <div>
@@ -336,8 +343,8 @@
           <div><input type="checkbox"
                       on:click={() => countInvoiceItemsToRemove(invoiceItem)}
           ></div>
-          <div class="hover:bg-myblue-100 cursor-pointer">{invoiceItem.work_type_id}</div>
-          <div class="hover:bg-myblue-100 cursor-pointer">{invoiceItem.detail}</div>
+          <div class="hover:bg-myblue-100 cursor-pointer">{workTypesById[invoiceItem.work_type]?.name} {invoiceItem.work_interval?.hhmm}</div>
+          <div class="hover:bg-myblue-100 cursor-pointer">{invoiceItem.detail ? invoiceItem.detail : ''}{invoiceItem.work_interval?.description}</div>
           <div class="hover:bg-myblue-100 cursor-pointer">{invoiceItem.amount_total}</div>
         {/each}
       </div>

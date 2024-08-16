@@ -123,7 +123,8 @@ def delete_invoices(request, *args, **kwargs):
         for invoice_item in invoice_items:
             work_intervals = WorkInterval.objects.filter(invoice_item_id=invoice_item.id)
             for work_interval in work_intervals:
-                work_interval.delete()
+                work_interval.invoice_item_id = None
+                work_interval.save()
             invoice_item.delete()
         invoice.delete()
         return JsonResponse({}, status=200, safe=False)

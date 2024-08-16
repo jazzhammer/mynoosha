@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
 from ..model.invoice_item import InvoiceItem
-from ..model.work_interval import WorkInterval, WorkIntervalSerializer
+from ..model.work_interval import WorkInterval, WorkIntervalSerializer, work_interval_hhmm
 from django.utils import timezone
 import pytz
 timezone.activate(pytz.timezone('UTC'))
@@ -77,7 +77,7 @@ def work_intervals(request):
             if invoice_item == 'isnull':
                 founds = founds.filter(invoice_item__isnull=True)
             else:
-                founds = founds.filter(invoice_item=invoice_item)
+                founds = founds.filter(invoice_item_id=invoice_item)
         if dt_filtered:
             # print(founds.query)
             try:
@@ -87,19 +87,13 @@ def work_intervals(request):
                     dicts = [model_to_dict(instance) for instance in founds]
                     for adict in dicts:
                         if adict['stop_utcms']:
-                            stop = adict['stop_utcms']
-                            start = adict['start_utcms']
-                            diff = stop - start  # seconds
-                            if diff < 3600:
-                                HH = 0
-                            else:
-                                HH = math.floor(diff / 3600)
-                            MM = math.floor((diff % 3600) / 60)
-                            hhstr = f'{HH}' if HH > 9 else f'0{HH}'
-                            mmstr = f'{MM}' if MM > 9 else f'0{MM}'
-                            hhmm = f'{hhstr}:{mmstr}'
-                            print(f"composed {hhmm}")
-                            adict['hhmm'] = hhmm
+                            adict['hhmm'] = work_interval_hhmm(adict['start_utcms'], adict['stop_utcms'])
+                        # greedy populate the invoice_items
+                        try:
+                            invoice_item = InvoiceItem.objects.get(pk=adict.invoice_item_id)
+                            adict['invoice_item'] = model_to_dict(invoice_item)
+                        except Exception:
+                            pass
                     return JsonResponse(dicts, status=200, safe=False)
             except WorkInterval.DoesNotExist:
                 return JsonResponse({'error': f'WorkInterval[{client_id=}] not found'}, status=404, safe=False)

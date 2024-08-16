@@ -22,6 +22,14 @@ def agreements(request, *args, **kwargs):
 
 
 def get_agreements(request, *args, **kwargs):
+    id = request.GET.get('id')
+    if id:
+        try:
+            found = Agreement.objects.get(pk=id)
+            return JsonResponse(model_to_dict(found), status=200, safe=False)
+        except:
+            return JsonResponse({"detail": f"none found for {id=}"}, status=404, safe=False)
+
     client = request.GET.get('client')
     worker = request.GET.get('worker')
     name = request.GET.get('name')
