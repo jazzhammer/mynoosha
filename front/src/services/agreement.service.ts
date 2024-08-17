@@ -6,6 +6,14 @@ export interface AgreementDto {
   worker?: number;
   name?: string;
 }
+
+export interface SearchAgreementDto {
+  client?: number;
+  worker?: number;
+  name?: string;
+  created_from?: string;
+  created_through?: string;
+}
 const AgreementService = {
   create: (toCreate: AgreementDto): Promise<Agreement> => {
     return axios.post(`${apiBaseUrl}agreements/`, toCreate);
@@ -13,9 +21,13 @@ const AgreementService = {
   update: (toUpdate: Partial<Agreement>): Promise<Agreement> => {
     return axios.put(`${apiBaseUrl}agreements/`, toUpdate);
   },
-  find: (search: string | null): Promise<Agreement[]> => {
-    const params = {search}
+  find: (search: SearchAgreementDto): Promise<Agreement[]> => {
+    const params = {...search}
     return axios.get(`${apiBaseUrl}agreements/`, {params});
+  },
+  count: (search: SearchAgreementDto): Promise<number> => {
+    const params = {...search}
+    return axios.get(`${apiBaseUrl}agreements/count`, {params});
   }
 };
 export default AgreementService;

@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
@@ -20,7 +23,6 @@ def agreements(request, *args, **kwargs):
     else:
         return JsonResponse({'data': f"{request.method} unsupported"}, status=400, safe=False)
 
-
 def get_agreements(request, *args, **kwargs):
     id = request.GET.get('id')
     if id:
@@ -31,9 +33,11 @@ def get_agreements(request, *args, **kwargs):
             return JsonResponse({"detail": f"none found for {id=}"}, status=404, safe=False)
 
     client = request.GET.get('client')
-    worker = request.GET.get('worker')
     name = request.GET.get('name')
     type = request.GET.get('type')
+    created_from = request.GET.get("created_from")
+    created_through = request.GET.get("created_through")
+
     founds = Agreement.objects.all()
     filtered = False
     if name:
@@ -42,12 +46,15 @@ def get_agreements(request, *args, **kwargs):
     if client:
         filtered = True
         founds = founds.filter(client_id=client)
-    if worker:
-        filtered = True
-        founds = founds.filter(worker_id=worker)
     if type:
         filtered = True
         founds = founds.filter(type=type)
+    if created_from:
+        filtered = True
+        founds = founds.filter(created__gte=datetime.fromisoformat(created_from))
+    if created_through:
+        filtered = True
+        founds = founds.filter(created__lte=datetime.fromisoformat(created_through))
 
     if filtered:
         if founds.exists():
@@ -57,7 +64,7 @@ def get_agreements(request, *args, **kwargs):
             return JsonResponse([], status=200, safe=False)
     else:
         return JsonResponse(
-            {'detail': f'empty result for search parameters {client=}, {worker=}, {type=}, {name=}'},
+            {'detail': f'empty result for search parameters {client=}, {type=}, {name=}'},
             status=200,
             safe=False
         )
@@ -85,14 +92,11 @@ def put_agreements(request, *args, **kwargs):
     if agreement:
         name = request.data.get('name')
         client = request.data.get('client')
-        worker = request.data.get('worker')
         type = request.data.get('type')
         if name:
             agreement.name = name
         if client:
             agreement.client = Client.objects.get(pk=client)
-        if worker:
-            agreement.worker = Worker.objects.get(pk=worker)
         if type:
             agreement.type = type
         agreement.save()
@@ -107,3 +111,18 @@ def delete_agreements(request, *args, **kwargs):
         return JsonResponse({}, status=200, safe=False)
     else:
         return JsonResponse({'error': f'not found to delete: {id=}'}, status=404, safe=False)
+
+@api_view(['GET'])
+def agreements_count(request, *args, **kwargs):
+    client = request.GET.get("client")
+    founds: QuerySet = Agreement.objects.all()
+    filtered = False
+    if client:
+        filtered = True
+        founds = founds.filter(client_id=client)
+
+    if filtered:
+        return JsonResponse(founds.count(), status=200, safe=False)
+    else:
+        return JsonResponse({"details": "require filter by client for count"}, status=400, safe=False)
+

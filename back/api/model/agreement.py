@@ -12,8 +12,9 @@ allows for attribution of a billable_type to a client so, among other things, a 
 class Agreement(models.Model):
     name = models.CharField(max_length=128)
     client = models.ForeignKey(Client, on_delete=models.PROTECT)
-    worker = models.ForeignKey(Worker, on_delete=models.PROTECT)
+    workers = models.ManyToManyField(Worker)
     type = models.CharField(max_length=24)
+    created = models.DateField(auto_now=True, null=True)
 
 class ClientWorker(models.Model):
     name = models.CharField(max_length=128)

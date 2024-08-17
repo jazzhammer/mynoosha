@@ -48,9 +48,7 @@
   import {onDestroy} from "svelte";
   import ProjectService from "../services/project.service";
   import {type Project} from "../models/project";
-  import WorkIntervalService from "../services/work_interval.service";
   import type {WorkInterval} from "../models/work_interval";
-  import WorkTypeService from "../services/work_type.service";
   import type {WorkType} from "../models/work_type";
 
   let startDate = new Date();

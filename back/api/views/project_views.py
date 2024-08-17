@@ -1,3 +1,4 @@
+from datetime import datetime
 
 from django.forms import model_to_dict
 from django.http import JsonResponse
@@ -19,9 +20,24 @@ def projects(request, *args, **kwargs):
 
 
 def get_projects(request, *args, **kwargs):
-    if request.GET.get('search'):
-        search = request.GET.get('search')
-        founds = Project.objects.filter(name__contains=search)
+    search = request.GET.get('search')
+    created_from = request.GET.get('created_from')
+    created_through = request.GET.get('created_through')
+    client = request.GET.get('client')
+    founds = Project.objects.all()
+    filtered = False
+    if client:
+        filtered = True
+        founds = founds.filter(agreement__client_id=client)
+    if created_from:
+        filtered = True
+        founds = founds.filter(created__gte=datetime.fromisoformat(created_from))
+    if created_through:
+        filtered = True
+        founds = founds.filter(created__lt=datetime.fromisoformat(created_through))
+    if search:
+        filtered = True
+        founds = founds.filter(name__contains=search)
         if founds.exists():
             dicts = []
             for instance in founds:
@@ -35,10 +51,17 @@ def get_projects(request, *args, **kwargs):
                 status=200,
                 safe=False
             )
+
+    if filtered:
+        # print(founds.query)
+        return JsonResponse(
+            [model_to_dict(instance) for instance in founds],
+            status=200,
+            safe=False)
     else:
         return JsonResponse(
-            [model_to_dict(instance) for instance in Project.objects.all().order_by('name')],
-            status=200,
+            {"detail": "unable to search without filter on name | created | client"},
+            status=400,
             safe=False)
 
 

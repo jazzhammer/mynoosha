@@ -2,6 +2,11 @@ import {type Client} from '../models/client';
 import axios from "axios";
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
+export interface ClientSearchDto {
+  id?: number;
+  name?: string;
+}
+
 const ClientService = {
   create: (toCreate: Partial<Client>): Promise<Client> => {
     return axios.post(`${apiBaseUrl}clients/`, toCreate);
@@ -9,8 +14,8 @@ const ClientService = {
   update: (toUpdate: Partial<Client>): Promise<Client> => {
     return axios.put(`${apiBaseUrl}clients/`, toUpdate);
   },
-  find: (search: any | null): Promise<Client[]> => {
-    const params = {search}
+  find: (search: ClientSearchDto): Promise<Client[]> => {
+    const params = {...search}
     return axios.get(`${apiBaseUrl}clients/`, {params});
   }
 };

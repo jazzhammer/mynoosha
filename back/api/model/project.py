@@ -6,7 +6,7 @@ from ..model.agreement import Agreement
 
 class Project(models.Model):
     name = models.CharField(max_length=64)
-    description = models.TextField(null=True);
+    description = models.TextField(null=True)
     agreement = models.ForeignKey(Agreement, null=True, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now=True)
 

@@ -1,4 +1,4 @@
-
+from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
@@ -20,23 +20,18 @@ def clients(request, *args, **kwargs):
 
 
 def get_clients(request, *args, **kwargs):
-    if request.GET.get('search'):
-        search = request.GET.get('search')
-        founds = Client.objects.filter(name__contains=search)
-        if founds.exists():
-            dicts = [model_to_dict(instance) for instance in founds]
-            return JsonResponse(dicts, status=200, safe=False)
-        else:
-            return JsonResponse(
-                {'detail': f'empty result for search={search}'},
-                status=201,
-                safe=False
-            )
+    name = request.GET.get('name')
+    search = request.GET.get('search')
+    founds: QuerySet = Client.objects.all()
+    if search:
+        founds = founds.filter(name__contains=search)
+    if name:
+        founds = founds.filter(name=name)
+    if founds.exists():
+        dicts = [model_to_dict(instance) for instance in founds]
+        return JsonResponse(dicts, status=200, safe=False)
     else:
-        return JsonResponse(
-            [model_to_dict(instance) for instance in Client.objects.all().order_by('name')],
-            status=200,
-            safe=False)
+        return JsonResponse([], status=200, safe=False)
 
 
 def post_clients(request, *args, **kwargs):

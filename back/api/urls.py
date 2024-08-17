@@ -1,12 +1,13 @@
 from django.urls import path
 
-from .views.agreement_views import agreements
+from .views.agreement_views import agreements, agreements_count
 from .views.client_views import clients
 from .views.content_catgory_views import content_categorys
 from .views.invoice_item_views import invoice_items
 from .views.invoice_views import invoices
 from .views.medium_views import mediums
 from .views.project_views import projects
+from .views.project_type_views import project_types
 from .views.utc_views import utc
 from .views.utc_views import utc_iso
 from .views.work_interval_views import work_intervals
@@ -20,6 +21,7 @@ from .views.worker_views import workers
 
 urlpatterns = [
     path('agreements/', agreements),
+    path('agreements/count', agreements_count),
     path('billable_types/', billable_types),
     path('clients/', clients),
     path('client_billable_types/', client_billable_types),
@@ -28,6 +30,7 @@ urlpatterns = [
     path('invoice_items/', invoice_items),
     path('mediums/', mediums),
     path('projects/', projects),
+    path('project_types/', project_types),
     path('workers/', workers),
     path('work_interval/', work_interval),
     path('work_intervals/', work_intervals),

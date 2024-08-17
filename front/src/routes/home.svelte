@@ -9,6 +9,8 @@
   import BillableTypes from './billable_types.svelte';
   import MediaManager from './media_manager.svelte';
   import Workers from './workers.svelte';
+  import Projects from './projects.svelte';
+  import Message from './message.svelte';
 
   let mode: string | null = 'clients'
   $: mode
@@ -28,7 +30,10 @@
 </style>
 <div class="p-1 rounded w-full h-lvh flex flex-col text-center home-layout bg-mylow_white" data-testid="home">
   <Nav></Nav>
-  <div class="h-lvh bg-myhigh_white rounded pt-20" style="width: 100%">
+  <div class="h-lvh bg-myhigh_white rounded pt-2" style="width: 100%">
+    <div style="height: 60px; width: 100%;">
+      <Message></Message>
+    </div>
     {#if mode === 'clients'}
       <div class="bg-myhigh_white rounded-lg">
         <Clients></Clients>
@@ -62,6 +67,11 @@
     {#if mode === 'media'}
       <div class="bg-myhigh_white rounded-lg" style="width: 100%;">
         <MediaManager></MediaManager>
+      </div>
+    {/if}
+    {#if mode === 'projects'}
+      <div class="bg-myhigh_white rounded-lg" style="width: 100%;">
+        <Projects></Projects>
       </div>
     {/if}
   </div>
