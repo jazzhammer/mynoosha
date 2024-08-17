@@ -42,14 +42,28 @@
   let ymdFrom: string = initialYmdFrom.toISOString().split('T')[0];
   const selectYmdFrom = (next: string): void => {
     ymdFrom = next;
+    executeSearch();
   }
 
   let ymdThrough: string = initialYmdThrough.toISOString().split('T')[0];
   const selectYmdThrough = (next: string): void => {
     ymdThrough = next;
+    executeSearch();
   }
 
   let timeoutSearchAgreement: any;
+  const executeSearch = (): void => {
+    AgreementService.find({
+      search: searchTerm,
+      client: client.id,
+      created_from: ymdFrom,
+      created_through: ymdThrough
+    }).then((response: any) => {
+      const agreements = response.data;
+      foundAgreements(agreements);
+    })
+  }
+
   const searchAgreement = (): void => {
     if (timeoutSearchAgreement) {
       clearTimeout(timeoutSearchAgreement);
@@ -60,14 +74,7 @@
         message: 'searching agreements...'
       });
       timeoutSearchAgreement = setTimeout(() => {
-        AgreementService.find({
-          client: client.id,
-          created_from: ymdFrom,
-          created_through: ymdThrough
-        }).then((response: any) => {
-          const agreements = response.data;
-          foundAgreements(agreements);
-        })
+        executeSearch();
       }, 300);
     } else {
       MessageStore.set({

@@ -2,7 +2,7 @@
   .agreement-form-fields {
     display: grid;
     grid-template-columns: 1fr;
-    width: 180px;
+    width: 220px;
   }
 
   .agreement-form-fields > * {
@@ -19,21 +19,35 @@
   }
 </style>
 <script lang="ts">
-  import AgreementService from '../services/agreement.service';
+  import AgreementService, {type AgreementDto} from '../services/agreement.service';
   import {AgreementStore, crud} from "../stores";
+  import type {Client} from "../models/client";
+  import type {Agreement} from "../models/agreement";
 
   let name ='';
   $: name
 
+  export let client: Client;
+  $: client
+
+  export let createdAgreement = (created: Agreement) => {
+    console.log(`createdArgument: ${JSON.stringify(created)}`);
+  }
+
   function createAgreement(): void {
-    AgreementService.create({
-      name
-    }).then((response: any) => {
+    const forAgreement: AgreementDto = {
+      name,
+      client: client.id
+    }
+    AgreementService.create(
+      forAgreement
+    ).then((response: any) => {
       const created = response.data;
       AgreementStore.set({
         type: crud.CREATE,
         payload: created
       });
+      createdAgreement(created);
     })
   }
   function keyupName(event: any) {
@@ -43,9 +57,12 @@
   }
 </script>
 <div class="flex flex-col border-myroon-100 border p-3 ml-3 rounded w-4/12 text-myhigh_white"
-     style="min-width: 226px; max-width: 300px; font-size: 10pt;" data-testid="new_agreement"
+     style="min-width: 287px; max-width: 300px; font-size: 10pt;" data-testid="new_agreement"
 >
-  <div class="agreement-form-header bg-mywood-900 rounded mb-5" data-testid="new_agreement_header" id="new_agreement_header">new agreement</div>
+  <div class="agreement-form-header bg-mywood-900 rounded mb-5 text-center"
+       data-testid="new_agreement_header" id="new_agreement_header">
+    new agreement
+  </div>
   <div class="agreement-form-fields w-3/12 text-mywood-900" data-testid="new_agreement_form">
     <label class="field-label" data-testid="new_agreement_name">name
       <input type="text"

@@ -25,6 +25,5 @@ class AgreementSerializer(serializers.ModelSerializer):
         model = Agreement
         fields = [
             'name',
-            'client',
-            'worker'
+            'client'
         ]

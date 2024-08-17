@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
@@ -34,15 +34,22 @@ def get_agreements(request, *args, **kwargs):
 
     client = request.GET.get('client')
     name = request.GET.get('name')
+    search = request.GET.get('search')
     type = request.GET.get('type')
     created_from = request.GET.get("created_from")
     created_through = request.GET.get("created_through")
 
     founds = Agreement.objects.all()
     filtered = False
+    if search:
+        filtered = True
+        if search.isnumeric():
+            founds = founds.filter(Q(name__contains=search) | Q(id=int(search)))
+        else:
+            founds = founds.filter(name__contains=search)
     if name:
         filtered = True
-        founds = founds.filter(name__contains=name)
+        founds = founds.filter(name=name)
     if client:
         filtered = True
         founds = founds.filter(client_id=client)
@@ -58,7 +65,11 @@ def get_agreements(request, *args, **kwargs):
 
     if filtered:
         if founds.exists():
-            dicts = [model_to_dict(instance) for instance in founds]
+            dicts = []
+            for instance in founds:
+                instance_dict = model_to_dict(instance)
+                instance_dict['created'] = instance.created
+                dicts.append(instance_dict)
             return JsonResponse(dicts, status=200, safe=False)
         else:
             return JsonResponse([], status=200, safe=False)

@@ -1,13 +1,14 @@
 import {type Agreement} from '../models/agreement';
 import axios from "axios";
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 export interface AgreementDto {
   client?: number;
-  worker?: number;
   name?: string;
 }
 
 export interface SearchAgreementDto {
+  search?: string;
   client?: number;
   worker?: number;
   name?: string;
