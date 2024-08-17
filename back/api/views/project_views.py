@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
@@ -42,7 +43,7 @@ def get_projects(request, *args, **kwargs):
             dicts = []
             for instance in founds:
                 dict = model_to_dict(instance)
-                dict['created'] = str(instance.created)
+                dict['created'] = instance.created
                 dicts.append(dict)
             return JsonResponse(dicts, status=200, safe=False)
         else:
@@ -54,8 +55,14 @@ def get_projects(request, *args, **kwargs):
 
     if filtered:
         # print(founds.query)
+        dicts = []
+        for instance in founds:
+            dict = model_to_dict(instance)
+            dict['created'] = instance.created
+            dicts.append(dict)
+
         return JsonResponse(
-            [model_to_dict(instance) for instance in founds],
+            dicts,
             status=200,
             safe=False)
     else:
@@ -66,7 +73,15 @@ def get_projects(request, *args, **kwargs):
 
 
 def post_projects(request, *args, **kwargs):
-    if not Project.objects.filter(name=request.GET.get('name')).exists():
+    name = request.data.get('name')
+    description = request.data.get('description')
+    client = request.data.get('client')
+    agreement = request.data.get('agreement')
+    # check dupes for client and name
+    if name and description and client:
+        already: QuerySet = Project.objects.filter(name=name, client_id=client)
+        if already.exists() and already.count() > 0:
+            return JsonResponse({'error': f'Project "{name}" already exists for client {client}'}, status=400, safe=False)
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             created = serializer.save()
@@ -74,7 +89,7 @@ def post_projects(request, *args, **kwargs):
         else:
             return JsonResponse({'error': 'invalid data for Project'}, status=400, safe=False)
     else:
-        return JsonResponse({'error': 'Project already exists'}, status=400, safe=False)
+        return JsonResponse({'error': 'Project requires name, description and client'}, status=400, safe=False)
 
 def delete_projects(request, *args, **kwargs):
     id = request.GET.get('id')

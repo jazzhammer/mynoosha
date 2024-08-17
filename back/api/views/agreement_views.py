@@ -81,15 +81,24 @@ def get_agreements(request, *args, **kwargs):
         )
 
 def post_agreements(request, *args, **kwargs):
-    if not Agreement.objects.filter(name=request.GET.get('name')).exists():
-        serializer = AgreementSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            created = serializer.save()
-            return JsonResponse(model_to_dict(created), status=201, safe=False)
+    name: str = request.GET.get('name')
+    if name:
+        name = name.strip()
+        if len(name) > 0:
+            if not Agreement.objects.filter(name=name).exists():
+                serializer = AgreementSerializer(data=request.data)
+                if serializer.is_valid(raise_exception=True):
+                    created = serializer.save()
+                    return JsonResponse(model_to_dict(created), status=201, safe=False)
+                else:
+                    return JsonResponse({'error': 'invalid data for Agreement'}, status=400, safe=False)
+            else:
+                return JsonResponse({'error': 'Agreement already exists'}, status=400, safe=False)
         else:
-            return JsonResponse({'error': 'invalid data for Agreement'}, status=400, safe=False)
+            return JsonResponse({'error': 'require non-blank name for agreement'}, status=400, safe=False)
     else:
-        return JsonResponse({'error': 'Agreement already exists'}, status=400, safe=False)
+        return JsonResponse({'error': 'require name for agreement'}, status=400, safe=False)
+
 
 def put_agreements(request, *args, **kwargs):
     id = request.data.get('id')

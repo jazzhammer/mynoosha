@@ -129,6 +129,11 @@
   const setMode = (next: string): void => {
     mode = next;
   }
+
+  const createdProject = (next: Project): void => {
+      project = next;
+      mode = 'browse';
+  }
 </script>
 <div class="projects flex flex-col">
   <div class="projects-header bg-mywood-100 text-myhigh_white text-xl flex flex-row">
@@ -156,14 +161,16 @@
     </div>
   {/if}
   {#if clients && clients.length > 0}
-    <div>
+    <div class="flex flex-col">
+      <div class="ml-3 text-left bg-myhigh_white text-mywood-900">select client:</div>
       <div>
         <ClientList clients={clients} selectClient={selectClient}></ClientList>
       </div>
     </div>
   {/if}
   {#if projects && projects.length > 0}
-    <div>
+    <div class="flex flex-col">
+      <div class="ml-3 text-left bg-myhigh_white text-mywood-900">select project:</div>
       <div>
         <ProjectList projects={projects} selectProject={selectProject}></ProjectList>
       </div>
@@ -179,7 +186,7 @@
   {#if mode==='new'}
     <div>
       <div>
-        <NewProject client={client}></NewProject>
+        <NewProject client={client} createdProject={createdProject}></NewProject>
       </div>
     </div>
   {/if}

@@ -3,6 +3,8 @@
     width: calc(100% - 5px);
     height: 80lvh;
     margin: 3px;
+    display: flex;
+    flex-direction: column;
   }
   .project-form {
     display: grid;
@@ -26,6 +28,20 @@
   import AgreementService from "../services/agreement.service";
   import NewAgreement from './new_agreement.svelte';
   import AgreementList from './agreement_list.svelte';
+  import ProjectService from "../services/project.service";
+  import {crud, ProjectStore} from "../stores";
+  import type {Project} from "../models/project";
+
+  export let createdProject = (created: Project) => {
+    console.log(`created project: ${JSON.stringify(created)}`);
+  }
+
+  let new_description = '';
+  $: new_description
+
+  let new_name = '';
+  $: new_name
+
   export let client: Client;
   $: client
 
@@ -76,16 +92,34 @@
     agreement = next;
     agreements = [];
   }
+
+  const createProject = (): void => {
+    if (client) {
+      ProjectService.create({
+          name: new_name,
+          description: new_description,
+          client: client.id,
+          agreement: agreement.id
+      }).then((response: any) => {
+        const created = response.data;
+        ProjectStore.set({
+          type: crud.CREATE,
+          payload: created
+        });
+        createdProject(created);
+      });
+    }
+  }
 </script>
 <div class="new-project rounded-xl">
   <div class="w-full bg-myroon-100 text-myhigh_white text-left pl-4">new project</div>
   <div class="flex flex-row text-mywood-900 justify-start">
     <div class="flex flex-col text-left project-form w-7/12">
       <div><label for="name">name</label></div>
-      <div><input id="name" type="text" style="width: 100%; font-size: 9pt; height: 20px;"/></div>
+      <div><input id="name" bind:value={new_name} type="text" style="width: 100%; font-size: 9pt; height: 20px;"/></div>
 
       <div><label for="description">description</label></div>
-      <div><textarea id="description" style="width: 100%; height: 100px; font-size: 9pt;"></textarea></div>
+      <div><textarea id="description" bind:value={new_description} style="width: 100%; height: 100px; font-size: 9pt;"></textarea></div>
 
       <div class="flex flex-col">
         <div><label for="agreement_id">agreement (total {count_agreements})</label></div>
@@ -128,5 +162,12 @@
       </div>
     </div>
   </div>
-
+  {#if new_name && new_name.trim().length > 0 && new_description && new_description.trim().length > 0 && agreement}
+    <div on:click={createProject}
+         class="rounded-md mb-3 mt-3 bg-mywood-100 text-center text-myhigh_white hover:bg-myblue-100 hover:text-myhigh_white cursor-pointer"
+         style="width: 150px;"
+    >
+      create
+    </div>
+  {/if}
 </div>

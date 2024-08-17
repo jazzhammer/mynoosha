@@ -3,7 +3,8 @@
   .search-text {
     font-size: 9pt;
     height: 18px;
-    width: 200px;
+    width: 80px;
+    text-align: center;
   }
 
   .search-agreement {
@@ -54,7 +55,7 @@
   let timeoutSearchAgreement: any;
   const executeSearch = (): void => {
     AgreementService.find({
-      search: searchTerm,
+      search: searchTerm.trim(),
       client: client.id,
       created_from: ymdFrom,
       created_through: ymdThrough
@@ -87,7 +88,7 @@
 <div class="search-agreement">
   <div><input bind:value={searchTerm}
               on:keyup={searchAgreement}
-              type="text" placeholder="<enter> to search agreements"
+              type="text" placeholder="search"
               class="search-text" on:focus={(e) => e?.target?.select()}>
   </div>
   <div style="margin-left: 4px; margin-right: 4px;">created from</div>

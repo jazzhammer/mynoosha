@@ -2,6 +2,7 @@ export interface Project {
   id: number;
   name: string;
   description: string;
-  agreement_id: number;
+  agreement: number;
   created: string;
+  client: number;
 }

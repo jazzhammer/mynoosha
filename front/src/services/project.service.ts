@@ -3,14 +3,16 @@ import axios from "axios";
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 export interface ProjectDto {
   name?: string;
+  description?: string;
   search?: string;
   created_from?: string;
   created_through?: string;
-  client?: number
+  client?: number;
+  agreement?: number;
 }
 const ProjectService = {
-  create: (toCreate: Partial<Project>): Promise<Project> => {
-    return axios.post(`${apiBaseUrl}projects/`, toCreate);
+  create: (toCreate: ProjectDto): Promise<Project> => {
+    return axios.post(`${apiBaseUrl}projects/`, {...toCreate});
   },
   update: (toUpdate: Partial<Project>): Promise<Project> => {
     return axios.put(`${apiBaseUrl}projects/`, toUpdate);
