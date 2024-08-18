@@ -2,6 +2,7 @@
   .project-view {
     display: flex;
     flex-direction: column;
+    max-width: 350px;
   }
 
   .project-demogs {
@@ -18,7 +19,7 @@
   let project: Project;
   $: project
   let unsubProject = ProjectStore.subscribe((pcrud: ProjectCrud) => {
-    if (pcrud && pcrud.type===crud.READ) {
+    if (pcrud && (pcrud.type===crud.READ || pcrud.type===crud.CREATE)) {
       if (!Array.isArray(pcrud.payload) ) {
         project = pcrud.payload;
       }
@@ -35,7 +36,7 @@
     <div>description</div><div>{project?.description}</div>
     <div>agreement_id</div><div>{project?.agreement}</div>
     <div>client_id</div><div>{project?.client}</div>
-    <div>created</div><div>{project?.created}</div>
+    <div>created</div><div>{project?.created?.split("T")[0]}</div>
   </div>
 </div>
 {/if}

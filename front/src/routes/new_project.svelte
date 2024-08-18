@@ -28,7 +28,7 @@
   import AgreementService from "../services/agreement.service";
   import NewAgreement from './new_agreement.svelte';
   import AgreementList from './agreement_list.svelte';
-  import ProjectService from "../services/project.service";
+  import ProjectService, {type ProjectDto} from "../services/project.service";
   import {crud, MessageStore, ProjectStore} from "../stores";
   import type {Project} from "../models/project";
   import NewClient from './new_client.svelte';
@@ -166,21 +166,24 @@
   }
 
   const createProject = (): void => {
+    const toCreate: ProjectDto = {
+      name: new_name,
+      description: new_description
+    };
     if (client) {
-      ProjectService.create({
-          name: new_name,
-          description: new_description,
-          client: client.id,
-          agreement: agreement.id
-      }).then((response: any) => {
-        const created = response.data;
-        ProjectStore.set({
-          type: crud.CREATE,
-          payload: created
-        });
-        createdProject(created);
-      });
+      toCreate['client'] = client.id;
     }
+    if (agreement) {
+      toCreate['agreement'] = agreement.id;
+    }
+    ProjectService.create(toCreate).then((response: any) => {
+      const created = response.data;
+      ProjectStore.set({
+        type: crud.CREATE,
+        payload: created
+      });
+      createdProject(created);
+    });
   }
 </script>
 <div class="new-project rounded-xl">
@@ -293,7 +296,7 @@
       </div>
     </div>
   </div>
-  {#if new_name && new_name.trim().length > 0 && new_description && new_description.trim().length > 0 && agreement}
+  {#if new_name && new_name.trim().length > 0 && new_description && new_description.trim().length > 0 }
     <div on:click={createProject}
          class="rounded-md mb-3 mt-3 bg-mywood-100 text-center text-myhigh_white hover:bg-myblue-100 hover:text-myhigh_white cursor-pointer"
          style="width: 150px;"

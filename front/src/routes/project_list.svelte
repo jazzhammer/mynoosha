@@ -19,7 +19,7 @@
   import {type Project} from '../models/project';
   import ProjectView from './project_view.svelte';
   import type {ProjectType} from "../models/project_type";
-  export let projectTypes: ProjectType[] = [];
+  export let projects: Project[] = [];
 
   export let selectProject: (project: Project) => void;
 
@@ -30,7 +30,7 @@
   <div class="project-list w-full border border-myblue-50">
     <div class="project-list-header bg-mylow_white">id</div>
     <div class="project-list-header bg-mylow_white">name</div>
-    {#each projectTypes as project}
+    {#each projects as project}
       <div on:click={() => {selectProject(project)}} class="project-field text-black cursor-pointer hover:bg-myblue-100">
         {project.id}
       </div>

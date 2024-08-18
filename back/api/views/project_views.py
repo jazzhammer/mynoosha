@@ -103,7 +103,7 @@ def get_projects(request: HttpRequest, *args, **kwargs):
             dicts = []
             for instance in founds:
                 dict = model_to_dict(instance)
-                dict['created'] = instance.created
+                dict['created'] = instance.created.isoformat()
                 dicts.append(dict)
             return JsonResponse(dicts, status=200, safe=False)
         else:
@@ -118,7 +118,7 @@ def get_projects(request: HttpRequest, *args, **kwargs):
         dicts = []
         for instance in founds:
             dict = model_to_dict(instance)
-            dict['created'] = instance.created
+            dict['created'] = instance.created.isoformat()
             dicts.append(dict)
 
         return JsonResponse(
@@ -138,18 +138,29 @@ def post_projects(request, *args, **kwargs):
     client = request.data.get('client')
     agreement = request.data.get('agreement')
     # check dupes for client and name
-    if name and description and client:
-        already: QuerySet = Project.objects.filter(name=name, client_id=client)
+    if name:
+        already: QuerySet = Project.objects.filter(name=name)
         if already.exists() and already.count() > 0:
             return JsonResponse({'error': f'Project "{name}" already exists for client {client}'}, status=400, safe=False)
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             created = serializer.save()
-            return JsonResponse(model_to_dict(created), status=201, safe=False)
+
+            if description:
+                created.description = description
+            if client:
+                created.client = Client.objects.get(pk=client)
+            if agreement:
+                created.agreement = Agreement.objects.get(pk=agreement)
+            created.save()
+            created_dict = model_to_dict(created)
+
+            created_dict['created'] = created.created.isoformat()
+            return JsonResponse(created_dict, status=201, safe=False)
         else:
             return JsonResponse({'error': 'invalid data for Project'}, status=400, safe=False)
     else:
-        return JsonResponse({'error': 'Project requires name, description and client'}, status=400, safe=False)
+        return JsonResponse({'error': 'Project requires name'}, status=400, safe=False)
 
 def delete_projects(request, *args, **kwargs):
     id = request.GET.get('id')

@@ -132,7 +132,11 @@
 
   const createdProject = (next: Project): void => {
       project = next;
-      mode = 'browse';
+      mode = 'edit';
+      ProjectStore.set({
+        type: crud.CREATE,
+        payload: project
+      });
   }
 </script>
 <div class="projects flex flex-col">
