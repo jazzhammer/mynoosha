@@ -209,6 +209,13 @@
         class="cursor-pointer hover:border hover:border-myroon-900 text-left ml-2 mt-2 bg-myhigh_white pl-2 rounded w-11/12">
     projects
   </div>
+  {#if mode === 'projects'}
+    <div on:click={() => {go('project types')}}
+         on:keyup={() => {go('project types')}}
+         role="button"
+         tabindex="0"
+         class="cursor-pointer hover:border hover:border-myroon-900 text-white text-left ml-5 mt-2 pl-2 w-10/12">project types</div>
+  {/if}
 
   <div  on:click={() => {go('media')}}
         on:keyup={() => {go('media')}}

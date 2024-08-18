@@ -10,6 +10,7 @@
   import MediaManager from './media_manager.svelte';
   import Workers from './workers.svelte';
   import Projects from './projects.svelte';
+  import ProjectTypes from './project_types.svelte';
   import Message from './message.svelte';
 
   let mode: string | null = 'clients'
@@ -72,6 +73,11 @@
     {#if mode === 'projects'}
       <div class="bg-myhigh_white rounded-lg" style="width: 100%;">
         <Projects></Projects>
+      </div>
+    {/if}
+    {#if mode === 'project types'}
+      <div class="bg-myhigh_white rounded-lg" style="width: 100%;">
+        <ProjectTypes></ProjectTypes>
       </div>
     {/if}
   </div>
