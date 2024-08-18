@@ -124,13 +124,24 @@
   }
   let mode = 'browse';
   $: mode
+  const getAllProjectTypes = (): void => {
+    ProjectTypeService.find({}).then((response: any) => {
+      projectTypes = response.data;
+    });
+  }
+
+  getAllProjectTypes();
+
   const setMode = (next: string): void => {
     mode = next;
+    if (mode === 'browse') {
+      getAllProjectTypes();
+    }
   }
 
   const createdProjectType = (next: ProjectType): void => {
-      project_type = next;
-      mode = 'browse';
+    projectType = next;
+    mode = 'edit';
   }
 </script>
 <div class="project_types flex flex-col">
@@ -161,7 +172,7 @@
   {#if mode==='new'}
     <div>
       <div>
-        <NewProjectType client={client} createdProjectType={createdProjectType}></NewProjectType>
+        <NewProjectType createdProjectType={createdProjectType}></NewProjectType>
       </div>
     </div>
   {/if}

@@ -3,6 +3,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     font-size: 9pt;
+    max-width: 250px;
   }
   .project-type-list-header {
     text-align: center;

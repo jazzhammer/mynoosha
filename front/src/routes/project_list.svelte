@@ -18,7 +18,8 @@
 <script lang="ts">
   import {type Project} from '../models/project';
   import ProjectView from './project_view.svelte';
-  export let projects: Project[] = [];
+  import type {ProjectType} from "../models/project_type";
+  export let projectTypes: ProjectType[] = [];
 
   export let selectProject: (project: Project) => void;
 
@@ -29,28 +30,12 @@
   <div class="project-list w-full border border-myblue-50">
     <div class="project-list-header bg-mylow_white">id</div>
     <div class="project-list-header bg-mylow_white">name</div>
-    <div class="project-list-header bg-mylow_white">description</div>
-    <div class="project-list-header bg-mylow_white">agreement</div>
-    <div class="project-list-header bg-mylow_white">client</div>
-    <div class="project-list-header bg-mylow_white">created</div>
-    {#each projects as project}
+    {#each projectTypes as project}
       <div on:click={() => {selectProject(project)}} class="project-field text-black cursor-pointer hover:bg-myblue-100">
         {project.id}
       </div>
       <div on:click={() => {selectProject(project)}} class="project-field text-black cursor-pointer hover:bg-myblue-100">
         {project.name}
-      </div>
-      <div on:click={() => {selectProject(project)}} class="project-field text-black cursor-pointer hover:bg-myblue-100">
-        {project.description}
-      </div>
-      <div on:click={() => {selectProject(project)}} class="project-field text-black cursor-pointer hover:bg-myblue-100">
-        {project.agreement}
-      </div>
-      <div on:click={() => {selectProject(project)}} class="project-field text-black cursor-pointer hover:bg-myblue-100">
-        {project.client}
-      </div>
-      <div on:click={() => {selectProject(project)}} class="project-field text-black cursor-pointer hover:bg-myblue-100">
-        {project.created?.split('T')[0]}
       </div>
     {/each}
   </div>

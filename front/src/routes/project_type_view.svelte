@@ -2,6 +2,7 @@
   .project-type-view {
     display: flex;
     flex-direction: column;
+    max-width: 250px;
   }
 
   .project-type-demogs {
@@ -18,7 +19,7 @@
   let projectType: ProjectType;
   $: projectType
   let unsubProjectType = ProjectTypeStore.subscribe((pcrud: ProjectTypeCrud) => {
-    if (pcrud && pcrud.type === crud.READ) {
+    if (pcrud && (pcrud.type === crud.READ || pcrud.type === crud.CREATE)) {
       if (!Array.isArray(pcrud.payload) ) {
         projectType = pcrud.payload;
       }

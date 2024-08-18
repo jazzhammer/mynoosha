@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from ..model.project_type import ProjectType, ProjectTypeSerializer
 
 
-@api_view(['GET', 'POST', 'DELETE'])
+@api_view(['GET', 'POST', 'DELETE', 'PUT'])
 def project_types(request, *args, **kwargs):
     if request.method == 'GET':
         return get_project_types(request, *args, **kwargs)
