@@ -173,6 +173,7 @@
     {/if}
   </div>
   {#if mode==='browse'}
+    {#if !projects || projects.length === 0}
     <div class="search-row">
       <div style="margin-left: 10px;">
         <SearchClient foundClients={foundClients}></SearchClient>
@@ -186,15 +187,17 @@
         <Ymd initialYmd="{initialYmdThrough}" selectYmd={selectYmdThrough}></Ymd>
       </div>
     </div>
-  {/if}
-  {#if clients && clients.length > 0}
-    <div class="flex flex-col">
-      <div class="ml-3 text-left bg-myhigh_white text-mywood-900">select client:</div>
-      <div>
-        <ClientList clients={clients} selectClient={selectClient}></ClientList>
+    {/if}
+    {#if clients && clients.length > 0 && (!projects || projects.length === 0) }
+      <div class="flex flex-col">
+        <div class="ml-3 text-left bg-myhigh_white text-mywood-900">select client:</div>
+        <div>
+          <ClientList clients={clients} selectClient={selectClient}></ClientList>
+        </div>
       </div>
-    </div>
+    {/if}
   {/if}
+
   {#if projects && projects.length > 0}
     <div class="flex flex-col">
       <div class="ml-3 text-left bg-myhigh_white text-mywood-900">select project:</div>

@@ -2,12 +2,12 @@
   .project-view {
     display: flex;
     flex-direction: column;
-    max-width: 350px;
   }
 
   .project-demogs {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    max-width: 350px;
   }
 </style>
 <script lang="ts">
@@ -38,6 +38,7 @@
     <div>client_id</div><div>{project?.client}</div>
     <div>created</div><div>{project?.created?.split("T")[0]}</div>
   </div>
+  <div class="bg-mymid_white">work intervals</div>
   <ProjectWorkIntervals project={project}></ProjectWorkIntervals>
 </div>
 {/if}

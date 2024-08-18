@@ -19,7 +19,7 @@
 <script lang="ts">
   import {type Project} from '../models/project';
   import ProjectView from './project_view.svelte';
-  import type {ProjectType} from "../models/project_type";
+
   export let projects: Project[] = [];
 
   export let selectProject: (project: Project) => void;
