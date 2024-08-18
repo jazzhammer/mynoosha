@@ -6,6 +6,7 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 export interface ClientSearchDto {
   id?: number;
   name?: string;
+  search?: string;
 }
 
 const ClientService = {

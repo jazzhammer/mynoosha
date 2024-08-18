@@ -1,8 +1,9 @@
 <style>
   .project-list {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 3fr;
     font-size: 9pt;
+    max-width: 300px;
   }
   .project-list-header {
     text-align: center;

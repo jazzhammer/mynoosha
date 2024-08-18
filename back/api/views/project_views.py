@@ -126,10 +126,18 @@ def get_projects(request: HttpRequest, *args, **kwargs):
             status=200,
             safe=False)
     else:
+        founds = Project.objects.all()[:5]
+        dicts = []
+        for instance in founds:
+            dict = model_to_dict(instance)
+            dict['created'] = instance.created.isoformat()
+            dicts.append(dict)
+
         return JsonResponse(
-            {"detail": "unable to search without filter on name | created | client"},
-            status=400,
-            safe=False)
+            dicts,
+            status=200,
+            safe=False
+        )
 
 
 def post_projects(request, *args, **kwargs):

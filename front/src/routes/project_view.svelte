@@ -15,7 +15,7 @@
   import {crud, type ProjectCrud, ProjectStore} from "../stores";
   import type {Project} from "../models/project";
   import {onDestroy} from "svelte";
-
+  import ProjectWorkIntervals from './project_work_intervals.svelte';
   let project: Project;
   $: project
   let unsubProject = ProjectStore.subscribe((pcrud: ProjectCrud) => {
@@ -38,5 +38,6 @@
     <div>client_id</div><div>{project?.client}</div>
     <div>created</div><div>{project?.created?.split("T")[0]}</div>
   </div>
+  <ProjectWorkIntervals project={project}></ProjectWorkIntervals>
 </div>
 {/if}

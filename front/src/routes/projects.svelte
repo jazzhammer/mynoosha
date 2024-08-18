@@ -94,8 +94,26 @@
 
   let projects: Project[] = [];
   $: projects
-  let project: Project;
+
+  let project: Project | null;
   $: project
+
+  const getAllProjects = (): void => {
+    ProjectService.find({}).then((response: any) => {
+      const founds = response.data;
+      projects = founds;
+      MessageStore.set({
+        type: '',
+        message: `found projects: ${founds ? founds.length: 'none'}`
+      });
+      ProjectStore.set({
+        type: crud.READ,
+        payload: founds
+      });
+    });
+  }
+
+  getAllProjects();
 
   const searchProjects = (): void => {
     ProjectService.find({
@@ -123,11 +141,16 @@
       type: crud.READ,
       payload: project
     });
+    mode = 'edit';
   }
   let mode = 'browse';
   $: mode
+
   const setMode = (next: string): void => {
     mode = next;
+    if (mode === 'browse') {
+      project = null;
+    }
   }
 
   const createdProject = (next: Project): void => {

@@ -24,7 +24,7 @@
     }
     if (searchTerm && searchTerm.length > 0) {
       timeoutSearchClient = setTimeout(() => {
-        ClientService.find(searchTerm).then((response: any) => {
+        ClientService.find({search: searchTerm}).then((response: any) => {
           const clients = response.data;
           foundClients(clients);
         })

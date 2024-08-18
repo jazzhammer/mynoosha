@@ -23,11 +23,20 @@ def get_clients(request, *args, **kwargs):
     name = request.GET.get('name')
     search = request.GET.get('search')
     founds: QuerySet = Client.objects.all()
-    if search:
-        founds = founds.filter(name__contains=search)
+    filtered = False
+    founds = Client.objects.all()
     if name:
-        founds = founds.filter(name=name)
-    if founds.exists():
+        name = name.strip()
+        if len(name) > 0:
+            filtered = True
+            founds: QuerySet = founds.filter(name=name)
+    if search:
+        search = search.strip()
+        if len(search) > 0:
+            filtered = True
+            founds: QuerySet = founds.filter(name__contains=search)
+
+    if filtered:
         dicts = [model_to_dict(instance) for instance in founds]
         return JsonResponse(dicts, status=200, safe=False)
     else:
@@ -63,14 +72,22 @@ def delete_clients(request, *args, **kwargs):
 @api_view(['GET'])
 def clients_count(request: HttpRequest):
     name: str = request.GET.get('name')
+    search: str = request.GET.get('search')
+    filtered = False
+    founds = Client.objects.all()
     if name:
         name = name.strip()
         if len(name) > 0:
-            founds: QuerySet = Client.objects.filter(name__contains=name)
-            return JsonResponse(founds.count(), status=200, safe=Fals)
-        else:
-            return JsonResponse({"detail": f"require non zero length name for count"}, status=400, safe=False)
+            filtered = True
+            founds: QuerySet = founds.filter(name=name)
+    if search:
+        search = search.strip()
+        if len(search) > 0:
+            filtered = True
+            founds: QuerySet = founds.filter(name__contains=search)
+
+    if filtered:
+        return JsonResponse(founds.count(), status=200, safe=False)
     else:
         all: QuerySet = Client.objects.all()
         return JsonResponse(all.count(), status=200, safe=False)
-    pass
