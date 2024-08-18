@@ -113,7 +113,7 @@
   let client_mode = ''
   $: client_mode
 
-  let agreement_mode = 'search'
+  let agreement_mode = ''
   $: agreement_mode
 
   const createdClient = (next: Client): void => {
@@ -162,6 +162,7 @@
   const selectAgreement = (next: Agreement): void => {
     agreement = next;
     agreements = [];
+    agreement_mode = '';
   }
 
   const createProject = (): void => {
@@ -234,7 +235,7 @@
                    class="rounded-md mb-3 mt-3 bg-mywood-100 text-center text-myhigh_white hover:bg-myblue-100 hover:text-myhigh_white cursor-pointer"
                    style="width: 150px; margin-left: 5px;"
               >
-                search
+                search clients
               </div>
             {/if}
           </div>
@@ -270,14 +271,24 @@
               {/if}
             </div>
           {/if}
-          {#if (!count_agreements || count_agreements < 10 ) && agreement_mode !== 'new'}
-            <div on:click={() => setAgreementMode('new')}
-                 class="rounded-md mb-3 mt-3 bg-mywood-100 text-center text-myhigh_white hover:bg-myblue-100 hover:text-myhigh_white cursor-pointer"
-                 style="width: 150px;"
-            >
-              new agreement
-            </div>
-          {/if}
+          <div class="flex flex-row" style="margin-right: 5px;">
+            {#if agreement_mode !== 'new'}
+              <div on:click={() => setAgreementMode('new')}
+                   class="rounded-md mb-3 mt-3 bg-mywood-100 text-center text-myhigh_white hover:bg-myblue-100 hover:text-myhigh_white cursor-pointer"
+                   style="width: 150px;"
+              >
+                new agreement
+              </div>
+            {/if}
+            {#if agreement_mode !== 'search'}
+              <div on:click={() => setAgreementMode('search')}
+                   class="rounded-md mb-3 mt-3 bg-mywood-100 text-center text-myhigh_white hover:bg-myblue-100 hover:text-myhigh_white cursor-pointer"
+                   style="width: 150px; margin-left: 5px;"
+              >
+                search agreements
+              </div>
+            {/if}
+          </div>
         </div>
       </div>
     </div>

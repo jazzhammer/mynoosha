@@ -21,7 +21,7 @@
   let searchTerm = '';
   $: searchTerm
 
-  export let client: Client;
+  export let client: Client | null;
   $: client
 
   export let foundAgreements = (agreements: Agreement[]): void => {

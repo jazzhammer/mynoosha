@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.db.models import QuerySet, Q
 from django.forms import model_to_dict
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 from rest_framework.decorators import api_view
 
 from ..model.agreement import Agreement, AgreementSerializer
@@ -80,8 +80,8 @@ def get_agreements(request, *args, **kwargs):
             safe=False
         )
 
-def post_agreements(request, *args, **kwargs):
-    name: str = request.GET.get('name')
+def post_agreements(request: HttpRequest, *args, **kwargs):
+    name: str = request.data.get('name')
     if name:
         name = name.strip()
         if len(name) > 0:

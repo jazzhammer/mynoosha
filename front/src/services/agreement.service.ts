@@ -17,7 +17,7 @@ export interface SearchAgreementDto {
 }
 const AgreementService = {
   create: (toCreate: AgreementDto): Promise<Agreement> => {
-    return axios.post(`${apiBaseUrl}agreements/`, toCreate);
+    return axios.post(`${apiBaseUrl}agreements/`, {...toCreate});
   },
   update: (toUpdate: Partial<Agreement>): Promise<Agreement> => {
     return axios.put(`${apiBaseUrl}agreements/`, toUpdate);
