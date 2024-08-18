@@ -12,4 +12,5 @@ export interface WorkInterval {
   localHHMMStop?: string;
   hhmm?: string;
   invoice_item?: number;
+  project?: number;
 }

@@ -5,6 +5,7 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
+from ..model import Project
 from ..model.invoice_item import InvoiceItem
 from ..model.work_interval import WorkInterval, WorkIntervalSerializer, work_interval_hhmm
 from django.utils import timezone
@@ -38,11 +39,14 @@ def work_intervals(request):
 
     client_id = request.GET.get('client')
     invoice_item = request.GET.get('invoice_item')
-
+    project_id = request.GET.get('project')
     id = request.GET.get('id')
     if request.method == 'GET':
         founds = WorkInterval.objects.all().order_by('start_utcms')
         dt_filtered = False
+        if project_id:
+            dt_filtered = True
+            founds = founds.filter(project_id=project_id)
         if pre_start:
             utcms_from_start = round(utc_ts(iso_format=pre_start))
             founds = founds.filter(start_utcms__gte=utcms_from_start)
@@ -93,6 +97,12 @@ def work_intervals(request):
                             invoice_item = InvoiceItem.objects.get(pk=adict.invoice_item_id)
                             adict['invoice_item'] = model_to_dict(invoice_item)
                         except Exception:
+                            pass
+                        # greedy populate the projects
+                        try:
+                            project = Project.objects.get(pk=adict.project_id)
+                            adict['project'] = model_to_dict(project)
+                        except:
                             pass
                     return JsonResponse(dicts, status=200, safe=False)
             except WorkInterval.DoesNotExist:

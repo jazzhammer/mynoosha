@@ -11,7 +11,8 @@ class Project(models.Model):
     agreement = models.ForeignKey(Agreement, null=True, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now=True)
     client = models.ForeignKey(Client, null=True, on_delete=models.PROTECT)
-
+    started = models.DateTimeField(null=True)
+    finished = models.DateTimeField(null=True)
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project

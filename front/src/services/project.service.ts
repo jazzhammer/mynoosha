@@ -8,7 +8,9 @@ export interface ProjectDto {
   created_from?: string;
   created_through?: string;
   client?: number;
+  client_name?: string;
   agreement?: number;
+  workInterval?: number;
 }
 const ProjectService = {
   create: (toCreate: ProjectDto): Promise<Project> => {

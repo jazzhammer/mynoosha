@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views.agreement_views import agreements, agreements_count
-from .views.client_views import clients
+from .views.client_views import clients, clients_count
 from .views.content_catgory_views import content_categorys
 from .views.invoice_item_views import invoice_items
 from .views.invoice_views import invoices
@@ -24,6 +24,7 @@ urlpatterns = [
     path('agreements/count', agreements_count),
     path('billable_types/', billable_types),
     path('clients/', clients),
+    path('clients/count', clients_count),
     path('client_billable_types/', client_billable_types),
     path('content_categorys/', content_categorys),
     path('invoices/', invoices),

@@ -5,4 +5,6 @@ export interface Project {
   agreement: number;
   created: string;
   client: number;
+  started: string;
+  finished: string;
 }

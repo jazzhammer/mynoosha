@@ -5,8 +5,11 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   }
+  .client-list-row:hover {
+    color: white;
+  }
   .client-headers {
-
+    text-align: center;
   }
   .client-headers > * {
     text-align: center;
@@ -35,8 +38,10 @@
     <div class="bg-mymid_white">postal</div>
   </div>
   {#each clients as client}
-    <div class="client-list-row">
-      <div on:click={() => selectClient(client)} class="cursor-pointer hover:bg-myblue-100 text-mywood-900 hover:text-mywood-500 hover:text-myhigh_white">{client.id}</div>
+    <div on:click={() => selectClient(client)}
+         class="client-list-row cursor-pointer hover:bg-myblue-100 text-mywood-900 hover:text-mywood-500 hover:text-myhigh_white"
+    >
+      <div style="text-align: center;">{client.id}</div>
       <div>{client.name}</div>
       <div>{client.address_street}</div>
       <div>{client.address_city}</div>

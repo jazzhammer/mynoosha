@@ -137,13 +137,13 @@
 </script>
 <div class="projects flex flex-col">
   <div class="projects-header bg-mywood-100 text-myhigh_white text-xl flex flex-row">
-    {#if mode!=='new' && client}
+    <div style="margin-left: 10px;">projects {client ? `for client: ${client.name}` : ''}</div>
+    {#if mode!=='new'}
       <div class="menu-item" on:click={() => setMode('new')}>new</div>
     {/if}
     {#if mode!=='browse'}
       <div class="menu-item" on:click={() => setMode('browse')}>browse</div>
     {/if}
-    <div style="margin-left: 10px;">projects {client ? `for client: ${client.name}` : ''}</div>
   </div>
   {#if mode==='browse'}
     <div class="search-row">

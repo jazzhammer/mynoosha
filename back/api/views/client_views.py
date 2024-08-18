@@ -1,6 +1,6 @@
 from django.db.models import QuerySet
 from django.forms import model_to_dict
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 from rest_framework.decorators import api_view
 
 from ..model.client import Client, ClientSerializer
@@ -59,3 +59,18 @@ def delete_clients(request, *args, **kwargs):
         return JsonResponse({'detail': f'{deleted=}'}, status=200, safe=False)
     else:
         return JsonResponse({'error': f'not found to delete: {id=}'}, status=404, safe=False)
+
+@api_view(['GET'])
+def clients_count(request: HttpRequest):
+    name: str = request.GET.get('name')
+    if name:
+        name = name.strip()
+        if len(name) > 0:
+            founds: QuerySet = Client.objects.filter(name__contains=name)
+            return JsonResponse(founds.count(), status=200, safe=Fals)
+        else:
+            return JsonResponse({"detail": f"require non zero length name for count"}, status=400, safe=False)
+    else:
+        all: QuerySet = Client.objects.all()
+        return JsonResponse(all.count(), status=200, safe=False)
+    pass

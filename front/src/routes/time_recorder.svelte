@@ -5,7 +5,7 @@
   }
   .work-interval-list-header-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 5fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 5fr 1fr 1fr;
     font-size: 9pt;
   }
   .work-interval-list-header-row > * {
@@ -14,7 +14,7 @@
   }
   .work-interval-list-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 5fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 5fr 1fr 1fr;
     font-size: 9pt;
   }
   .work-interval-list-row > * {
@@ -42,6 +42,11 @@
     WorkIntervalListsByClient,
     WorkIntervalStore
   } from "../stores";
+  import ProjectService from "../services/project.service";
+  import type {Project} from "../models/project";
+  import WorkIntervalProject from './work_interval_project.svelte';
+
+
   let workIntervalList: WorkInterval[];
   $: workIntervalList
 
@@ -50,6 +55,9 @@
 
   let client: Client;
   $: client
+
+  let project: Project;
+  $: project
 
   let editableWorkInterval: WorkInterval | null = null
   $: editableWorkInterval
@@ -244,6 +252,11 @@
       type: crud.READ,
       payload: editableWorkInterval
     })
+    // find attached project
+    ProjectService.find({workInterval: workInterval.id}).then((response: any) => {
+      const found = response.data;
+      project = found;
+    });
   }
 
   function keyupHHMM(e: any): void {
@@ -273,6 +286,19 @@
       });
     }
   }
+
+  let workIntervalProject = false;
+  $: workIntervalProject
+  const selectWorkIntervalProject = (): void => {
+    workIntervalProject = true;
+  }
+
+  const updatedWorkInterval = (updated: WorkInterval): void => {
+    WorkIntervalStore.set({
+      type: crud.UPDATE,
+      payload: updated
+    });
+  }
 </script>
 {#if client}
   <div class="border-2 border-myroon-100 rounded text-mywood-900 m-2 time-recorder"
@@ -284,6 +310,7 @@
       <div>hh:mm</div>
       <div>description</div>
       <div>invoice</div>
+      <div>project</div>
     </div>
     {#if workIntervalList}
       {#each workIntervalList as workInterval, index}
@@ -311,6 +338,7 @@
             >{@html markdownify(workInterval.description)}
             </div>
             <div>{workInterval.invoice_item}</div>
+            <div on:click={ selectWorkIntervalProject } class="hover:bg-myblue-50 cursor-pointer">{workInterval.project ? workInterval.project : 'none'}</div>
           </div>
         {/if}
       {/each}
@@ -351,6 +379,13 @@
 <!--        <WorkIntervalTimeEditor></WorkIntervalTimeEditor>-->
       </div>
       {#if editableWorkInterval}
+        {#if workIntervalProject}
+        <div>
+          <WorkIntervalProject workInterval={editableWorkInterval}
+                               updatedWorkinterval={updatedWorkInterval}
+          ></WorkIntervalProject>
+        </div>
+        {/if}
         <div  on:click={deleteEditableWorkInterval}
               on:keyup={() => {}}
               tabindex="0"

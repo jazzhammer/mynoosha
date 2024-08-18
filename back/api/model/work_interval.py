@@ -1,6 +1,9 @@
 import math
 from django.utils import timezone
 import pytz
+
+from . import Project
+
 timezone.activate(pytz.timezone('UTC'))
 
 from rest_framework import serializers
@@ -21,6 +24,7 @@ class WorkInterval(models.Model):
     client = models.ForeignKey(Client, null=False, on_delete=models.PROTECT)
     invoice_item = models.ForeignKey(InvoiceItem, null=True, on_delete=models.PROTECT)
     worker = models.ForeignKey(Worker, null=True, on_delete=models.PROTECT)
+    project = models.ForeignKey(Project, null=True, on_delete=models.PROTECT)
 
     class Meta:
         indexes = [models.Index(fields=['start_utcms'])]

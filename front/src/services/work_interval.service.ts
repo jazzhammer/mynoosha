@@ -2,8 +2,24 @@ import {type WorkInterval} from '../models/work_interval';
 import axios from "axios";
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
+export interface WorkIntervalDto {
+  start?: string;
+  stop?: string;
+  start_utcms?: number;
+  stop_utcms?: number;
+  description?: string;
+  client?: number;
+  minutes?: number;
+  hours?: number;
+  localHHMMStart?: string;
+  localHHMMStop?: string;
+  hhmm?: string;
+  invoice_item?: number;
+  project?: number;
+}
+
 const WorkIntervalService = {
-  create: (toCreate: WorkInterval): Promise<WorkInterval> => {
+  create: (toCreate: WorkIntervalDto): Promise<WorkInterval> => {
     return axios.post(`${apiBaseUrl}work_intervals/`, toCreate);
   },
   find: (search: {}): Promise<WorkInterval[]> => {
