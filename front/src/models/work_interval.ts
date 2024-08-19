@@ -1,6 +1,6 @@
 export interface WorkInterval {
   id: number;
-  start: string;
+  start?: string;
   stop?: string;
   start_utcms?: number;
   stop_utcms?: number;

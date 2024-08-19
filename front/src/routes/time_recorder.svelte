@@ -114,20 +114,22 @@
     if (wicrud && wicrud.type === crud.DELETE) {
       const nextWorkInterval = wicrud.payload as WorkInterval;
       if (nextWorkInterval) {
-        const index = workIntervalList.findIndex((maybe: WorkInterval) => {
-          maybe.id === nextWorkInterval.id;
-        });
-        if (index > 0) {
-          const nextWorkIntervalList = structuredClone(workIntervalList);
-          nextWorkIntervalList.splice(index, 1);
-          workIntervalList = nextWorkIntervalList;
+        if (workIntervalList) {
+          const index = workIntervalList.findIndex((maybe: WorkInterval) => {
+            maybe.id === nextWorkInterval.id;
+          });
+          if (index > 0) {
+            const nextWorkIntervalList = structuredClone(workIntervalList);
+            nextWorkIntervalList.splice(index, 1);
+            workIntervalList = nextWorkIntervalList;
+          }
         }
       }
     } else
     if (wicrud && wicrud.type === crud.UPDATE) {
       // debugger;
       const nextWorkInterval = wicrud.payload as WorkInterval;
-      if (nextWorkInterval) {
+      if (workIntervalList) {
         const index = workIntervalList.findIndex((maybe: WorkInterval) => {
           maybe.id === nextWorkInterval.id;
         });

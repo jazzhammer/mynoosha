@@ -1,10 +1,10 @@
-import math
 
 
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
+from ..model import Client
 from ..model import Project
 from ..model.invoice_item import InvoiceItem
 from ..model.work_interval import WorkInterval, WorkIntervalSerializer, work_interval_hhmm
@@ -108,7 +108,35 @@ def work_intervals(request):
             except WorkInterval.DoesNotExist:
                 return JsonResponse({'error': f'WorkInterval[{client_id=}] not found'}, status=404, safe=False)
         else:
-            return JsonResponse({'error': f'operation not supported by this set of fields: {request.data}'}, status=400, safe=False)
+            founds = WorkInterval.objects.all()
+            dicts = [model_to_dict(instance) for instance in founds]
+            for adict in dicts:
+                if adict['stop_utcms']:
+                    adict['hhmm'] = work_interval_hhmm(adict['start_utcms'], adict['stop_utcms'])
+                # greedy populate the invoice_items
+                try:
+                    invoice_item = InvoiceItem.objects.get(pk=adict.invoice_item_id)
+                    adict['invoice_item'] = model_to_dict(invoice_item)
+                except Exception:
+                    pass
+                # greedy populate the projects
+                try:
+                    project = Project.objects.get(pk=adict.project_id)
+                    adict['project'] = model_to_dict(project)
+                except:
+                    pass
+                try:
+                    adict['start'] = adict['start'].isoformat()
+                except:
+                    pass
+                try:
+                    adict['stop'] = adict['stop'].isoformat()
+                except:
+                    pass
+
+            return JsonResponse(dicts, status=200, safe=False)
+
+            # return JsonResponse({'error': f'operation not supported by this set of fields: {request.data}'}, status=400, safe=False)
     if request.method == 'POST':
         # post a stop on all existing unstopped WorkIntervals for the client
         client = request.data['client']
@@ -169,6 +197,18 @@ def work_intervals(request):
             if request.data.get('invoice_item'):
                 invoice_item = InvoiceItem.objects.get(pk=int(request.data.get('invoice_item')))
                 found.invoice_item = invoice_item
+
+            if request.data.get('project'):
+                project = Project.objects.get(pk=request.data.get('project'))
+                found.project = project
+
+            if request.data.get('client'):
+                client = Client.objects.get(pk=request.data.get('client'))
+                found.client = client
+
+            if request.data.get('worker'):
+                worker = Worker.objects.get(pk=request.data.get('worker'))
+                found.worker = worker
 
             found.save()
             updated = found

@@ -25,7 +25,7 @@
   export let selectYmd = (next: string) => {
     console.log(`selected ymd: ${formattedYmd}`);
   }
-
+  export let keyup = () => {}
 </script>
 <div>
   <DatePicker onDayClick={setYmd} isOpen={isOpen} startDate={initialYmd} enableFutureDates={true}>
@@ -33,6 +33,7 @@
            placeholder="from"
            value={formattedYmd}
            on:click={toggleDatePicker}
+           on:keyup={keyup}
            style="width: 100px; font-size: 9pt; height: 18px; text-align: center;"
     />
   </DatePicker>
