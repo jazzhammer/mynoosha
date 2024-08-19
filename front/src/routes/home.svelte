@@ -12,7 +12,9 @@
   import Projects from './projects.svelte';
   import ProjectTypes from './project_types.svelte';
   import Message from './message.svelte';
-
+  import WorkIntervals from './work_intervals.svelte';
+  import WorkPieces from './work_pieces.svelte';
+  import WorkMilestones from './work_milestones.svelte';
   let mode: string | null = 'clients'
   $: mode
 
@@ -78,6 +80,21 @@
     {#if mode === 'project types'}
       <div class="bg-myhigh_white rounded-lg" style="width: 100%;">
         <ProjectTypes></ProjectTypes>
+      </div>
+    {/if}
+    {#if mode === 'work intervals'}
+      <div class="bg-myhigh_white rounded-lg" style="width: 100%;">
+        <WorkIntervals></WorkIntervals>
+      </div>
+    {/if}
+    {#if mode === 'work pieces'}
+      <div class="bg-myhigh_white rounded-lg" style="width: 100%;">
+        <WorkPieces></WorkPieces>
+      </div>
+    {/if}
+    {#if mode === 'work milestones'}
+      <div class="bg-myhigh_white rounded-lg" style="width: 100%;">
+        <WorkMilestones></WorkMilestones>
       </div>
     {/if}
   </div>

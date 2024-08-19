@@ -16,6 +16,30 @@ from ..model.worker import get_default_worker, Worker
 from ..utils.time_utils import utc_ts
 
 
+def hydrate(adict: dict):
+    if adict['stop_utcms']:
+        adict['hhmm'] = work_interval_hhmm(adict['start_utcms'], adict['stop_utcms'])
+    # greedy populate the invoice_items
+    try:
+        invoice_item = InvoiceItem.objects.get(pk=adict.invoice_item_id)
+        adict['invoice_item'] = model_to_dict(invoice_item)
+    except Exception:
+        pass
+    # greedy populate the projects
+    try:
+        project = Project.objects.get(pk=adict.project_id)
+        adict['project'] = model_to_dict(project)
+    except:
+        pass
+    try:
+        adict['start'] = adict['start'].isoformat()
+    except:
+        pass
+    try:
+        adict['stop'] = adict['stop'].isoformat()
+    except:
+        pass
+
 @api_view(['DELETE'])
 def work_interval(request, *args, **kwargs):
     if request.method == 'DELETE':
@@ -90,20 +114,7 @@ def work_intervals(request):
                 else:
                     dicts = [model_to_dict(instance) for instance in founds]
                     for adict in dicts:
-                        if adict['stop_utcms']:
-                            adict['hhmm'] = work_interval_hhmm(adict['start_utcms'], adict['stop_utcms'])
-                        # greedy populate the invoice_items
-                        try:
-                            invoice_item = InvoiceItem.objects.get(pk=adict.invoice_item_id)
-                            adict['invoice_item'] = model_to_dict(invoice_item)
-                        except Exception:
-                            pass
-                        # greedy populate the projects
-                        try:
-                            project = Project.objects.get(pk=adict.project_id)
-                            adict['project'] = model_to_dict(project)
-                        except:
-                            pass
+                        hydrate(adict)
                     return JsonResponse(dicts, status=200, safe=False)
             except WorkInterval.DoesNotExist:
                 return JsonResponse({'error': f'WorkInterval[{client_id=}] not found'}, status=404, safe=False)
@@ -111,28 +122,7 @@ def work_intervals(request):
             founds = WorkInterval.objects.all()
             dicts = [model_to_dict(instance) for instance in founds]
             for adict in dicts:
-                if adict['stop_utcms']:
-                    adict['hhmm'] = work_interval_hhmm(adict['start_utcms'], adict['stop_utcms'])
-                # greedy populate the invoice_items
-                try:
-                    invoice_item = InvoiceItem.objects.get(pk=adict.invoice_item_id)
-                    adict['invoice_item'] = model_to_dict(invoice_item)
-                except Exception:
-                    pass
-                # greedy populate the projects
-                try:
-                    project = Project.objects.get(pk=adict.project_id)
-                    adict['project'] = model_to_dict(project)
-                except:
-                    pass
-                try:
-                    adict['start'] = adict['start'].isoformat()
-                except:
-                    pass
-                try:
-                    adict['stop'] = adict['stop'].isoformat()
-                except:
-                    pass
+                adict = hydrate(adict)
 
             return JsonResponse(dicts, status=200, safe=False)
 
@@ -179,7 +169,9 @@ def work_intervals(request):
             else:
                 created.worker = worker
             created.save()
-            return JsonResponse(model_to_dict(created), status=201, safe=False)
+            dict = model_to_dict(created)
+            hydrate(dict)
+            return JsonResponse(dict, status=201, safe=False)
     if request.method == 'PUT':
         # serializer = WorkIntervalSerializer(data=request.data)
         # if serializer.is_valid(raise_exception=False):
@@ -212,7 +204,9 @@ def work_intervals(request):
 
             found.save()
             updated = found
-            return JsonResponse(model_to_dict(updated), status=200, safe=False)
+            dict = model_to_dict(updated)
+            hydrate(dict)
+            return JsonResponse(dict, status=200, safe=False)
         else:
             return JsonResponse({'error': f"no WorkInterval[{request.data['id']}]"}, status=404, safe=False)
 
@@ -223,4 +217,5 @@ def work_intervals(request):
             return JsonResponse({'detail': f'deleted WorkInterval[{id=}]'}, status=200)
         except Exception as e:
             return JsonResponse({'detail': f'deleted WorkInterval[{e}]'}, status=404)
+
 

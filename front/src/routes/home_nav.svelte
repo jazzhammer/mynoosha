@@ -217,6 +217,36 @@
          class="cursor-pointer hover:border hover:border-myroon-900 text-white text-left ml-5 mt-2 pl-2 w-10/12">project types</div>
   {/if}
 
+  <div  on:click={() => {go('work')}}
+        on:keyup={() => {go('work')}}
+        role="button"
+        tabindex="0"
+        class="cursor-pointer hover:border hover:border-myroon-900 text-left ml-2 mt-2 bg-myhigh_white pl-2 rounded w-11/12">
+    work
+  </div>
+  {#if mode === 'work'}
+    <div on:click={() => {go('work intervals')}}
+         on:keyup={() => {go('work intervals')}}
+         role="button"
+         tabindex="0"
+         class="cursor-pointer hover:border hover:border-myroon-900 text-white text-left ml-5 mt-2 pl-2 w-10/12">
+      work intervals
+    </div>
+    <div on:click={() => {go('work pieces')}}
+         on:keyup={() => {go('work pieces')}}
+         role="button"
+         tabindex="0"
+         class="cursor-pointer hover:border hover:border-myroon-900 text-white text-left ml-5 mt-2 pl-2 w-10/12">
+      work pieces
+    </div>
+    <div on:click={() => {go('work milestones')}}
+         on:keyup={() => {go('work milestones')}}
+         role="button"
+         tabindex="0"
+         class="cursor-pointer hover:border hover:border-myroon-900 text-white text-left ml-5 mt-2 pl-2 w-10/12">
+      work milestones
+    </div>
+  {/if}
   <div  on:click={() => {go('media')}}
         on:keyup={() => {go('media')}}
         role="button"

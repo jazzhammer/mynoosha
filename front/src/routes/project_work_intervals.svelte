@@ -5,7 +5,7 @@
 </style>
 <script lang="ts">
   import type {Project} from "../models/project";
-  import TimeRecorder from './time_recorder.svelte';
+  // import TimeRecorder from './time_recorder.svelte';
   import WorkIntervalList from './work_interval_list.svelte';
   import WorkIntervalService from "../services/work_interval.service";
   import type {WorkInterval} from "../models/work_interval";

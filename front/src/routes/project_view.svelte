@@ -22,16 +22,44 @@
     border: 1px solid #ddddff;
   }
 
+  .work-pieces {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .work-pieces-assigned {
+    border: 1px solid #ddddff;
+  }
+
+  .work-pieces-other {
+    border: 1px solid #ddddff;
+  }
+
 </style>
 <script lang="ts">
   import WorkIntervalList from './work_interval_list.svelte';
+  import WorkPieceList from './work_piece_list.svelte';
+
   import SearchWorkInterval from './search_work_interval.svelte';
-  import {crud, MessageStore, type ProjectCrud, ProjectStore, type WorkIntervalCrud, WorkIntervalStore} from "../stores";
+  import SearchWorkPiece from './search_work_piece.svelte';
+  import {
+    crud,
+    MessageStore,
+    type ProjectCrud,
+    ProjectStore,
+    type WorkIntervalCrud,
+    WorkIntervalStore,
+    WorkPieceStore
+  } from "../stores";
   import type {Project} from "../models/project";
   import {onDestroy} from "svelte";
   import ProjectWorkIntervals from './project_work_intervals.svelte';
+  import ProjectWorkPieces from './project_work_pieces.svelte';
+
   import type {WorkInterval} from "../models/work_interval";
   import WorkIntervalService from "../services/work_interval.service";
+  import type {WorkPiece} from "../models/work_piece";
+  import WorkPieceService from "../services/work_piece.service";
   let project: Project;
   $: project
   let unsubProject = ProjectStore.subscribe((pcrud: ProjectCrud) => {
@@ -42,6 +70,9 @@
     }
   });
   onDestroy(unsubProject);
+
+  let otherWorkPieces: WorkPiece[];
+  $: otherWorkPieces
 
   let otherWorkIntervals: WorkInterval[];
   $: otherWorkIntervals
@@ -65,12 +96,35 @@
   });
   onDestroy(unsubWorkInterval);
 
+  const foundWorkPieces = (founds: WorkPiece[]): void => {
+    otherWorkPieces = founds;
+    MessageStore.set({
+      type: '',
+      message: `found work pieces: ${otherWorkPieces ? otherWorkPieces.length : 'none'}`
+    });
+  }
   const foundWorkIntervals = (founds: WorkInterval[]): void => {
     otherWorkIntervals = founds;
     MessageStore.set({
       type: '',
       message: `found work intervals: ${otherWorkIntervals ? otherWorkIntervals.length : 'none'}`
     });
+  }
+  const selectWorkPiece = (next: WorkPiece): void => {
+    MessageStore.set({
+      type: '',
+      message: `selected workPiece: ${next.id}`
+    });
+    if (project) {
+      next.project = project.id;
+      WorkPieceService.update(next).then((response: any) => {
+        const updated = response.data;
+        WorkPieceStore.set({
+          type: crud.UPDATE,
+          payload: updated
+        })
+      });
+    }
   }
   const selectWorkInterval = (next: WorkInterval): void => {
     MessageStore.set({
@@ -114,10 +168,27 @@
       <div class="text-mywood-900">search other work intervals</div>
       <SearchWorkInterval foundWorkIntervals={foundWorkIntervals}></SearchWorkInterval>
       {#if otherWorkIntervals && otherWorkIntervals.length > 0}
-      <div class="text-left pl-2 w-full text-mywood-900">select to assign to project:</div>
-      <WorkIntervalList selectWorkInterval={selectWorkInterval}
-                        workIntervals={otherWorkIntervals}>
-      </WorkIntervalList>
+        <div class="text-left pl-2 w-full text-mywood-900">select to assign to project:</div>
+        <WorkIntervalList selectWorkInterval={selectWorkInterval}
+                          workIntervals={otherWorkIntervals}>
+        </WorkIntervalList>
+      {/if}
+    </div>
+  </div>
+  <div class="bg-mymid_white">work pieces</div>
+  <div class="work-pieces">
+    <div class="flex flex-col m-2 work-pieces-assigned">
+      <div class="text-mywood-900" style="height: 72px; padding-top: 23px;">assigned to project</div>
+      <ProjectWorkPieces project={project}></ProjectWorkPieces>
+    </div>
+    <div class="flex flex-col m-2 work-pieces-other">
+      <div class="text-mywood-900">search other work pieces</div>
+      <SearchWorkPiece foundWorkPieces={foundWorkPieces}></SearchWorkPiece>
+      {#if otherWorkPieces && otherWorkPieces.length > 0}
+        <div class="text-left pl-2 w-full text-mywood-900">select to assign to project:</div>
+        <WorkPieceList selectWorkPiece={selectWorkPiece}
+                          workPieces={otherWorkPieces}>
+        </WorkPieceList>
       {/if}
     </div>
   </div>
