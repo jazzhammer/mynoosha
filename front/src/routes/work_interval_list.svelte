@@ -1,9 +1,9 @@
 <style>
   .work-interval-list {
     display: grid;
-    grid-template-columns: 1fr 2fr 2fr 5fr 5fr 2fr;
+    grid-template-columns: 1fr 2fr 2fr 2fr 5fr 5fr 2fr;
     font-size: 9pt;
-    max-width: 600px;
+    max-width: 800px;
   }
   .work-interval-list-header {
     text-align: center;
@@ -32,6 +32,7 @@
     <div class="work-interval-list-header bg-mylow_white">id</div>
     <div class="work-interval-list-header bg-mylow_white">client</div>
     <div class="work-interval-list-header bg-mylow_white">project</div>
+    <div class="work-interval-list-header bg-mylow_white">worker</div>
     <div class="work-interval-list-header bg-mylow_white">start</div>
     <div class="work-interval-list-header bg-mylow_white">stop</div>
     <div class="work-interval-list-header bg-mylow_white">hhmm</div>
@@ -44,6 +45,9 @@
       </div>
       <div on:click={() => {selectWorkInterval(workInterval)}} class="work-interval-field text-black cursor-pointer hover:bg-myblue-100">
         {workInterval.project ? workInterval.project : 'none'}
+      </div>
+      <div on:click={() => {selectWorkInterval(workInterval)}} class="work-interval-field text-black cursor-pointer hover:bg-myblue-100">
+        {workInterval.worker ? workInterval.worker : 'none'}
       </div>
       <div on:click={() => {selectWorkInterval(workInterval)}} class="work-interval-field text-black cursor-pointer hover:bg-myblue-100">
         {workInterval.start.split('.')[0].replace('T', ' ')}

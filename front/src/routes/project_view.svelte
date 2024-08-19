@@ -107,7 +107,7 @@
   <div class="bg-mymid_white">work intervals</div>
   <div class="work-intervals">
     <div class="flex flex-col m-2 work-intervals-assigned">
-      <div class="text-mywood-900">assigned to project</div>
+      <div class="text-mywood-900" style="height: 72px; padding-top: 23px;">assigned to project</div>
       <ProjectWorkIntervals project={project}></ProjectWorkIntervals>
     </div>
     <div class="flex flex-col m-2 work-intervals-other">

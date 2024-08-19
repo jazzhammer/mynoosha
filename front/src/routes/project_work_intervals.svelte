@@ -9,6 +9,8 @@
   import WorkIntervalList from './work_interval_list.svelte';
   import WorkIntervalService from "../services/work_interval.service";
   import type {WorkInterval} from "../models/work_interval";
+  import {type WorkIntervalCrud, WorkIntervalStore} from "../stores";
+  import {onDestroy} from "svelte";
 
   export let project: Project;
   $: project
@@ -24,6 +26,13 @@
       });
     }
   }
+  getWorkIntervals();
+  const unsubWorkInterval = WorkIntervalStore.subscribe((wicrud: WorkIntervalCrud) => {
+    if (!Array.isArray(wicrud)) {
+      getWorkIntervals();
+    }
+  })
+  onDestroy(unsubWorkInterval);
   const selectWorkInterval = (next: WorkInterval): void => {
     console.log(`project work intervals: selectedWorkInterval: ${next.id}`);
   }
