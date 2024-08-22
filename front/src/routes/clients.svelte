@@ -2,6 +2,9 @@
   .menu-item {
 
   }
+  .clients {
+    width: calc(100% - 15px);
+  }
 </style>
 <script lang="ts">
   import NewClient from './new_client.svelte';
@@ -14,14 +17,18 @@
     mode = next;
   }
 </script>
-<div class="">
-  <div class="flex flex-row ml-3 mb-3 w-2/12">
+<div class="clients">
+  <div class="projects-header bg-mywood-100 text-myhigh_white text-xl flex flex-row mb-3"
+    style="height: 30px;"
+  >
+    <div style="margin-left: 10px;">clients</div>
     {#if mode!=='browse'}
       <div on:click={() => {setMode('browse')}}
            on:keyup={() => {}}
            tabindex="0"
            role="button"
-           class="menu-item border border-t-1 rounded-md border-l-1 border-r-1 border-myblue-500 cursor-pointer hover:border-myblue-500 pl-6 pr-6">
+           style="font-size: 11pt; margin-left: 4px; height: 26px; margin-top: 2px; padding-top: -1;"
+           class="text-mywood-900 bg-mymid_white menu-item border border-t-1 rounded-md border-l-1 border-r-1 border-myblue-500 cursor-pointer hover:border-myblue-500 pl-6 pr-6">
         browse
       </div>
     {/if}
@@ -30,7 +37,8 @@
            on:keyup={() => {}}
            tabindex="0"
            role="button"
-           class="menu-item border border-t-1 rounded-md border-l-1 border-r-1 border-myblue-500 cursor-pointer hover:border-myblue-500 pl-6 pr-6">
+           style="font-size: 11pt; margin-left: 4px; height: 26px; margin-top: 2px; padding-top: -1;"
+           class="text-mywood-900 bg-mymid_white menu-item border border-t-1 rounded-md border-l-1 border-r-1 border-myblue-500 cursor-pointer hover:border-myblue-500 pl-6 pr-6">
         new
       </div>
     {/if}
@@ -39,7 +47,8 @@
            on:keyup={() => {}}
            tabindex="0"
            role="button"
-           class="menu-item border border-t-1 rounded-md border-l-1 border-r-1 border-myblue-500 cursor-pointer hover:border-myblue-500 pl-6 pr-6">
+           style="font-size: 11pt; margin-left: 4px; height: 26px; margin-top: 2px; padding-top: -1;"
+           class="text-mywood-900 bg-mymid_white menu-item border border-t-1 rounded-md border-l-1 border-r-1 border-myblue-500 cursor-pointer hover:border-myblue-500 pl-6 pr-6">
         edit
       </div>
     {/if}

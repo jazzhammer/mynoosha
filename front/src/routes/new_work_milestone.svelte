@@ -1,44 +1,37 @@
 <style>
-  .new-project {
+  .new-work-milestone {
     width: calc(100% - 5px);
     height: 80lvh;
     margin: 3px;
     display: flex;
     flex-direction: column;
   }
-  .project-form {
+  .work-milestone-form {
     display: grid;
     grid-template-columns: 1fr 3fr;
-    min-width: 560px;
   }
-  .project-form > * {
+  .work-milestone-form > * {
     margin-top: 4px;
     font-size: 9pt;
   }
-  .agreement-search {
-
-  }
-  .agreement-search > * {
-    margin-right: 5px;
-  }
 </style>
 <script lang="ts">
-  import SearchAgreement from './search-agreement.svelte';
   import type {Client} from "../models/client";
-  import type {Agreement} from "../models/agreement";
-  import AgreementService from "../services/agreement.service";
-  import NewAgreement from './new_agreement.svelte';
-  import AgreementList from './agreement_list.svelte';
-  import ProjectService, {type ProjectDto} from "../services/project.service";
-  import {crud, MessageStore, ProjectStore} from "../stores";
   import type {Project} from "../models/project";
+  import WorkMilestoneService, {type WorkMilestoneDto} from "../services/work_milestone.service";
+  import {crud, MessageStore, WorkMilestoneStore} from "../stores";
+  import type {WorkMilestone} from "../models/work_milestone";
   import NewClient from './new_client.svelte';
+  import NewProject from './new_project.svelte';
   import ClientService from "../services/client.service";
   import SearchClient from './search-client.svelte';
+  import SearchProject from './search_project.svelte';
   import ClientList from './client_list.svelte';
+  import ProjectList from './project_list.svelte';
+  import ProjectService from "../services/project.service";
 
-  export let createdProject = (created: Project) => {
-    console.log(`created project: ${JSON.stringify(created)}`);
+  export let createdWorkMilestone = (created: WorkMilestone) => {
+    console.log(`created milestone: ${JSON.stringify(created)}`);
   }
 
   let new_description = '';
@@ -50,35 +43,21 @@
   export let client: Client | null;
   $: client
 
+  export let project: Project | null;
+  $: project
+
   let clients: Client[];
   $: clients
 
-  let agreements: Agreement[];
-  $: agreements
-
-  let agreement: Agreement;
-  $: agreement
+  let projects: Project[];
+  $: projects
 
   const foundClients = (next: Client[]): void => {
     clients = next;
   }
 
-  const foundAgreements = (next: Agreement[]): void => {
-    agreements = next;
-  }
-  const countClientAgreements = async () => {
-    AgreementService.count({
-      client: client.id
-    }).then((response: any) => {
-      count_agreements = response.data;
-      if (count_agreements < 10) {
-        AgreementService.find({client: client.id}).then((response: any) => {
-          agreements = response.data;
-          agreement = agreements[0];
-        });
-
-      }
-    });
+  const foundProjects = (next: Project[]): void => {
+    projects = next;
   }
 
   const countClients = async () => {
@@ -87,6 +66,16 @@
       count_clients = response.data;
       if (count_clients < 10) {
         findAllClients();
+      }
+    });
+  }
+
+  const countProjects = async () => {
+    ProjectService.count({
+    }).then((response: any) => {
+      count_clients = response.data;
+      if (count_clients < 10) {
+        findAllProjects();
       }
     });
   }
@@ -100,22 +89,41 @@
     });
   }
 
+  const findAllProjects = (): void => {
+    ProjectService.find({}).then((response: any) => {
+      projects = response.data;
+      if (projects.length === 1) {
+        project = projects[0];
+      }
+    });
+  }
+
   let count_clients = 0;
   $: count_clients
   countClients();
 
+  let count_projects = 0;
+  $: count_projects
+  countProjects();
 
-  let count_agreements = 0;
-  $: count_agreements
-  if (client) {
-    countClientAgreements();
-  }
 
   let client_mode = ''
   $: client_mode
 
+  let project_mode = ''
+  $: project_mode
+
   let agreement_mode = ''
   $: agreement_mode
+
+  const createdProject = (next: Project): void => {
+    if (!projects) {
+      projects = [];
+    }
+    projects.push(next);
+    project = next;
+    project_mode = 'search';
+  }
 
   const createdClient = (next: Client): void => {
     if (!clients) {
@@ -127,14 +135,13 @@
     // countClientClients();
   }
 
-  const createdAgreement = (next: Agreement): void => {
-    if (!agreements) {
-      agreements = [];
+  const setProjectMode = (next: string): void => {
+    project_mode = next;
+    if (project_mode === 'search') {
+      // findAllProjects();
+    } else if (project_mode === 'new') {
+      project = null;
     }
-    agreements.push(next);
-    agreement = next;
-    agreement_mode = 'search';
-    countClientAgreements();
   }
 
   const setClientMode = (next: string): void => {
@@ -146,8 +153,14 @@
     }
   }
 
-  const setAgreementMode = (next: string): void => {
-    agreement_mode = next;
+  const selectProject = (next: Project): void => {
+    project = next;
+    projects = [];
+    project_mode = '';
+    MessageStore.set({
+      type: '',
+      message: `selected project ${project?.name}`
+    });
   }
 
   const selectClient = (next: Client): void => {
@@ -160,37 +173,28 @@
     });
   }
 
-  const selectAgreement = (next: Agreement): void => {
-    agreement = next;
-    agreements = [];
-    agreement_mode = '';
-  }
-
-  const createProject = (): void => {
-    const toCreate: ProjectDto = {
+  const createWorkMilestone = (): void => {
+    const toCreate: WorkMilestoneDto = {
       name: new_name,
       description: new_description
     };
     if (client) {
       toCreate['client'] = client.id;
     }
-    if (agreement) {
-      toCreate['agreement'] = agreement.id;
-    }
-    ProjectService.create(toCreate).then((response: any) => {
+    WorkMilestoneService.create(toCreate).then((response: any) => {
       const created = response.data;
-      ProjectStore.set({
+      WorkMilestoneStore.set({
         type: crud.CREATE,
         payload: created
       });
-      createdProject(created);
+      createdWorkMilestone(created);
     });
   }
 </script>
-<div class="new-project rounded-xl">
-  <div class="w-full bg-myroon-100 text-myhigh_white text-left pl-4">new project</div>
+<div class="new-work-milestone rounded-xl">
+  <div class="w-full bg-myroon-100 text-myhigh_white text-left pl-4">new milestone</div>
   <div class="flex flex-row text-mywood-900 justify-start">
-    <div class="flex flex-col text-left project-form w-7/12">
+    <div class="flex flex-col text-left work-milestone-form w-7/12">
       <div><label for="name">name</label></div>
       <div><input id="name" bind:value={new_name} type="text" style="width: 100%; font-size: 9pt; height: 20px;"/></div>
 
@@ -247,58 +251,58 @@
       </div>
 
       <div class="flex flex-col">
-        <div><label for="agreement_id">agreement (total {count_agreements})</label></div>
+        <div><label for="agreement_id">project (total {count_projects})</label></div>
       </div>
       <div>
         <div class="flex flex-col">
-          {#if agreement_mode === 'new' && client}
+          {#if project_mode === 'new'}
             <div></div>
-            <NewAgreement client={client} createdAgreement={createdAgreement}></NewAgreement>
+            <NewProject client={client} createdProject={createdProject}></NewProject>
           {/if}
-          {#if count_agreements === 1 || agreement}
+          {#if count_projects === 1 || project}
             <div class="flex flex-row">
-              <div class="mr-2">{agreement?.id}</div>
-              <div class="mr-2">{agreement?.name}</div>
-              <div class="mr-2">{agreement?.created? `${agreement.created}` : ''}</div>
+              <div class="mr-2">{project? project.id : ''}</div>
+              <div class="mr-2">{project? project.name : ''}</div>
             </div>
           {/if}
-          {#if agreement_mode === 'search'}
-            <div id="agreement_id" class="flex flex-col agreement-search">
-              <SearchAgreement client={client} foundAgreements={foundAgreements}></SearchAgreement>
+          {#if project_mode === 'search'}
+            <div id="project_id" class="flex flex-col project-search">
+              <SearchProject foundProjects={foundProjects}></SearchProject>
             </div>
           {/if}
-          {#if (agreements && agreements.length < 10) || (agreement_mode === 'search' && (agreements && agreements.length > 0))}
+          {#if (projects && projects.length < 10) || (project_mode === 'search' && (projects && projects.length > 0))}
             <div class="flex flex-col">
-              {#if agreements && agreements.length > 0}
-                <div>select agreement:</div>
-                <AgreementList agreements={agreements} selectAgreement={selectAgreement}></AgreementList>
+              {#if projects && projects.length > 0 && project_mode === 'search'}
+                <div>select project:</div>
+<!--                <ProjectList projects={projects} selectProject={selectProject}></ProjectList>-->
               {/if}
             </div>
           {/if}
-          <div class="flex flex-row" style="margin-right: 5px;">
-            {#if agreement_mode !== 'new'}
-              <div on:click={() => setAgreementMode('new')}
+          <div class="flex flex-row">
+            {#if (!count_projects || count_projects < 10 ) && project_mode !== 'new'}
+              <div on:click={() => setProjectMode('new')}
                    class="rounded-md mb-3 mt-3 bg-mywood-100 text-center text-myhigh_white hover:bg-myblue-100 hover:text-myhigh_white cursor-pointer"
                    style="width: 150px;"
               >
-                new agreement
+                new project
               </div>
             {/if}
-            {#if agreement_mode !== 'search'}
-              <div on:click={() => setAgreementMode('search')}
+            {#if project_mode !== 'search'}
+              <div on:click={() => setProjectMode('search')}
                    class="rounded-md mb-3 mt-3 bg-mywood-100 text-center text-myhigh_white hover:bg-myblue-100 hover:text-myhigh_white cursor-pointer"
                    style="width: 150px; margin-left: 5px;"
               >
-                search agreements
+                search projects
               </div>
             {/if}
           </div>
         </div>
       </div>
+
     </div>
   </div>
   {#if new_name && new_name.trim().length > 0 && new_description && new_description.trim().length > 0 }
-    <div on:click={createProject}
+    <div on:click={createWorkMilestone}
          class="rounded-md mb-3 mt-3 bg-mywood-100 text-center text-myhigh_white hover:bg-myblue-100 hover:text-myhigh_white cursor-pointer"
          style="width: 150px;"
     >

@@ -24,7 +24,6 @@ def get_clients(request, *args, **kwargs):
     search = request.GET.get('search')
     founds: QuerySet = Client.objects.all()
     filtered = False
-    founds = Client.objects.all()
     if name:
         name = name.strip()
         if len(name) > 0:
@@ -40,8 +39,9 @@ def get_clients(request, *args, **kwargs):
         dicts = [model_to_dict(instance) for instance in founds]
         return JsonResponse(dicts, status=200, safe=False)
     else:
-        return JsonResponse([], status=200, safe=False)
-
+        founds = founds.filter()[:10]
+        dicts = [model_to_dict(instance) for instance in founds]
+        return JsonResponse(dicts, status=200, safe=False)
 
 def post_clients(request, *args, **kwargs):
     if not Client.objects.filter(name=request.GET.get('name')).exists():

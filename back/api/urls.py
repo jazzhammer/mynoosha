@@ -6,12 +6,13 @@ from .views.content_catgory_views import content_categorys
 from .views.invoice_item_views import invoice_items
 from .views.invoice_views import invoices
 from .views.medium_views import mediums
-from .views.project_views import projects
+from .views.project_views import projects, projects_count
 from .views.project_type_views import project_types
 from .views.utc_views import utc
 from .views.utc_views import utc_iso
 from .views.work_interval_views import work_intervals
 from .views.work_interval_views import work_interval
+from .views.work_piece_milestones import work_milestones
 from .views.work_piece_views import work_pieces
 from .views.work_type_views import work_types
 from .views.billable_type_views import billable_types
@@ -31,11 +32,13 @@ urlpatterns = [
     path('invoice_items/', invoice_items),
     path('mediums/', mediums),
     path('projects/', projects),
+    path('projects/count', projects_count),
     path('project_types/', project_types),
     path('workers/', workers),
     path('work_interval/', work_interval),
     path('work_intervals/', work_intervals),
     path('work_pieces/', work_pieces),
+    path('work_milestones/', work_milestones),
     path('work_types/', work_types),
     path('worker_rates/', worker_rates),
     path('utc/', utc),

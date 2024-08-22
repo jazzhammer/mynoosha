@@ -10,6 +10,7 @@ import type {Project} from "./models/project";
 import type {Medium} from "./models/medium";
 import type {ProjectType} from "./models/project_type";
 import type {WorkPiece} from "./models/work_piece";
+import type {WorkMilestone} from "./models/work_milestone";
 
 
 export enum crud {
@@ -60,6 +61,12 @@ export const RecordableClientsStore = writable<Client[]>();
 
 export const WorkIntervalListsByClient = writable<{[key: number]: WorkInterval[]}>({});
 
+
+export interface WorkMilestoneCrud {
+  type: crud;
+  payload: WorkMilestone | WorkMilestone[];
+}
+export const WorkMilestoneStore = writable<WorkMilestoneCrud>();
 
 export interface WorkPieceCrud {
   type: crud;

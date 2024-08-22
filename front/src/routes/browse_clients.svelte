@@ -1,5 +1,5 @@
 <style>
-  .message {
+  .browse-clients {
     width: 100%;
     text-align: left;
   }
@@ -9,7 +9,8 @@
   import type {Client} from "../models/client";
   import {onDestroy} from "svelte";
   import ClientService from "../services/client.service";
-
+  import SearchClient from './search-client.svelte';
+  import ClientList from './client_list.svelte';
   let client: Client;
   $: client
   const unsubClient = ClientStore.subscribe((ccrud: ClientCrud) => {
@@ -46,15 +47,18 @@
   });
 
   onDestroy(unsubMessage);
-
+  const foundClients = (next: Client[]): void => {
+    clients = next;
+  }
 </script>
-<div class="flex flex-col border-myroon-100 border p-3 ml-3 rounded w-4/12 text-myhigh_white text-mywood-900"
+<div class="flex flex-col p-3 ml-3 rounded w-4/12 text-myhigh_white text-mywood-900 browse-clients "
      style="min-width: 226px;
-     max-width: 300px;
+     max-width: 700px;
      font-size: 10pt;"
      data-testid="browse_clients"
 >
-  <div class="message">
-    {message}
+  <div>
+    <SearchClient foundClients={foundClients}></SearchClient>
+    <ClientList clients={clients}></ClientList>
   </div>
 </div>

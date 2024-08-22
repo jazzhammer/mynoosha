@@ -92,14 +92,14 @@
         console.log(`!WorkIntervalStore unhandled crud type: ${wic.type}:(wic=${JSON.stringify(wic)})`);
       }
     } else {
-      console.log(`workIntervalListEvent !!!`);
+      // console.log(`workIntervalListEvent !!!`);
     }
   });
   onDestroy(unsubscribeWorkInterval);
   //---------------------------------------------------------------
   const unsubscribeWorkIntervalListsByClient = WorkIntervalListsByClient.subscribe((wilbc) => {
     workIntervalListsByClient = wilbc;
-    console.log('!next workIntervalListsByClient');
+    // console.log('!next workIntervalListsByClient');
   });
   onDestroy(unsubscribeWorkIntervalListsByClient);
   //---------------------------------------------------------------

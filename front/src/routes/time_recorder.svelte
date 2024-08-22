@@ -103,10 +103,10 @@
 
 
   const unsubWorkIntervalLists = WorkIntervalListsByClient.subscribe((lists: {[key: number]: WorkInterval[]}) => {
-    console.log(`WorkIntervalListsByClient event>...`);
+    // console.log(`WorkIntervalListsByClient event>...`);
     workIntervalListsByClient = lists;
     workIntervalList = workIntervalListsByClient[client?.id as unknown as number];
-    console.log(`workIntervalList now length: ${workIntervalList ? workIntervalList.length : 'none'}`);
+    // console.log(`workIntervalList now length: ${workIntervalList ? workIntervalList.length : 'none'}`);
   });
   onDestroy(unsubWorkIntervalLists)
 
@@ -146,7 +146,7 @@
   onDestroy(unsubWorkInterval)
 
   function createWorkIntervalForDTISO(dtIso: string): void {
-    console.log(`createWorkIntervalForDTISO(${dtIso})`)
+    // console.log(`createWorkIntervalForDTISO(${dtIso})`)
     // debugger;
     WorkIntervalService.create({
       start: dtIso,

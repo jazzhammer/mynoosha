@@ -78,12 +78,12 @@
     <div>created</div>
   </div>
   <div class="search-row">
-    <div><input on:keyup={searchProject} bind:value={searchClientName} type="text" style="width: 100%; min-width:50px; "/></div>
-    <div><input on:keyup={searchProject} bind:value={searchProjectName} type="text" style="width: 100%; min-width:50px; "/></div>
+    <div style="padding-top: 2px;"><input on:keyup={searchProject} bind:value={searchClientName} type="text" style="width: 100%; min-width:50px; height: 18px;"/></div>
+    <div style="padding-top: 2px;"><input on:keyup={searchProject} bind:value={searchProjectName} type="text" style="width: 100%; min-width:50px; height: 18px"/></div>
     <div class="flex flex-row">
       <Ymd initialYmd={searchYmdStart} selectYmd={selectYmdStart}></Ymd>
       <Ymd initialYmd={searchYmdFinish} selectYmd={selectYmdFinish}></Ymd>
     </div>
   </div>
-  <ProjectList projects={projects}></ProjectList>
+<!--  <ProjectList projects={projects}></ProjectList>-->
 </div>

@@ -65,7 +65,7 @@
     new agreement
   </div>
   <div class="agreement-form-fields w-3/12 text-mywood-900" data-testid="new_agreement_form">
-    <label class="field-label" data-testid="new_agreement_name">name ({name})
+    <label class="field-label" data-testid="new_agreement_name">name
       <input type="text"
              bind:value={name}
              on:keyup={keyupName}

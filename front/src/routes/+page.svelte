@@ -3,7 +3,7 @@
   let mode = 'splash';
 
   function go(next: string) {
-    console.log(`next ${next}`)
+    // console.log(`next ${next}`)
     mode = next;
   }
 </script>

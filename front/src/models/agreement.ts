@@ -1,5 +1,5 @@
 export interface Agreement {
-  id?: number;
+  id: number;
   name?: string;
   created?: string;
   client?: number;

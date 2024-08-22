@@ -17,20 +17,22 @@ def projects(request, *args, **kwargs):
         return post_projects(request, *args, **kwargs)
     elif request.method == 'DELETE':
         return delete_projects(request, *args, **kwargs)
+    elif request.method == 'PUT':
+        return put_projects(request)
     else:
-        return JsonResponse({'data': f"{request.method} unsupported"}, status=400, safe=False)
+        return JsonResponse({"detail": f"unsupported: {request.method}"}, status=400, safe=False)
 
 def put_projects(request: HttpRequest):
-    started = request.POST.get('started')
-    finished = request.POST.get('finished')
+    started = request.data.get('started')
+    finished = request.data.get('finished')
 
-    client = request.POST.get('client')
-    agreement = request.POST.get('agreement')
+    client = request.data.get('client')
+    agreement = request.data.get('agreement')
 
-    name = request.POST.get('name')
-    description = request.POST.get('description')
+    name = request.data.get('name')
+    description = request.data.get('description')
 
-    id = request.POST.get('id')
+    id = request.data.get('id')
     errors = []
     if id:
         found = Project.objects.get(pk=id)
@@ -177,3 +179,27 @@ def delete_projects(request, *args, **kwargs):
         return JsonResponse({}, status=200, safe=False)
     else:
         return JsonResponse({'error': f'not found to delete: {id=}'}, status=404, safe=False)
+
+
+@api_view(['GET'])
+def projects_count(request: HttpRequest):
+    name: str = request.GET.get('name')
+    search: str = request.GET.get('search')
+    filtered = False
+    founds = Project.objects.all()
+    if name:
+        name = name.strip()
+        if len(name) > 0:
+            filtered = True
+            founds: QuerySet = founds.filter(name=name)
+    if search:
+        search = search.strip()
+        if len(search) > 0:
+            filtered = True
+            founds: QuerySet = founds.filter(name__contains=search)
+
+    if filtered:
+        return JsonResponse(founds.count(), status=200, safe=False)
+    else:
+        all: QuerySet = Project.objects.all()
+        return JsonResponse(all.count(), status=200, safe=False)

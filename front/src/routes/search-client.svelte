@@ -33,5 +33,9 @@
   }
 </script>
 <div>
-  <input bind:value={searchTerm} on:keyup={searchClient} type="text" placeholder="search client" class="search-text" on:focus={(e) => e?.target?.select()}>
+  <input bind:value={searchTerm} on:keyup={searchClient}
+         on:focus={(e) => e?.target?.select()}
+         type="text" placeholder="search client"
+         class="search-text"
+  >
 </div>

@@ -42,7 +42,7 @@
   import {type ClientCrud, ClientStore, crud, MessageStore, ProjectStore} from "../stores";
   import ClientList from './client_list.svelte';
   import {onDestroy} from "svelte";
-  import ProjectService from "../services/project.service";
+  import ProjectService, {type ProjectSearchDto} from "../services/project.service";
   import type {Project} from "../models/project";
   import ProjectList from './project_list.svelte';
   import ProjectView from './project_view.svelte';
@@ -83,7 +83,7 @@
     });
   }
 
-  let client: Client;
+  let client: Client | null;
   $: client
 
   const selectClient = (next: Client): void => {
@@ -116,11 +116,14 @@
   getAllProjects();
 
   const searchProjects = (): void => {
-    ProjectService.find({
-      client: client.id,
-      created_from: ymdFrom,
-      created_through: ymdThrough
-    }).then((response: any) => {
+    const forSearch: ProjectSearchDto = {
+      pre_created_from: ymdFrom,
+      post_created_from: ymdThrough
+    }
+    if (client) {
+      forSearch.client = client.id;
+    }
+    ProjectService.find(forSearch).then((response: any) => {
       const founds = response.data;
       projects = founds;
       MessageStore.set({
@@ -148,8 +151,9 @@
 
   const setMode = (next: string): void => {
     mode = next;
-    if (mode === 'browse') {
+    if (mode === 'browse' || mode === 'new') {
       project = null;
+      client = null;
     }
   }
 

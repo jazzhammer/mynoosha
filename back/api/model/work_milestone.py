@@ -6,27 +6,25 @@ from api.model import Worker, Client, Project
 from api.model.invoice_item import InvoiceItem
 
 
-class WorkPiece(Model):
+class WorkMilestone(Model):
     name = models.CharField(max_length=128)
     description = models.TextField(null=True, blank=True)
-    start = models.DateTimeField(null=True)
-    finish = models.DateTimeField(null=True)
+    start = models.DateTimeField()
     invoice_item = models.ForeignKey(InvoiceItem, null=True, on_delete=models.PROTECT)
     client = models.ForeignKey(Client, on_delete=models.PROTECT)
-    project = models.ForeignKey(Project, null=True, on_delete=models.PROTECT)
+    project = models.ForeignKey(Project, on_delete=models.PROTECT)
     worker = models.ManyToManyField(Worker)
 
     class Meta:
         indexes = [models.Index(fields=['start'])]
 
-class WorkPieceSerializer(serializers.ModelSerializer):
+class WorkMilestoneSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WorkPiece
+        model = WorkMilestone
         fields = [
             'name',
             'description',
             'start',
-            'finish',
             'client',
             'project',
             'worker',
