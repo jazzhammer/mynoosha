@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
@@ -10,7 +12,6 @@ import pytz
 timezone.activate(pytz.timezone('UTC'))
 
 from ..model.worker import get_default_worker, Worker
-from ..utils.time_utils import utc_ts
 
 
 @api_view(['DELETE'])
@@ -28,51 +29,60 @@ def work_milestone(request, *args, **kwargs):
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def work_milestones(request):
-    # expect dt strings for these boundarys:
     pre_start = request.GET.get('pre_start')
     post_start = request.GET.get('post_start')
 
     client_id = request.GET.get('client')
     invoice_item = request.GET.get('invoice_item')
+    project_id = request.GET.get('project')
 
     id = request.GET.get('id')
     if request.method == 'GET':
-        founds = WorkMilestone.objects.all().order_by('start_utcms')
-        dt_filtered = False
+        founds = WorkMilestone.objects.all().order_by('start')
+        filtered = False
         if pre_start:
-            utcms_from_start = round(utc_ts(iso_format=pre_start))
-            founds = founds.filter(start_utcms__gte=utcms_from_start)
-            dt_filtered = True
+            pre_start = datetime.fromisoformat(pre_start)
+            founds = founds.filter(start__gte=pre_start)
+            filtered = True
         if post_start:
-            utcms_justb4_start = round(utc_ts(iso_format=post_start))
-            founds = founds.filter(start_utcms__lt=utcms_justb4_start)
-            dt_filtered = True
+            post_start = datetime.fromisoformat(post_start)
+            founds = founds.filter(start__lt=post_start)
+            filtered = True
         if client_id:
             try:
                 int(client_id)
             except ValueError:
                 return JsonResponse({'error': f"invalid {client_id=}"}, status=400)
             founds = founds.filter(client=client_id)
-            dt_filtered = True
+            filtered = True
+        if project_id:
+            try:
+                int(project_id)
+            except ValueError:
+                return JsonResponse({'error': f"invalid {project_id=}"}, status=400)
+            founds = founds.filter(project=project_id)
+            filtered = True
         if id:
             try:
                 int(id)
             except ValueError:
                 return JsonResponse({'error': f"invalid {id=}"}, status=400)
             founds = founds.filter(id=id)
-            dt_filtered = True
+            filtered = True
         if invoice_item:
             if invoice_item == 'isnull':
                 founds = founds.filter(invoice_item__isnull=True)
             else:
                 founds = founds.filter(invoice_item=invoice_item)
-        if dt_filtered:
+        if filtered:
             # print(founds.query)
             try:
                 if not founds.exists() or len(founds) == 0:
                     return JsonResponse([], status=201, safe=False)
                 else:
                     dicts = [model_to_dict(instance) for instance in founds]
+                    for dict in dicts:
+                        dict['workers'] = None
                     return JsonResponse(dicts, status=200, safe=False)
             except WorkMilestone.DoesNotExist:
                 return JsonResponse({'error': f'WorkMilestone[{client_id=}] not found'}, status=404, safe=False)
@@ -92,11 +102,13 @@ def work_milestones(request):
                 print(f"no worker for {request.data.get('worker')=}")
             if worker is None:
                 default_worker = get_default_worker()
-                created.worker = default_worker
+                created.workers.add(default_worker)
             else:
-                created.worker = worker
+                created.workers.add(worker)
             created.save()
-            return JsonResponse(model_to_dict(created), status=201, safe=False)
+            created_dict = model_to_dict(created)
+            created_dict['workers'] = None
+            return JsonResponse(created_dict, status=201, safe=False)
     if request.method == 'PUT':
         # serializer = WorkMilestoneSerializer(data=request.data)
         # if serializer.is_valid(raise_exception=False):

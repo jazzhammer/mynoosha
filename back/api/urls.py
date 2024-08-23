@@ -12,7 +12,7 @@ from .views.utc_views import utc
 from .views.utc_views import utc_iso
 from .views.work_interval_views import work_intervals
 from .views.work_interval_views import work_interval
-from .views.work_piece_milestones import work_milestones
+from .views.work_milestone_views import work_milestones
 from .views.work_piece_views import work_pieces
 from .views.work_type_views import work_types
 from .views.billable_type_views import billable_types

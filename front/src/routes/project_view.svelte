@@ -35,6 +35,36 @@
     border: 1px solid #ddddff;
   }
 
+  .work-milestones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .work-milestones-assigned {
+    border: 1px solid #ddddff;
+  }
+
+  .work-milestones-other {
+    border: 1px solid #ddddff;
+  }
+  .menu-item {
+    padding-left: 4px;
+    padding-right: 4px;
+    min-width: 80px;
+    text-align: center;
+    background-color: antiquewhite;
+    cursor: pointer;
+    border-radius: 2px;
+    color: #3b1000;
+    margin: 3px;
+    font-size: 10pt;
+    height: 23px;
+    margin-left: 12px;
+  }
+  .menu-item:hover {
+    border: 1px solid #501a00;
+  }
+
 </style>
 <script lang="ts">
   import WorkIntervalList from './work_interval_list.svelte';
@@ -48,7 +78,7 @@
     type ProjectCrud,
     ProjectStore,
     type WorkIntervalCrud,
-    WorkIntervalStore,
+    WorkIntervalStore, WorkMilestoneStore,
     WorkPieceStore
   } from "../stores";
   import type {Project} from "../models/project";
@@ -68,6 +98,13 @@
   import type {Agreement} from "../models/agreement";
   import AgreementList from './agreement_list.svelte';
   import ClientService from "../services/client.service";
+  import ProjectWorkMilestones from './project_work_milestones.svelte';
+  import SearchWorkMilestone from './search_work_milestone.svelte';
+  import type {WorkMilestone} from "../models/work_milestone";
+  import WorkMilestoneList from './work_milestone_list.svelte';
+  import WorkMilestoneService from "../services/work_milestone.service";
+
+  import NewWorkMilestone from './new_work_milestone.svelte';
 
   let project: Project;
   $: project
@@ -81,6 +118,7 @@
         project = pcrud.payload;
         if (project.client) {
           ClientService.find({id: project.client}).then((response: any) => {
+            console.log(`load client for project: ${JSON.stringify(response.data)}`);
             client = response.data;
           });
         }
@@ -88,6 +126,9 @@
     }
   });
   onDestroy(unsubProject);
+
+  let otherWorkMilestones: WorkMilestone[];
+  $: otherWorkMilestones
 
   let otherWorkPieces: WorkPiece[];
   $: otherWorkPieces
@@ -114,6 +155,14 @@
   });
   onDestroy(unsubWorkInterval);
 
+  const foundWorkMilestones = (founds: WorkMilestone[]): void => {
+    otherWorkMilestones = founds;
+    MessageStore.set({
+      type: '',
+      message: `found work pieces: ${otherWorkMilestones ? otherWorkMilestones.length : 'none'}`
+    });
+  }
+
   const foundWorkPieces = (founds: WorkPiece[]): void => {
     otherWorkPieces = founds;
     MessageStore.set({
@@ -121,6 +170,7 @@
       message: `found work pieces: ${otherWorkPieces ? otherWorkPieces.length : 'none'}`
     });
   }
+
   const foundWorkIntervals = (founds: WorkInterval[]): void => {
     otherWorkIntervals = founds;
     MessageStore.set({
@@ -128,6 +178,24 @@
       message: `found work intervals: ${otherWorkIntervals ? otherWorkIntervals.length : 'none'}`
     });
   }
+
+  const selectWorkMilestone = (next: WorkMilestone): void => {
+    MessageStore.set({
+      type: '',
+      message: `selected workMilestone: ${next.id}`
+    });
+    if (project) {
+      next.project = project.id;
+      WorkMilestoneService.update(next).then((response: any) => {
+        const updated = response.data;
+        WorkMilestoneStore.set({
+          type: crud.UPDATE,
+          payload: updated
+        })
+      });
+    }
+  }
+
   const selectWorkPiece = (next: WorkPiece): void => {
     MessageStore.set({
       type: '',
@@ -144,6 +212,7 @@
       });
     }
   }
+
   const selectWorkInterval = (next: WorkInterval): void => {
     MessageStore.set({
       type: '',
@@ -222,13 +291,27 @@
       });
     }
   }
+
+  let showNewWorkMilestone = false;
+  const toggleNewWorkMilestone = (): void => {
+    showNewWorkMilestone = !showNewWorkMilestone;
+  }
+
+  let createdWorkMilestone = (next: WorkMilestone): void => {
+    WorkMilestoneStore.set({
+      type: crud.CREATE,
+      payload: next
+    });
+    showNewWorkMilestone = false;
+  }
 </script>
 {#if project}
 <div class="project-view">
   <div class="bg-mymid_white flex flex-row pl-2">
     <div class="mr-5">project: {project?.name} [{project?.id}]</div>
-    <div on:click={toggleClientSelector} class="mr-5 pl-2 pr-2 cursor-pointer hover:bg-myblue-500 hover:text-myhigh_white">
-      client: {project?.client ? `[${project?.client}] ${project?.name}` : 'none'}
+    <div  on:click={toggleClientSelector}
+          class="mr-5 pl-2 pr-2 cursor-pointer hover:bg-myblue-500 hover:text-myhigh_white">
+          client: {project?.client ? `[${project?.client}] ${client?.name}` : 'none'}
     </div>
     {#if showClientSelector}
     <div class="mr-5" style="position: relative;">
@@ -295,6 +378,44 @@
         <WorkPieceList selectWorkPiece={selectWorkPiece}
                           workPieces={otherWorkPieces}>
         </WorkPieceList>
+      {/if}
+    </div>
+  </div>
+  <div class="bg-mymid_white flex flex-row"
+  >
+    <div class="ml-2">work milestones</div>
+    <div
+      style="position: relative"
+    >
+      {#if client && project}
+        <div  on:click={toggleNewWorkMilestone}
+              class="ml-2 cursor-pointer menu-item"
+        >
+          <div>new</div>
+        </div>
+      {/if}
+      {#if showNewWorkMilestone}
+        <div class="border border-2 border-myblue-500 bg-myhigh_white"
+             style="text-align: left; position: absolute; top: 28px; left: 12px; width: 700px; z-index: 1000;"
+        >
+          <NewWorkMilestone client={client} project={project} createdWorkMilestone={createdWorkMilestone}></NewWorkMilestone>
+        </div>
+      {/if}
+    </div>
+  </div>
+  <div class="work-milestones">
+    <div class="flex flex-col m-2 work-milestones-assigned">
+      <div class="text-mywood-900" style="height: 72px; padding-top: 23px;">assigned to project</div>
+      <ProjectWorkMilestones project={project}></ProjectWorkMilestones>
+    </div>
+    <div class="flex flex-col m-2 work-milestones-other">
+      <div class="text-mywood-900">search other work milestones</div>
+      <SearchWorkMilestone foundWorkMilestones={foundWorkMilestones}></SearchWorkMilestone>
+      {#if otherWorkMilestones && otherWorkMilestones.length > 0}
+        <div class="text-left pl-2 w-full text-mywood-900">select to assign to project:</div>
+        <WorkMilestoneList selectWorkMilestone={selectWorkMilestone}
+                       workMilestones={otherWorkMilestones}>
+        </WorkMilestoneList>
       {/if}
     </div>
   </div>

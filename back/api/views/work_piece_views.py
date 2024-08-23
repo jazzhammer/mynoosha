@@ -13,7 +13,6 @@ import pytz
 timezone.activate(pytz.timezone('UTC'))
 
 from ..model.worker import get_default_worker, Worker
-from ..utils.time_utils import utc_ts
 
 
 @api_view(['DELETE'])

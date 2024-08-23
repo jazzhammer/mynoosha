@@ -22,18 +22,27 @@ def clients(request, *args, **kwargs):
 def get_clients(request, *args, **kwargs):
     name = request.GET.get('name')
     search = request.GET.get('search')
+    project = request.GET.get('project')
     founds: QuerySet = Client.objects.all()
+    id = request.GET.get('id')
+    if id:
+        return JsonResponse(model_to_dict(Client.objects.get(pk=id)), status=200, safe=False)
     filtered = False
     if name:
         name = name.strip()
         if len(name) > 0:
             filtered = True
             founds: QuerySet = founds.filter(name=name)
+
     if search:
         search = search.strip()
         if len(search) > 0:
             filtered = True
             founds: QuerySet = founds.filter(name__contains=search)
+
+    if project:
+        filtered = True
+        founds: QuerySet = founds.filter(project_id=project)
 
     if filtered:
         dicts = [model_to_dict(instance) for instance in founds]

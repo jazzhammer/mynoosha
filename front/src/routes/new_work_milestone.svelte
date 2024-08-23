@@ -1,7 +1,6 @@
 <style>
   .new-work-milestone {
     width: calc(100% - 5px);
-    height: 80lvh;
     margin: 3px;
     display: flex;
     flex-direction: column;
@@ -27,7 +26,6 @@
   import SearchClient from './search-client.svelte';
   import SearchProject from './search_project.svelte';
   import ClientList from './client_list.svelte';
-  import ProjectList from './project_list.svelte';
   import ProjectService from "../services/project.service";
 
   export let createdWorkMilestone = (created: WorkMilestone) => {
@@ -180,6 +178,9 @@
     };
     if (client) {
       toCreate['client'] = client.id;
+    }
+    if (project) {
+      toCreate['project'] = project.id;
     }
     WorkMilestoneService.create(toCreate).then((response: any) => {
       const created = response.data;

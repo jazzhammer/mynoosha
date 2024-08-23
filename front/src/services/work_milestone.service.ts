@@ -12,11 +12,22 @@ export interface WorkMilestoneDto {
   worker?: number;
 }
 
+export interface WorkMilestoneSearchDto {
+  name?: string;
+  description?: string;
+  pre_start?: string;
+  post_start?: string;
+  invoice_item?: number;
+  client?: number;
+  project?: number;
+  worker?: number;
+}
+
 const WorkMilestoneService = {
   create: (toCreate: WorkMilestoneDto): Promise<WorkMilestone> => {
     return axios.post(`${apiBaseUrl}work_milestones/`, toCreate);
   },
-  find: (search: {}): Promise<WorkMilestone[]> => {
+  find: (search: WorkMilestoneSearchDto): Promise<WorkMilestone[]> => {
     const params = search
     return axios.get(`${apiBaseUrl}work_milestones/`, {params});
   },

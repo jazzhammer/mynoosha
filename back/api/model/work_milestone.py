@@ -9,11 +9,11 @@ from api.model.invoice_item import InvoiceItem
 class WorkMilestone(Model):
     name = models.CharField(max_length=128)
     description = models.TextField(null=True, blank=True)
-    start = models.DateTimeField()
+    start = models.DateTimeField(null=True)
     invoice_item = models.ForeignKey(InvoiceItem, null=True, on_delete=models.PROTECT)
     client = models.ForeignKey(Client, on_delete=models.PROTECT)
     project = models.ForeignKey(Project, on_delete=models.PROTECT)
-    worker = models.ManyToManyField(Worker)
+    workers = models.ManyToManyField(Worker)
 
     class Meta:
         indexes = [models.Index(fields=['start'])]
@@ -24,8 +24,8 @@ class WorkMilestoneSerializer(serializers.ModelSerializer):
         fields = [
             'name',
             'description',
-            'start',
+            # 'start',
             'client',
             'project',
-            'worker',
+            # 'worker',
         ]
