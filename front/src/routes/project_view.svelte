@@ -105,6 +105,7 @@
   import WorkMilestoneService from "../services/work_milestone.service";
 
   import NewWorkMilestone from './new_work_milestone.svelte';
+  import TimeRecorder from './time_recorder.svelte';
 
   let project: Project;
   $: project
@@ -118,7 +119,7 @@
         project = pcrud.payload;
         if (project.client) {
           ClientService.find({id: project.client}).then((response: any) => {
-            console.log(`load client for project: ${JSON.stringify(response.data)}`);
+            // console.log(`load client for project: ${JSON.stringify(response.data)}`);
             client = response.data;
           });
         }
@@ -304,6 +305,12 @@
     });
     showNewWorkMilestone = false;
   }
+
+  let showTimeRecorder = false;
+  $: showTimeRecorder
+  const toggleTimeRecorder = (): void => {
+    showTimeRecorder = !showTimeRecorder;
+  }
 </script>
 {#if project}
 <div class="project-view">
@@ -347,8 +354,22 @@
 <!--    <div>client_id</div><div>{project?.client}</div>-->
     <div>created</div><div>{project?.created?.split("T")[0]}</div>
   </div>
-  <div class="bg-mymid_white">work intervals</div>
+  <div class="bg-mymid_white flex flex-row">
+    <div>work intervals</div>
+    <div on:click={toggleTimeRecorder} class="text-center ml-4 pt-1 px-5 cursor-pointer hover:border-myroon-900 hover:text-white hover:bg-blue-800">
+      <svg style="margin: auto;" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 14 14" {...$$props}>
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9.5 8.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3m-5 0a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3m0 0h5" />
+          <path d="M4.145 12.84a6.5 6.5 0 1 0-2.556-2.238m2.556 2.239L.5 13.5l1.089-2.897m2.556 2.238l.005-.001m-2.561-2.237l.001-.003" />
+        </g>
+      </svg>
+    </div>
+  </div>
   <div class="work-intervals">
+    {#if showTimeRecorder && client}
+      <TimeRecorder client={client} project={project}></TimeRecorder>
+      <div></div>
+    {/if}
     <div class="flex flex-col m-2 work-intervals-assigned">
       <div class="text-mywood-900" style="height: 72px; padding-top: 23px;">assigned to project</div>
       <ProjectWorkIntervals project={project}></ProjectWorkIntervals>

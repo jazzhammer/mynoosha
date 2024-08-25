@@ -37,6 +37,7 @@
 </style>
 <script lang="ts">
   import SearchClient from './search-client.svelte';
+  import SearchProject from './search_project.svelte';
   import Ymd from './ymd.svelte';
   import type {Client} from "../models/client";
   import {type ClientCrud, ClientStore, crud, MessageStore, ProjectStore} from "../stores";
@@ -47,6 +48,7 @@
   import ProjectList from './project_list.svelte';
   import ProjectView from './project_view.svelte';
   import NewProject from './new_project.svelte';
+  import Icon from '@iconify/svelte';
   let initialYmdFrom = new Date();
   initialYmdFrom.setMonth(initialYmdFrom.getMonth() - 1)
   initialYmdFrom.setDate(1)
@@ -165,6 +167,13 @@
         payload: project
       });
   }
+
+  let search_mode = 'client';
+  $: search_mode
+
+  const foundProjects = (next: Project[]): void => {
+    projects = next;
+  }
 </script>
 <div class="projects flex flex-col">
   <div class="projects-header bg-mywood-100 text-myhigh_white text-xl flex flex-row">
@@ -179,8 +188,12 @@
   {#if mode==='browse'}
     {#if !projects || projects.length === 0}
     <div class="search-row">
+      {#if search_mode === 'client'}
       <div style="margin-left: 10px;">
         <SearchClient foundClients={foundClients}></SearchClient>
+      </div>
+      <div>
+        <Icon icon="mdi-light:home" style="font-size: 20pt;"/>
       </div>
       <div>project created from:</div>
       <div style="margin-left: 10px;">
@@ -190,6 +203,20 @@
       <div style="margin-left: 10px;">
         <Ymd initialYmd="{initialYmdThrough}" selectYmd={selectYmdThrough}></Ymd>
       </div>
+      {/if}
+      {#if search_mode === 'project'}
+        <div style="margin-left: 10px;">
+          <SearchProject client={client} foundProjects={foundProjects}></SearchProject>
+        </div>
+        <div>project created from:</div>
+        <div style="margin-left: 10px;">
+          <Ymd initialYmd="{initialYmdFrom}" selectYmd={selectYmdFrom}></Ymd>
+        </div>
+        <div>through:</div>
+        <div style="margin-left: 10px;">
+          <Ymd initialYmd="{initialYmdThrough}" selectYmd={selectYmdThrough}></Ymd>
+        </div>
+      {/if}
     </div>
     {/if}
     {#if clients && clients.length > 0 && (!projects || projects.length === 0) }

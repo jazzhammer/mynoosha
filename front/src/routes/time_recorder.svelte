@@ -29,7 +29,7 @@
   import WorkIntervalDescription from './work_interval_description.svelte';
   import type {Client} from "../models/client";
   import type {WorkInterval} from "../models/work_interval";
-  import WorkIntervalService from "../services/work_interval.service";
+  import WorkIntervalService, {type WorkIntervalDto} from "../services/work_interval.service";
   import {DateTime} from "luxon";
   import {onDestroy} from "svelte";
   import {padLeft} from "../utils/numbers.js";
@@ -53,10 +53,10 @@
   let workIntervalListsByClient: {[key: number]: WorkInterval[]} = {};
   $: workIntervalListsByClient
 
-  let client: Client;
+  export let client: Client;
   $: client
 
-  let project: Project;
+  export let project: Project;
   $: project
 
   let editableWorkInterval: WorkInterval | null = null
@@ -148,10 +148,14 @@
   function createWorkIntervalForDTISO(dtIso: string): void {
     // console.log(`createWorkIntervalForDTISO(${dtIso})`)
     // debugger;
-    WorkIntervalService.create({
+    const widto: WorkIntervalDto = {
       start: dtIso,
       client: client.id
-    }).then((response: any) => {
+    }
+    if (project) {
+      widto['project'] = project.id;
+    }
+    WorkIntervalService.create(widto).then((response: any) => {
       if (response.data) {
         const created = response.data;
 

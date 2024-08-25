@@ -10,9 +10,9 @@
 </style>
 <script lang="ts">
   import Ymd from './ymd.svelte';
-  import {type Project} from './../models/project.js';
+  import {type Project} from '../models/project';
   import ProjectService from "../services/project.service";
-  import ProjectList from './project_list.svelte';
+  import type {Client} from "../models/client";
 
   let searchClientName = '';
   $: searchClientName
@@ -27,6 +27,10 @@
   let searchYmdFinish = new Date();
   searchYmdFinish.setMonth(searchYmdFinish.getMonth() + 1);
   searchYmdFinish.setDate(0);
+
+  export let client: Client;
+  $: client
+
 
   export let foundProjects = (founds: Project[]) => {
     console.log(`foundProjects: ${founds ? founds.length : 'none'}`);
@@ -48,7 +52,10 @@
     searchYmdFinishString = next;
     executeSearchProject();
   }
-
+  if (client) {
+    searchClientName = client.name as string;
+    executeSearchProject();
+  }
   const executeSearchProject = (): void => {
     ProjectService.find({
       created_from: searchYmdStartString,
@@ -78,8 +85,15 @@
     <div>created</div>
   </div>
   <div class="search-row">
-    <div style="padding-top: 2px;"><input on:keyup={searchProject} bind:value={searchClientName} type="text" style="width: 100%; min-width:50px; height: 18px;"/></div>
-    <div style="padding-top: 2px;"><input on:keyup={searchProject} bind:value={searchProjectName} type="text" style="width: 100%; min-width:50px; height: 18px"/></div>
+    <div style="padding-top: 2px;">
+      <input on:keyup={searchProject}
+             bind:value={searchClientName}
+             type="text"
+             style="width: 100%; min-width:50px; height: 18px;"
+             placeholder="? client name"
+      />
+    </div>
+    <div style="padding-top: 2px;"><input on:keyup={searchProject} bind:value={searchProjectName} type="text" style="width: 100%; min-width:50px; height: 18px" placeholder="? project name"/></div>
     <div class="flex flex-row">
       <Ymd initialYmd={searchYmdStart} selectYmd={selectYmdStart}></Ymd>
       <Ymd initialYmd={searchYmdFinish} selectYmd={selectYmdFinish}></Ymd>

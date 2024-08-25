@@ -53,7 +53,7 @@
         {workInterval.start.split('.')[0].replace('T', ' ')}
       </div>
       <div on:click={() => {selectWorkInterval(workInterval)}} class="work-interval-field text-black cursor-pointer hover:bg-myblue-100">
-        {workInterval.stop.split('.')[0].replace('T', ' ')}
+        {workInterval.stop?.split('.')[0].replace('T', ' ')}
       </div>
       <div on:click={() => {selectWorkInterval(workInterval)}} class="work-interval-field text-black cursor-pointer hover:bg-myblue-100">
         {workInterval.hhmm}

@@ -130,6 +130,7 @@ def work_intervals(request):
     if request.method == 'POST':
         # post a stop on all existing unstopped WorkIntervals for the client
         client = request.data['client']
+        project = request.data.get('project')
         # get the start string and start ts seconds
         if 'start' in request.data:
             utc_new_s = request.data['start']
@@ -156,6 +157,9 @@ def work_intervals(request):
 
         if serializer.is_valid(raise_exception=True):
             created = serializer.save()
+            if project:
+                created.project_id = project
+                created.save()
             created = WorkInterval.objects.get(id=created.id)
             # automate the worker assignment for this new workInterval if not provided
             worker = None
